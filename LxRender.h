@@ -40,7 +40,8 @@ public:
 public:
 	virtual void DrawDocument(CDC* pDC) override;
 private:
-	void DrawBorder();
+	void DrawBorder(CDC* pDC);
+	void DrawPageSpace(CDC* pDC, int bottom_pos, int pages_space);
 private:
 	LxRender* base_render_;
 };

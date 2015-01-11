@@ -147,6 +147,7 @@ public:
 	int get_area_begin() { return index_begin; }
 	int get_area_end() { return index_end; }
 	int get_top_pos() { return top_pos_global; }
+	int get_bottom_pos() { return top_pos_global + LxPaper::pixel_height; }
 	int get_last_space() { return last_space; }
 	size_t size() { return index_end - index_begin + 1; }
 public:
