@@ -599,6 +599,7 @@ void ComposePage::FlushOwnArea(CDC* pDC)
 		this->get_top_pos() + LxPaper::pixel_height - ViewWindow::GetViewWindowInstance()->offset_y);
 	FlushRect(pDC, &rect, LxPaper::paper_back_color);
 	//绘制四个角的定位标识
+	pDC->SetDCPenColor(RGB(255, 0, 0));
 	pDC->MoveTo(rect.left + LxPaper::left_margin / 2, rect.top + LxPaper::top_margin);
 	pDC->LineTo(rect.left + LxPaper::left_margin, rect.top + LxPaper::top_margin);
 	pDC->LineTo(rect.left + LxPaper::left_margin, rect.top + LxPaper::top_margin / 2);
@@ -660,6 +661,8 @@ void ComposeRow::FlushOwnArea(CDC* pDC)
 
 void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index)
 {
+	if (this->size() == 0)
+		return;
 	size_t inner_index = this->index_begin - base_index;
 	size_t font_index, same_font_cnt;
 	size_t color_index, same_color_cnt;

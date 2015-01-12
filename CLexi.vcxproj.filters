@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\GD_base">
+      <UniqueIdentifier>{575c51d0-701e-4429-bee4-03bc30f60c88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\GD_base">
+      <UniqueIdentifier>{0ab2cc64-2099-4b10-a981-696fd71b7821}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -81,6 +87,9 @@
     <ClInclude Include="LxCommon.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="GD_proxy_base.h">
+      <Filter>头文件\GD_base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLexi.cpp">
@@ -136,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="LxCommon.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GD_proxy_base.cpp">
+      <Filter>源文件\GD_base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

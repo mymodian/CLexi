@@ -12,6 +12,8 @@
 #include "CLexiDoc.h"
 #include "CLexiView.h"
 
+#include "LxSrcFontFactory.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -39,7 +41,7 @@ END_MESSAGE_MAP()
 CCLexiView::CCLexiView()
 {
 	// TODO: 在此处添加构造代码
-
+	
 }
 
 CCLexiView::~CCLexiView()
@@ -55,6 +57,23 @@ BOOL CCLexiView::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 // CCLexiView 绘制
+
+void CCLexiView::create_caret(int height, int width)
+{
+	CreateSolidCaret(width, height);
+}
+void CCLexiView::hide_caret()
+{
+	HideCaret();
+}
+void CCLexiView::show_caret(int x, int y)
+{
+	POINT point;
+	point.x = x;
+	point.y = y;
+	SetCaretPos(point);
+	ShowCaret();
+}
 
 void CCLexiView::OnDraw(CDC* pDC)
 {
@@ -78,6 +97,18 @@ void CCLexiView::OnDraw(CDC* pDC)
 	dcMem.SelectObject(&bmp);
 	dcMem.FillSolidRect(rect, pDC->GetBkColor());
 	dcMem.TextOut(100, 100, "hello world!!!");
+
+	CString screen_size;
+	int cx = GetSystemMetrics(SM_CXSCREEN);
+	int cy = GetSystemMetrics(SM_CYSCREEN);
+	
+	int nScreenWidth, nScreenHeight;
+	HDC hdcScreen = ::GetDC(NULL);			//获取屏幕的HDC
+	nScreenWidth = GetDeviceCaps(hdcScreen, HORZSIZE);
+	nScreenHeight = GetDeviceCaps(hdcScreen, VERTSIZE);
+	screen_size.Format("分辨率:%d,%d   尺寸:%d,%d", cx, cy, nScreenWidth, nScreenHeight);
+	dcMem.TextOutA(100, 200, screen_size);
+
 	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
 		&dcMem, 0, 0, SRCCOPY);
 
@@ -145,6 +176,10 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	CDC* pDC = GetDC();
+	doc_view_controler.init(pDC);
+	doc_view_controler.draw_complete(pDC);
+	ReleaseDC(pDC);
 
 	CView::OnLButtonDown(nFlags, point);
 }

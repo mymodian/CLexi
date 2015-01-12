@@ -104,6 +104,7 @@
     <ClInclude Include="CLexi.h" />
     <ClInclude Include="CLexiDoc.h" />
     <ClInclude Include="CLexiView.h" />
+    <ClInclude Include="GD_proxy_base.h" />
     <ClInclude Include="LxCommon.h" />
     <ClInclude Include="LxCommand.h" />
     <ClInclude Include="LxComposeAlgom.h" />
@@ -127,6 +128,7 @@
     <ClCompile Include="CLexi.cpp" />
     <ClCompile Include="CLexiDoc.cpp" />
     <ClCompile Include="CLexiView.cpp" />
+    <ClCompile Include="GD_proxy_base.cpp" />
     <ClCompile Include="LxCommon.cpp" />
     <ClCompile Include="LxCommand.cpp" />
     <ClCompile Include="LxComposeAlgom.cpp" />

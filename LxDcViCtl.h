@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "LxDocument.h"
 #include "LxComposeDoc.h"
 #include "LxTreeBase.h"
@@ -15,6 +16,7 @@ class LxDcViCtl
 public:
 	LxDcViCtl();
 	~LxDcViCtl();
+	void init(CDC* pDC);
 public:
 	void insert(size_t position, size_t  count);
 	void insert(size_t position, size_t  count, size_t font_src_index);
@@ -25,13 +27,15 @@ public:
 //≈≈∞Êœ‡πÿ
 public:
 	void modify_layout();
-	void compose_complete();
+	void compose_complete(CDC* pDC);
+	void draw_complete(CDC* pDC);
 private:
 	Document document;
 	ComposeDoc compose_doc;
 	TreeBase font_tree;
 	TreeBase color_tree;
 	LxCursor cursor;
+	GD_proxy_base gd_proxy;
 	LxRender* render;
 };
 

@@ -27,7 +27,7 @@ private:
 class Paragraph
 {
 public:
-	Paragraph() {}
+	Paragraph() : compose_algom(nullptr) {}
 	virtual ~Paragraph() {}
 	void SetComposeAlgom(LxComposeAlgom* compose_algom)
 	{

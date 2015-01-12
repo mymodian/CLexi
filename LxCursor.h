@@ -9,7 +9,7 @@ public:
 	LxCursor() :point_x(0), point_y(0), index_inner(0) {}
 	~LxCursor() {}
 	LxCursor& operator++();
-	LxCursor& operator++(int);
+	LxCursor operator++(int);
 public:
 	int point_x;
 	int point_y;
