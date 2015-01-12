@@ -3,38 +3,58 @@
 #include "LxRender.h"
 #include "LxViewWindow.h"
 
-//show cousor.
-void LxRender::ShowCousor(CDC* pDC, LxCursor* cursor)
-{
-	SetCaretPos(cursor->point_x, cursor->point_y);
-	//ShowCaret(HWND hWnd);
-}
-
 //context render,only draw text.
-LxContexRender::LxContexRender(ComposeDoc* compose_doc) : compose_doc_(compose_doc) {}
+LxContexRender::LxContexRender(ComposeDoc* compose_doc, GD_proxy_base* gd_proxy) 
+	: compose_doc_(compose_doc), 
+	gd_proxy_(gd_proxy) {}
 LxContexRender::~LxContexRender() {}
 
 void LxContexRender::DrawDocument(CDC* pDC)
 {
 	compose_doc_->Draw(pDC);
 }
+
+void LxContexRender::create_caret(int height, int width)
+{
+	gd_proxy_->create_caret(height, width);
+}
+void LxContexRender::show_caret(LxCursor* cursor)
+{
+	gd_proxy_->show_caret(cursor->point_x, cursor->point_y);
+}
+void LxContexRender::hide_caret()
+{
+	gd_proxy_->hide_caret();
+}
+ComposeDoc* LxContexRender::get_compose_doc()
+{
+	return compose_doc_;
+}
+GD_proxy_base* LxContexRender::get_gd_proxy()
+{
+	return gd_proxy_;
+}
+
 //border render,draw border and the base render which is decorated.
-LxBorderRender::LxBorderRender(LxRender* base_render) : base_render_(base_render) {}
+LxBorderRender::LxBorderRender(LxRender* base_render)
+	: base_render_(base_render) {}
 LxBorderRender::~LxBorderRender() {}
+
 void LxBorderRender::DrawPageSpace(CDC* pDC, int bottom_pos, int pages_space)
 {
 	CRect rect(ViewWindow::GetViewWindowInstance()->border_width_left -
-		ViewWindow::GetViewWindowInstance()->offset_x + LxPaper::left_margin,
+		ViewWindow::GetViewWindowInstance()->offset_x,
 		bottom_pos - pages_space,
 		ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::pixel_width -
-		ViewWindow::GetViewWindowInstance()->offset_x - LxPaper::right_margin,
+		ViewWindow::GetViewWindowInstance()->offset_x,
 		bottom_pos);
-	FlushRect(pDC, &rect, LxPaper::paper_back_color);
+	FlushRect(pDC, &rect, ViewWindow::GetViewWindowInstance()->get_view_back_color());
 }
+
 void LxBorderRender::DrawBorder(CDC* pDC)
 {
 	// draw spaces between pages
-	ComposeDoc* compose_doc_;
+	ComposeDoc* compose_doc_ = base_render_->get_compose_doc();
 	int view_top = ViewWindow::GetViewWindowInstance()->get_top_pos();
 	int view_bottom = ViewWindow::GetViewWindowInstance()->get_bottom_pos();
 	int pages_space = ViewWindow::GetViewWindowInstance()->border_height;
@@ -50,8 +70,9 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 			page_++;
 			if (page_ == compose_doc_->end())
 				break;
+			continue;
 		}
-		if ((*page_)->get_top_pos() > view_top >= view_bottom)
+		if ((*page_)->get_top_pos() >= view_bottom)
 			break;
 	}
 	// draw left and right border
@@ -59,10 +80,33 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 		ViewWindow::GetViewWindowInstance()->height);
 	CRect rect_r(ViewWindow::GetViewWindowInstance()->width - ViewWindow::GetViewWindowInstance()->border_width_right,
 		0, ViewWindow::GetViewWindowInstance()->width, ViewWindow::GetViewWindowInstance()->height);
-	FlushRect(pDC, &rect_l, LxPaper::paper_back_color);
-	FlushRect(pDC, &rect_r, LxPaper::paper_back_color);
+	FlushRect(pDC, &rect_l, ViewWindow::GetViewWindowInstance()->get_view_back_color());
+	FlushRect(pDC, &rect_r, ViewWindow::GetViewWindowInstance()->get_view_back_color());
 }
+
 void LxBorderRender::DrawDocument(CDC* pDC)
 {
 	base_render_->DrawDocument(pDC);
+	DrawBorder(pDC);
+}
+
+void LxBorderRender::create_caret(int height, int width)
+{
+	base_render_->create_caret(height, width);
+}
+void LxBorderRender::show_caret(LxCursor* cursor)
+{
+	base_render_->show_caret(cursor);
+}
+void LxBorderRender::hide_caret()
+{
+	base_render_->hide_caret();
+}
+ComposeDoc* LxBorderRender::get_compose_doc()
+{
+	return base_render_->get_compose_doc();
+}
+GD_proxy_base* LxBorderRender::get_gd_proxy()
+{
+	return base_render_->get_gd_proxy();
 }

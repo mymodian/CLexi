@@ -1,39 +1,43 @@
 #include "stdafx.h"
 #include "LxDcViCtl.h"
+#include "LxSrcFontFactory.h"
 
-LxDcViCtl::LxDcViCtl()
+LxDcViCtl::LxDcViCtl() {}
+LxDcViCtl::~LxDcViCtl() {}
+
+void LxDcViCtl::init(CDC* pDC)
 {
-	ComposePage* first_page=new ComposePage();
-	ComposeParagraph* first_paragraph=new ComposeParagraph();
-	ComposeRow* first_row=new ComposeRow();
-	first_row->set_area(0, 0);
-	first_paragraph->set_area(0, 0);
-	first_page->set_area(0, 0);
-
-	compose_doc.add_page(first_page);
-	first_page->add_paragraph(first_paragraph);
-	first_paragraph->add_row(first_row);
-	
-	cursor.point_x = ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::left_margin;
-	cursor.point_y = ViewWindow::GetViewWindowInstance()->border_height + LxPaper::top_margin;
-	cursor.page = compose_doc.begin();
-	cursor.paragraph = first_page->begin();
-	cursor.row = first_paragraph->begin();
-	cursor.index_inner = 0;
-	cursor.width_used = 0;
+	CFont* m_Font = new CFont;
+	m_Font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Arial");
+	LOGFONT logfont;
+	m_Font->GetLogFont(&logfont);
+	size_t font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
+	font_tree.insert(0, 0, font_index);
+	delete m_Font;
 
 	Paragraph* paragraph = new Paragraph();
 	//设置默认的排版算法，对象应从排版算法管理结构中获取
 	paragraph->SetComposeAlgom(new LxSimpleComposeAlgo());
 	document.add_paragraph(paragraph);
-	first_paragraph->set_phy_paragraph(paragraph);
 	compose_doc.AttachColorInfo(&color_tree);
 	compose_doc.AttachFontInfo(&font_tree);
 	compose_doc.AttachPhyDoc(&document);
+
+	compose_doc.compose_complete(pDC);
+
+	cursor.point_x = ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::left_margin;
+	cursor.point_y = ViewWindow::GetViewWindowInstance()->border_height + LxPaper::top_margin;
+	cursor.page = compose_doc.begin();
+	cursor.paragraph = (*cursor.page)->begin();
+	cursor.row = (*cursor.paragraph)->begin();
+	cursor.index_inner = 0;
+	cursor.width_used = 0;
+
+	gd_proxy.init();
+	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
 }
-LxDcViCtl::~LxDcViCtl()
-{
-}
+
 void LxDcViCtl::insert(size_t position, size_t  count)
 {
 }
@@ -57,4 +61,17 @@ void LxDcViCtl::modify_font(size_t position_begin, size_t position_end, size_t f
 void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t color_src_index)
 {
 	color_tree.modify(position_begin,position_end,color_src_index);
+}
+
+//full text
+void LxDcViCtl::compose_complete(CDC* pDC)
+{
+	compose_doc.compose_complete(pDC);
+}
+void LxDcViCtl::draw_complete(CDC* pDC)
+{
+	render->DrawDocument(pDC);
+	render->hide_caret();
+	render->create_caret(20, 4);
+	render->show_caret(&cursor);
 }

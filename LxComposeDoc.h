@@ -7,6 +7,7 @@ using std::list;
 
 #include "LxDocument.h"
 #include "LxTreeBase.h"
+#include "LxPaper.h"
 
 /*
 用来表示排版结构，当各种操作后都需要重新计算排版的变更，更改变化了的结构信息。包括行、段、页属性的变化。

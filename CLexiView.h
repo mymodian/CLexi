@@ -27,6 +27,10 @@ public:
 	int GetTextTrueWidth(char* text, size_t src_font);
 	int GetTextTrueHeight(char text, size_t src_font);
 
+public:
+	void create_caret(int height, int width);
+	void hide_caret();
+	void show_caret(int x, int y);
 
 // ÖØÐ´
 public:

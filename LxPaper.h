@@ -97,3 +97,12 @@ struct LxPaper
 };
 
 #endif
+//A4规格：210*297毫米
+//获取屏幕的分辨率和物理尺寸
+//int cx = GetSystemMetrics(SM_CXSCREEN);
+//int cy = GetSystemMetrics(SM_CYSCREEN);
+//
+//int nScreenWidth, nScreenHeight;
+//HDC hdcScreen = GetDC(NULL);			//获取屏幕的HDC
+//nScreenWidth = GetDeviceCaps(hdcScreen, HORZSIZE);
+//nScreenHeight = GetDeviceCaps(hdcScreen, VERTSIZE);
