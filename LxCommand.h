@@ -13,6 +13,12 @@ public:
 	virtual void Excute() = 0;
 	virtual bool CanUndo() = 0;
 	virtual void Undo() {}
+	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl)
+	{
+		doc_view_ctrl_ = doc_view_ctrl;
+	}
+protected:
+	LxDcViCtl* doc_view_ctrl_;
 };
 
 class LxEmptyCmd : public LxCommandBase
@@ -29,11 +35,13 @@ class LxInsertCmd : public LxCommandBase
 public:
 	LxInsertCmd() = delete;
 	virtual ~LxInsertCmd() = default;
+	LxInsertCmd(char c);
 	LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color);
 	virtual void Excute() override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
+	char ch;
 	size_t ins_pos;
 	size_t src_font;
 	COLORREF src_color;
@@ -101,6 +109,7 @@ public:
 	virtual void Excute() override;
 	virtual bool CanUndo() override;
 	virtual void Undo() override;
+	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl) override;
 private:
 	list<LxCommandBase*> command;
 };

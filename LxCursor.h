@@ -10,8 +10,12 @@ public:
 	~LxCursor() {}
 	LxCursor& operator++();
 	LxCursor operator++(int);
+	size_t get_index_global()
+	{
+		return (*row)->get_area_begin() + index_inner;
+	}
 public:
-	int point_x;
+	int point_x;			//carset的位置相对于页面范围
 	int point_y;
 	int height;				//光标的高度随字体而改变
 	int index_inner;		//在当前行的第几个字符后 //need

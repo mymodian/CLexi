@@ -4,6 +4,8 @@
 
 #pragma once
 
+#define LEXI_INIT WM_USER + 0x01
+
 #include "LxCommand.h"
 
 class CCLexiView : public CView
@@ -31,6 +33,8 @@ public:
 	void create_caret(int height, int width);
 	void hide_caret();
 	void show_caret(int x, int y);
+public:
+	void insert(char c);
 
 // 重写
 public:
@@ -62,6 +66,7 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg LRESULT OnLexiInit(WPARAM wParam, LPARAM lParam);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

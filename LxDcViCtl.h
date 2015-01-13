@@ -18,8 +18,8 @@ public:
 	~LxDcViCtl();
 	void init(CDC* pDC);
 public:
-	void insert(size_t position, size_t  count);
-	void insert(size_t position, size_t  count, size_t font_src_index);
+	void insert(char* src, size_t  count);
+	void insert(char* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);
 	void remove(size_t position_begin, size_t position_end);
 	void modify_font(size_t position_begin, size_t position_end, size_t font_src_index);

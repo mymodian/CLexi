@@ -5,11 +5,14 @@ LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
 	: ins_pos(ins_pos), src_font(src_font), src_color(src_color)
 {
 }
+LxInsertCmd::LxInsertCmd(char c) : ch(c) {}
 void LxInsertCmd::Excute()
 {
 	//1.先修改物理文档
 	//2.根据修改的物理文档的位置调用相应的排版函数
 	//3.依次计算剩余文档的段、页关系
+	doc_view_ctrl_->insert(&ch, 1);
+
 }
 void LxInsertCmd::Undo()
 {
@@ -80,16 +83,12 @@ void LxCommand::add_child_cmd(LxCommandBase* child_cmd)
 void LxCommand::Excute()
 {
 	for (LxCommandBase* it : command)
-	{
 		it->Excute();
-	}
 }
 bool LxCommand::CanUndo()
 {
 	for (LxCommandBase* it : command)
-	{
 		if (!it->CanUndo()) return false;
-	}
 	return true;
 }
 void LxCommand::Undo()
@@ -103,6 +102,11 @@ void LxCommand::Undo()
 			(*(rit))->Undo();
 		}
 	}
+}
+void LxCommand::set_dvctl(LxDcViCtl* doc_view_ctrl)
+{
+	for (LxCommandBase* it : command)
+		it->set_dvctl(doc_view_ctrl);
 }
 
 LxCommandMgr::LxCommandMgr()

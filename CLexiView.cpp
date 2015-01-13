@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CCLexiView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
+	ON_MESSAGE(LEXI_INIT, &CCLexiView::OnLexiInit)
 	ON_WM_CHAR()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
@@ -87,33 +88,33 @@ void CCLexiView::OnDraw(CDC* pDC)
 	SetCaretPos(CPoint(100, 100));
 	ShowCaret();*/
 
-	CRect rect;
-	GetClientRect(&rect);
-	CDC dcMem;
-	CBitmap bmp;
+	//CRect rect;
+	//GetClientRect(&rect);
+	//CDC dcMem;
+	//CBitmap bmp;
 
-	dcMem.CreateCompatibleDC(pDC);
-	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	dcMem.SelectObject(&bmp);
-	dcMem.FillSolidRect(rect, pDC->GetBkColor());
-	dcMem.TextOut(100, 100, "hello world!!!");
+	//dcMem.CreateCompatibleDC(pDC);
+	//bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+	//dcMem.SelectObject(&bmp);
+	//dcMem.FillSolidRect(rect, pDC->GetBkColor());
+	//dcMem.TextOut(100, 100, "hello world!!!");
 
-	CString screen_size;
-	int cx = GetSystemMetrics(SM_CXSCREEN);
-	int cy = GetSystemMetrics(SM_CYSCREEN);
-	
-	int nScreenWidth, nScreenHeight;
-	HDC hdcScreen = ::GetDC(NULL);			//获取屏幕的HDC
-	nScreenWidth = GetDeviceCaps(hdcScreen, HORZSIZE);
-	nScreenHeight = GetDeviceCaps(hdcScreen, VERTSIZE);
-	screen_size.Format("分辨率:%d,%d   尺寸:%d,%d", cx, cy, nScreenWidth, nScreenHeight);
-	dcMem.TextOutA(100, 200, screen_size);
+	//CString screen_size;
+	//int cx = GetSystemMetrics(SM_CXSCREEN);
+	//int cy = GetSystemMetrics(SM_CYSCREEN);
+	//
+	//int nScreenWidth, nScreenHeight;
+	//HDC hdcScreen = ::GetDC(NULL);			//获取屏幕的HDC
+	//nScreenWidth = GetDeviceCaps(hdcScreen, HORZSIZE);
+	//nScreenHeight = GetDeviceCaps(hdcScreen, VERTSIZE);
+	//screen_size.Format("分辨率:%d,%d   尺寸:%d,%d", cx, cy, nScreenWidth, nScreenHeight);
+	//dcMem.TextOutA(100, 200, screen_size);
 
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
-		&dcMem, 0, 0, SRCCOPY);
+	//pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
+	//	&dcMem, 0, 0, SRCCOPY);
 
-	dcMem.DeleteDC();
-	bmp.DeleteObject();
+	//dcMem.DeleteDC();
+	//bmp.DeleteObject();
 }
 
 
@@ -159,6 +160,15 @@ CCLexiDoc* CCLexiView::GetDocument() const // 非调试版本是内联的
 
 // CCLexiView 消息处理程序
 
+LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
+{
+	CDC* pDC = GetDC();
+	doc_view_controler.init(pDC);
+	doc_view_controler.draw_complete(pDC);
+	ReleaseDC(pDC);
+	return 0;
+}
+
 BOOL CCLexiView::OnEraseBkgnd(CDC* pDC)
 {
 	return TRUE;
@@ -168,7 +178,24 @@ BOOL CCLexiView::OnEraseBkgnd(CDC* pDC)
 void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-
+	switch (nChar)
+	{
+	case '\t':
+		//table 转为多个空格处理
+		break;
+	case '\r':
+		//按下回车，创建新物理段
+		break;
+	case '\n':
+		break;
+	case 8:
+		//删除
+		break;
+	default:
+		//字符输入
+		this->insert(nChar);
+		break;
+	}
 	CView::OnChar(nChar, nRepCnt, nFlags);
 }
 
@@ -176,10 +203,6 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	CDC* pDC = GetDC();
-	doc_view_controler.init(pDC);
-	doc_view_controler.draw_complete(pDC);
-	ReleaseDC(pDC);
 
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -207,5 +230,21 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 	CRect rect;
 	GetClientRect(&rect);
 	AdjustViewWindow(rect.Width(), rect.Height());
-	// TODO:  在此处添加消息处理程序代码
+	//size改变后，文档的offset_y保持不变，但当客户区域的高度大于等于文档总高度时，将offset_y设为0
+	//同样offset_x也保持不变，当客户区域的宽度大于等于文档页面宽度时，将offset_x设为0
+	
+	CDC* pDC = GetDC();
+	doc_view_controler.draw_complete(pDC);
+	ReleaseDC(pDC);
+}
+
+// CCLexiView mydoc命令处理程序
+
+void CCLexiView::insert(char c)
+{
+	LxCommand* insert_cmd = new LxCommand();
+	insert_cmd->add_child_cmd(new LxInsertCmd(c));
+	insert_cmd->set_dvctl(&doc_view_controler);
+	insert_cmd->Excute();
+	lx_command_mgr.insert_cmd(insert_cmd);
 }

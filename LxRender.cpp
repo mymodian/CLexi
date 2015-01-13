@@ -20,7 +20,9 @@ void LxContexRender::create_caret(int height, int width)
 }
 void LxContexRender::show_caret(LxCursor* cursor)
 {
-	gd_proxy_->show_caret(cursor->point_x, cursor->point_y);
+	gd_proxy_->show_caret(cursor->point_x + ViewWindow::GetViewWindowInstance()->border_width_left -
+		ViewWindow::GetViewWindowInstance()->offset_x,
+		cursor->point_y - ViewWindow::GetViewWindowInstance()->offset_y);
 }
 void LxContexRender::hide_caret()
 {
@@ -74,6 +76,17 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 		}
 		if ((*page_)->get_top_pos() >= view_bottom)
 			break;
+	}
+	// draw bottom border if need
+	int doc_bottom_pos = (*(--compose_doc_->end()))->get_bottom_pos() + 
+		ViewWindow::GetViewWindowInstance()->border_height - 
+		ViewWindow::GetViewWindowInstance()->offset_y;
+	if (doc_bottom_pos < ViewWindow::GetViewWindowInstance()->height)
+	{
+		CRect rect_b(ViewWindow::GetViewWindowInstance()->border_width_left, doc_bottom_pos,
+			ViewWindow::GetViewWindowInstance()->width - ViewWindow::GetViewWindowInstance()->border_width_right,
+			ViewWindow::GetViewWindowInstance()->height);
+		FlushRect(pDC, &rect_b, ViewWindow::GetViewWindowInstance()->get_view_back_color());
 	}
 	// draw left and right border
 	CRect rect_l(0, 0, ViewWindow::GetViewWindowInstance()->border_width_left, 

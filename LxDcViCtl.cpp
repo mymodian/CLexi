@@ -7,14 +7,21 @@ LxDcViCtl::~LxDcViCtl() {}
 
 void LxDcViCtl::init(CDC* pDC)
 {
-	CFont* m_Font = new CFont;
-	m_Font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	CFont* font = new CFont;
+	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Arial");
 	LOGFONT logfont;
-	m_Font->GetLogFont(&logfont);
+	font->GetLogFont(&logfont);
 	size_t font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
 	font_tree.insert(0, 0, font_index);
-	delete m_Font;
+
+	pDC->SelectObject(font);
+	TEXTMETRIC trx;
+	pDC->GetTextMetrics(&trx);
+	cursor.height = trx.tmHeight;
+
+	delete font;
+	color_tree.insert(0, 0, RGB(0, 0, 0));
 
 	Paragraph* paragraph = new Paragraph();
 	//设置默认的排版算法，对象应从排版算法管理结构中获取
@@ -26,7 +33,7 @@ void LxDcViCtl::init(CDC* pDC)
 
 	compose_doc.compose_complete(pDC);
 
-	cursor.point_x = ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::left_margin;
+	cursor.point_x = LxPaper::left_margin;
 	cursor.point_y = ViewWindow::GetViewWindowInstance()->border_height + LxPaper::top_margin;
 	cursor.page = compose_doc.begin();
 	cursor.paragraph = (*cursor.page)->begin();
@@ -38,10 +45,11 @@ void LxDcViCtl::init(CDC* pDC)
 	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
 }
 
-void LxDcViCtl::insert(size_t position, size_t  count)
+void LxDcViCtl::insert(char* src, size_t  count)
 {
+	//在cursor处执行插入操作
 }
-void LxDcViCtl::insert(size_t position, size_t  count, size_t src_index)
+void LxDcViCtl::insert(char* src, size_t  count, size_t src_index)
 {
 }
 void LxDcViCtl::remove(size_t position)
@@ -70,8 +78,9 @@ void LxDcViCtl::compose_complete(CDC* pDC)
 }
 void LxDcViCtl::draw_complete(CDC* pDC)
 {
+	pDC->SetBkMode(TRANSPARENT);
 	render->DrawDocument(pDC);
 	render->hide_caret();
-	render->create_caret(20, 4);
+	render->create_caret(cursor.height, cursor.height/8);
 	render->show_caret(&cursor);
 }

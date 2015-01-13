@@ -123,6 +123,9 @@ BOOL CCLexiApp::InitInstance()
 	// 唯一的一个窗口已初始化，因此显示它并对其进行更新
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
+	CCLexiView* the_view = (CCLexiView*)(((CMainFrame*)m_pMainWnd)->GetActiveView());
+	PostMessage(the_view->m_hWnd, LEXI_INIT, NULL, NULL);
+
 	return TRUE;
 }
 
