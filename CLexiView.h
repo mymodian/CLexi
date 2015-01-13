@@ -48,6 +48,9 @@ protected:
 // й╣ож
 private:
 
+//в╢л╛
+private:
+	BOOL bInitialized;
 public:
 	virtual ~CCLexiView();
 #ifdef _DEBUG

@@ -42,7 +42,7 @@ END_MESSAGE_MAP()
 CCLexiView::CCLexiView()
 {
 	// TODO: 在此处添加构造代码
-	
+	bInitialized = FALSE;
 }
 
 CCLexiView::~CCLexiView()
@@ -166,6 +166,7 @@ LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 	doc_view_controler.init(pDC);
 	doc_view_controler.draw_complete(pDC);
 	ReleaseDC(pDC);
+	bInitialized = TRUE;
 	return 0;
 }
 
@@ -232,7 +233,8 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 	AdjustViewWindow(rect.Width(), rect.Height());
 	//size改变后，文档的offset_y保持不变，但当客户区域的高度大于等于文档总高度时，将offset_y设为0
 	//同样offset_x也保持不变，当客户区域的宽度大于等于文档页面宽度时，将offset_x设为0
-	
+	if (!bInitialized)
+		return;
 	CDC* pDC = GetDC();
 	doc_view_controler.draw_complete(pDC);
 	ReleaseDC(pDC);
