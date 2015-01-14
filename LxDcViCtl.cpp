@@ -48,6 +48,11 @@ void LxDcViCtl::init(CDC* pDC)
 void LxDcViCtl::insert(char* src, size_t  count)
 {
 	//在cursor处执行插入操作
+	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
+	pgh->Insert(cursor.get_index_inner_paragraph(), src, count);
+
+	font_tree.insert(cursor.get_index_global(), count);
+	color_tree.insert(cursor.get_index_global(), count);
 }
 void LxDcViCtl::insert(char* src, size_t  count, size_t src_index)
 {
@@ -69,6 +74,22 @@ void LxDcViCtl::modify_font(size_t position_begin, size_t position_end, size_t f
 void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t color_src_index)
 {
 	color_tree.modify(position_begin,position_end,color_src_index);
+}
+
+//partial
+void LxDcViCtl::modify_layout(CDC* pDC, int count)
+{
+	LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
+	size_t cur_gbl_index_old = cursor.get_index_global();
+	Paragraph* phy_pgh = cursor.get_phy_paragraph();
+
+	compose_doc.modify_index(pgh_doc_it, count);
+	pgh_doc_it = compose_doc.modify(pgh_doc_it, cursor.row, pDC);
+	compose_doc.relayout(pgh_doc_it);
+
+	//计算新的cursor
+	cur_gbl_index_old += count;
+	compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 }
 
 //full text

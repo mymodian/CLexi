@@ -26,7 +26,7 @@ public:
 	void modify_color(size_t position_begin, size_t position_end, size_t color_src_index);
 //≈≈∞Êœ‡πÿ
 public:
-	void modify_layout();
+	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
 private:

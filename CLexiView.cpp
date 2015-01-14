@@ -245,8 +245,10 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 void CCLexiView::insert(char c)
 {
 	LxCommand* insert_cmd = new LxCommand();
-	insert_cmd->add_child_cmd(new LxInsertCmd(c));
+	insert_cmd->add_child_cmd(new LxInsertCmd(&c, 1));
 	insert_cmd->set_dvctl(&doc_view_controler);
-	insert_cmd->Excute();
+	CDC* pDC = GetDC();
+	insert_cmd->Excute(pDC);
+	ReleaseDC(pDC);
 	lx_command_mgr.insert_cmd(insert_cmd);
 }

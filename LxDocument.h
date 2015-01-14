@@ -20,6 +20,8 @@ public:
 	void store_stream(FILE* file);
 	void add_paragraph(Paragraph* paragraph);
 	void insert_paragraph(Paragraph* paragraph,int index);
+public:
+	void insert(size_t pos, char* cs, size_t len);		//insert中不包括换行符
 private:
 	std::list<Paragraph*> paragraph_list;
 };

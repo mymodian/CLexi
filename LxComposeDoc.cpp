@@ -4,6 +4,7 @@
 #include "LxComposeDoc.h"
 #include "LxComposeAlgom.h"
 #include "LxSrcFontFactory.h"
+#include "LxCursor.h"
 #include <iostream>
 using namespace std;
 
@@ -31,6 +32,58 @@ LxParagraphInDocIter ComposeDoc::pargraph_begin()
 LxParagraphInDocIter ComposeDoc::pargraph_end()
 {
 	return LxParagraphInDocIter(this, end(), (*(--end()))->end());
+}
+
+void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC)
+{
+	for (page_iter page = begin(); page != end(); page++)
+	{
+		if ((*page)->get_area_end() + 1 >= cur_gbl_index)
+		{
+			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); paragraph++)
+			{
+				if ((*paragraph)->get_area_end() + 1 >= cur_gbl_index)
+				{
+					if ((*paragraph)->get_phy_paragraph() == phy_pgh)
+					{
+						for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); row++)
+						{
+							if ((*row)->get_area_end() + 1 >= cur_gbl_index)
+							{
+								cursor.page = page;
+								cursor.paragraph = paragraph;
+								cursor.row = row;
+								cursor.index_inner = cur_gbl_index - (*row)->get_area_begin();
+								//cursor在row的第index_inner个字符后
+								int x = LxPaper::left_margin;
+								int y = (*row)->get_top_pos();
+								size_t index = (*row)->get_area_begin();
+								size_t font_index, same_font_cnt;
+								for (int i = 0; i < cursor.index_inner; i++)
+								{
+									font_tree->get_src_index(index, font_index, same_font_cnt);
+									size_t count = min(cursor.index_inner - i, same_font_cnt);
+									CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(font_index);
+									pDC->SelectObject(font);
+									TEXTMETRIC trx;
+									pDC->GetTextMetrics(&trx);
+									CSize size;
+									for (int i = 0; i < count; i++)
+									{
+										size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index, 1);
+										
+										inner_index++;
+										x += size.cx + words_space;
+									}
+								}
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void ComposeDoc::Draw(CDC* pDC)
@@ -67,7 +120,7 @@ void ComposeDoc::compose_complete(CDC* pDC)
 	{
 		size_t index_inner = 0;
 		ComposeParagraph* paragraph = new ComposeParagraph();
-		paragraph->set_area(index_global, -1);
+		paragraph->set_area(index_global, index_global - 1);
 		paragraph->set_offset_inner(index_inner);
 		paragraph->set_phy_paragraph(*phy_pagph);
 		paragraph->set_pos(y_offset, 0);
@@ -97,7 +150,7 @@ void ComposeDoc::compose_complete(CDC* pDC)
 				int new_page_pos = page->get_top_pos() + LxPaper::pixel_height +
 					ViewWindow::GetViewWindowInstance()->border_height;
 				page = new ComposePage();
-				page->set_area(index_global, -1);
+				page->set_area(index_global, index_global - 1);
 				page->set_top_pos(new_page_pos);
 				add_page(page);
 				y_offset = page->get_top_pos() + LxPaper::top_margin;
@@ -250,6 +303,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 			LxParagraphInDocIter last_PD(this, page_cusr, pgraph_cusr);
 			return last_PD;
 		}
+		delete *pgraph_cusr;
 		(*page_cusr)->remove_paragraph(pgraph_cusr);
 		page_cusr--;
 		pgraph_cusr = --((*page_cusr)->end());

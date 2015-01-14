@@ -28,6 +28,8 @@ typedef list<ComposeRow*>::iterator row_iter;
 class LxRowInPageIter;
 class LxParagraphInDocIter;
 
+class LxCursor;
+
 class ComposeBase
 {
 public:
@@ -37,6 +39,7 @@ public:
 class ComposeRow
 {
 public:
+	friend class ComposeDoc;
 	ComposeRow();
 	~ComposeRow() {}
 	void init();
@@ -81,6 +84,7 @@ private:
 class ComposeParagraph
 {
 public:
+	friend class ComposeDoc;
 	ComposeParagraph() {}
 	~ComposeParagraph();
 public:
@@ -134,6 +138,7 @@ private:
 class ComposePage
 {
 public:
+	friend class ComposeDoc;
 	ComposePage() {}
 	~ComposePage();
 	void add_paragraph(ComposeParagraph* paragraph);
@@ -192,6 +197,7 @@ public:
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
 	void Draw(CDC* pDC);
+	void calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC);
 	void AttachFontInfo(TreeBase* font_tree) { this->font_tree = font_tree; }
 	void AttachColorInfo(TreeBase* color_tree) { this->color_tree = color_tree; }
 	void AttachPhyDoc(Document* phy_document) { this->phy_document = phy_document; }

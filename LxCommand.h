@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "LxDcViCtl.h"
 #include <list>
 using namespace std;
@@ -10,7 +11,7 @@ class LxCommandBase
 public:
 	LxCommandBase() = default;
 	virtual ~LxCommandBase() = default;
-	virtual void Excute() = 0;
+	virtual void Excute(CDC* pDC) = 0;
 	virtual bool CanUndo() = 0;
 	virtual void Undo() {}
 	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl)
@@ -26,7 +27,7 @@ class LxEmptyCmd : public LxCommandBase
 public:
 	LxEmptyCmd() = default;
 	virtual ~LxEmptyCmd() = default;
-	virtual void Excute() override {}
+	virtual void Excute(CDC* pDC) override {}
 	virtual bool CanUndo() override { return false; }
 };
 
@@ -35,13 +36,14 @@ class LxInsertCmd : public LxCommandBase
 public:
 	LxInsertCmd() = delete;
 	virtual ~LxInsertCmd() = default;
-	LxInsertCmd(char c);
+	LxInsertCmd(char* cs, size_t len);
 	LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color);
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	char ch;
+	char* cs_;
+	size_t len_;
 	size_t ins_pos;
 	size_t src_font;
 	COLORREF src_color;
@@ -52,7 +54,7 @@ class LxDeleteCmd : public LxCommandBase
 public:
 	LxDeleteCmd() = default;
 	virtual ~LxDeleteCmd();
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
@@ -67,7 +69,7 @@ class LxModifyViewCmd : public LxCommandBase
 public:
 	LxModifyViewCmd() = default;
 	~LxModifyViewCmd() = default;
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return false; }
 };
 
@@ -78,7 +80,7 @@ public:
 	LxMergeCmd(ComposeParagraph* paragraph1, ComposeParagraph* paragraph2);
 	virtual ~LxMergeCmd();
 public:
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
@@ -93,7 +95,7 @@ public:
 	LxSplitCmd(ComposeParagraph* paragraph);
 	virtual ~LxSplitCmd();
 public:
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
@@ -106,7 +108,7 @@ public:
 	LxCommand() = default;
 	virtual ~LxCommand();
 	void add_child_cmd(LxCommandBase* child_cmd);
-	virtual void Excute() override;
+	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override;
 	virtual void Undo() override;
 	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl) override;

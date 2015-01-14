@@ -5,14 +5,15 @@ LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
 	: ins_pos(ins_pos), src_font(src_font), src_color(src_color)
 {
 }
-LxInsertCmd::LxInsertCmd(char c) : ch(c) {}
-void LxInsertCmd::Excute()
+LxInsertCmd::LxInsertCmd(char* cs, size_t len) : cs_(cs), len_(len) {}
+void LxInsertCmd::Excute(CDC* pDC)
 {
 	//1.先修改物理文档
 	//2.根据修改的物理文档的位置调用相应的排版函数
 	//3.依次计算剩余文档的段、页关系
-	doc_view_ctrl_->insert(&ch, 1);
-
+	doc_view_ctrl_->insert(cs_, len_);
+	doc_view_ctrl_->modify_layout(pDC, len_);
+	doc_view_ctrl_->draw_complete(pDC);
 }
 void LxInsertCmd::Undo()
 {
@@ -23,7 +24,7 @@ LxDeleteCmd::~LxDeleteCmd()
 {
 
 }
-void LxDeleteCmd::Excute()
+void LxDeleteCmd::Excute(CDC* pDC)
 {
 
 }
@@ -32,7 +33,7 @@ void LxDeleteCmd::Undo()
 
 }
 
-void LxModifyViewCmd::Excute()
+void LxModifyViewCmd::Excute(CDC* pDC)
 {
 
 }
@@ -45,7 +46,7 @@ LxMergeCmd::~LxMergeCmd()
 {
 
 }
-void LxMergeCmd::Excute()
+void LxMergeCmd::Excute(CDC* pDC)
 {
 
 }
@@ -62,7 +63,7 @@ LxSplitCmd::~LxSplitCmd()
 {
 
 }
-void LxSplitCmd::Excute()
+void LxSplitCmd::Excute(CDC* pDC)
 {
 
 }
@@ -80,10 +81,10 @@ void LxCommand::add_child_cmd(LxCommandBase* child_cmd)
 {
 	command.push_back(child_cmd);
 }
-void LxCommand::Excute()
+void LxCommand::Excute(CDC* pDC)
 {
 	for (LxCommandBase* it : command)
-		it->Excute();
+		it->Excute(pDC);
 }
 bool LxCommand::CanUndo()
 {

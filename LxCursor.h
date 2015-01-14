@@ -14,11 +14,19 @@ public:
 	{
 		return (*row)->get_area_begin() + index_inner;
 	}
+	size_t get_index_inner_paragraph()
+	{
+		return get_index_global() - (*paragraph)->get_area_begin() + (*paragraph)->get_offset_inner();
+	}
+	Paragraph* get_phy_paragraph()
+	{
+		return (*paragraph)->get_phy_paragraph();
+	}
 public:
 	int point_x;			//carset的位置相对于页面范围
 	int point_y;
 	int height;				//光标的高度随字体而改变
-	int index_inner;		//在当前行的第几个字符后 //need
+	int index_inner;		//在当前行的第几个字符后,如果此处没有字符，则为0 //need
 	int width_used;		//当前行在此处达到的宽度 //don't need
 	page_iter page;
 	paragraph_iter paragraph;
