@@ -56,10 +56,10 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 								cursor.index_inner = cur_gbl_index - (*row)->get_area_begin();
 								//cursor在row的第index_inner个字符后
 								int x = LxPaper::left_margin;
-								int y = (*row)->get_top_pos();
+								int y;
 								size_t index = (*row)->get_area_begin();
 								size_t font_index, same_font_cnt;
-								for (int i = 0; i < cursor.index_inner; i++)
+								for (int i = 0; i < cursor.index_inner; )
 								{
 									font_tree->get_src_index(index, font_index, same_font_cnt);
 									size_t count = min(cursor.index_inner - i, same_font_cnt);
@@ -67,15 +67,19 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 									pDC->SelectObject(font);
 									TEXTMETRIC trx;
 									pDC->GetTextMetrics(&trx);
+									cursor.height = trx.tmHeight;
+									y = (*row)->get_top_pos() + (*row)->get_base_line() - trx.tmAscent;
 									CSize size;
-									for (int i = 0; i < count; i++)
+									for (int j = 0; j < count; j++)
 									{
-										size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index, 1);
-										
-										inner_index++;
-										x += size.cx + words_space;
+										size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index - (*paragraph)->get_area_begin(), 1);
+										index++;
+										x += size.cx + (*row)->get_words_space();
 									}
+									i += count;
 								}
+								cursor.point_x = x;
+								cursor.point_y = y;
 								return;
 							}
 						}
@@ -212,6 +216,7 @@ void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
 	pgraph_cusr++;
 	page_iter page_cusr = pagraph_iter.get_page();
+	(*page_cusr)->set_area((*page_cusr)->get_area_begin(), (*page_cusr)->get_area_end() + count);
 
 	for (;;)
 	{
