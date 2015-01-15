@@ -294,11 +294,21 @@ public:
 		//不同list之间的迭代器是不可比较的
 		//return paragraph == other.paragraph;
 		//这里在初始化时插入会因为end不可提取出错
-		return (*paragraph)->get_area_begin() == (*(other.paragraph))->get_area_begin();
+		if (page != other.page)
+			return false;
+		if (paragraph != other.paragraph)
+			return false;
+		return true;
+		//return (*paragraph)->get_area_begin() == (*(other.paragraph))->get_area_begin();
 	}
 	bool operator!=(const LxParagraphInDocIter& other) const
 	{
-		return (*paragraph)->get_area_begin() != (*(other.paragraph))->get_area_begin();
+		if (page != other.page)
+			return true;
+		if (paragraph != other.paragraph)
+			return true;
+		return false;
+		//return (*paragraph)->get_area_begin() != (*(other.paragraph))->get_area_begin();
 	}
 	LxParagraphInDocIter& operator=(LxParagraphInDocIter& other)
 	{
