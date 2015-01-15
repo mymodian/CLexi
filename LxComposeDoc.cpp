@@ -34,6 +34,81 @@ LxParagraphInDocIter ComposeDoc::pargraph_end()
 	return LxParagraphInDocIter(this, end(), (*(--end()))->end());
 }
 
+void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
+{
+	for (page_iter page = begin(); page != end(); page++)
+	{
+		if ((*page)->get_top_pos() <= doc_y && doc_y <= (*page)->get_bottom_pos())
+		{
+			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); paragraph++)
+			{
+				if ((*paragraph)->get_top_pos() <= doc_y && doc_y <= (*paragraph)->get_bottom_pos())
+				{
+					for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); row++)
+					{
+						if ((*row)->get_top_pos() <= doc_y && doc_y <= (*row)->get_bottom_pos())
+						{
+							cursor.row = row;
+							cursor.paragraph = paragraph;
+							cursor.page = page;
+							int x = LxPaper::left_margin;
+							int y = (*row)->get_top_pos();
+							if ((*row)->size() == 0)
+							{
+								cursor.height = (*row)->get_height();
+								cursor.point_x = x;
+								cursor.point_y = y;
+								cursor.index_inner = 0;
+								return;
+							}
+							size_t index = (*row)->get_area_begin();
+							size_t font_index, same_font_cnt;
+							Paragraph* phy_pgh = (*paragraph)->get_phy_paragraph();
+							for (int i=0; i<(*row)->size(); )
+							{
+								font_tree->get_src_index(index, font_index, same_font_cnt);
+								same_font_cnt = min((*row)->size() - i, same_font_cnt);
+								i += same_font_cnt;
+								CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(font_index);
+								pDC->SelectObject(font);
+								TEXTMETRIC trx;
+								pDC->GetTextMetrics(&trx);
+								cursor.height = trx.tmHeight;
+								y = (*row)->get_top_pos() + (*row)->get_base_line() - trx.tmAscent;
+								CSize size;
+								for (int j = 0; j < same_font_cnt; j++)
+								{
+									if (x >= doc_x)
+									{
+										cursor.point_x = x;
+										cursor.point_y = y;
+										cursor.index_inner = index - (*row)->get_area_begin();
+										return;
+									}
+									size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index + (*paragraph)->get_offset_inner() - (*paragraph)->get_area_begin(), 1);
+									index++;
+									x += size.cx + (*row)->get_words_space();
+									if (x >= doc_x)
+									{
+										cursor.point_x = x;
+										cursor.point_y = y;
+										cursor.index_inner = index - (*row)->get_area_begin();
+										return;
+									}
+								}
+							}
+							cursor.point_x = x;
+							cursor.point_y = y;
+							cursor.index_inner = index - (*row)->get_area_begin();
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC)
 {
 	for (page_iter page = begin(); page != end(); page++)
@@ -72,7 +147,7 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 									CSize size;
 									for (int j = 0; j < count; j++)
 									{
-										size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index - (*paragraph)->get_area_begin(), 1);
+										size = pDC->GetTextExtent(phy_pgh->get_context_ptr() + index + (*paragraph)->get_offset_inner() - (*paragraph)->get_area_begin(), 1);
 										index++;
 										x += size.cx + (*row)->get_words_space();
 									}
@@ -387,6 +462,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 	//最后更新段的末尾属性
 	composed_paragraph->set_area(composed_paragraph->get_area_begin(), index_global - 1);
 	composed_paragraph->set_pos(composed_paragraph->get_top_pos(), (*(--composed_paragraph->end()))->get_bottom_pos());
+	(*page_cusr)->set_area((*page_cusr)->get_area_begin(), (*(--(*page_cusr)->end()))->get_area_end());
 	LxParagraphInDocIter last_PD(this, page_cusr, pgraph_cusr);
 	return last_PD;
 }
@@ -700,7 +776,7 @@ void ComposeParagraph::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree)
 			continue;
 		if (row_->get_top_pos() >= ViewWindow::GetViewWindowInstance()->get_bottom_pos())
 			break;
-		row_->Draw(pDC, font_tree, color_tree, get_phy_paragraph(), index_begin);
+		row_->Draw(pDC, font_tree, color_tree, get_phy_paragraph(), index_begin - offset_inner);
 	}
 }
 
@@ -728,6 +804,7 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 	size_t index = this->index_begin;
 	int x = ViewWindow::GetViewWindowInstance()->border_width_left -
 		ViewWindow::GetViewWindowInstance()->offset_x + LxPaper::left_margin;
+	int base_top = ViewWindow::GetViewWindowInstance()->offset_y;
 	for (; index <= this->index_end;)
 	{
 		font_tree->get_src_index(index, font_index, same_font_cnt);
@@ -742,7 +819,7 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 		for (int i = 0; i < count; i++)
 		{
 			size = pDC->GetTextExtent(pagraph->get_context_ptr() + inner_index, 1);
-			pDC->TextOutA(x, top_offset_session + baseline_offset_inner - trx.tmAscent,
+			pDC->TextOutA(x, top_offset_session + baseline_offset_inner - trx.tmAscent - base_top,
 				pagraph->get_context_ptr() + inner_index, 1);
 			inner_index++;
 			x += size.cx + words_space;

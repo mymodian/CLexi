@@ -101,7 +101,7 @@ void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph
 	for (; index_inner < pagraph->size(); )
 	{
 		size_t src_index, count;
-		font_tree->get_src_index(index_begin + index_inner, src_index, count);
+		font_tree->get_src_index(index_begin + index_inner - index_inner_orig, src_index, count);
 		CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(src_index);
 		pDC->SelectObject(font);
 		TEXTMETRIC text_metric;
@@ -113,6 +113,7 @@ void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph
 			external_leading = text_metric.tmExternalLeading; row_to_compose->set_external_leading(external_leading);
 		}
 		int desired_char_cnt = row_to_compose->get_line_space() / text_metric.tmAveCharWidth;
+		desired_char_cnt = desired_char_cnt ? desired_char_cnt : 1;
 		int measure_cnt = min(desired_char_cnt, min(count, pagraph->size() - index_inner));
 		int char_length = pDC->GetTextExtent(pagraph->get_context_ptr() + index_inner, measure_cnt).cx;
 		if (char_length > row_to_compose->get_line_space())

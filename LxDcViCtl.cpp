@@ -8,8 +8,8 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Arial");
+	font->CreateFont(-48, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Î¢ÈíÑÅºÚ");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
 	size_t font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
@@ -90,6 +90,19 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 	//¼ÆËãÐÂµÄcursor
 	cur_gbl_index_old += count;
 	compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y += 
+			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
+	}
+}
+
+void LxDcViCtl::locate(CDC* pDC, int doc_x, int doc_y)
+{
+	compose_doc.locate(cursor, pDC, doc_x, doc_y);
+	render->hide_caret();
+	render->create_caret(cursor.height, cursor.height / 8);
+	render->show_caret(&cursor);
 }
 
 //full text

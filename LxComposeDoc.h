@@ -197,6 +197,7 @@ public:
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
 	void Draw(CDC* pDC);
+	void locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y);
 	void calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC);
 	void AttachFontInfo(TreeBase* font_tree) { this->font_tree = font_tree; }
 	void AttachColorInfo(TreeBase* color_tree) { this->color_tree = color_tree; }
@@ -290,11 +291,14 @@ public:
 	inline paragraph_iter get_paragraph() { return paragraph; }
 	bool operator==(const LxParagraphInDocIter& other) const
 	{
-		return paragraph == other.paragraph;
+		//不同list之间的迭代器是不可比较的
+		//return paragraph == other.paragraph;
+		//这里在初始化时插入会因为end不可提取出错
+		return (*paragraph)->get_area_begin() == (*(other.paragraph))->get_area_begin();
 	}
 	bool operator!=(const LxParagraphInDocIter& other) const
 	{
-		return paragraph != other.paragraph;
+		return (*paragraph)->get_area_begin() != (*(other.paragraph))->get_area_begin();
 	}
 	LxParagraphInDocIter& operator=(LxParagraphInDocIter& other)
 	{

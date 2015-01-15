@@ -29,6 +29,7 @@ public:
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
+	void locate(CDC* pDC, int doc_x, int doc_y);
 private:
 	Document document;
 	ComposeDoc compose_doc;

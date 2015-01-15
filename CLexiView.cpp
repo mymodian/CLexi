@@ -183,6 +183,10 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 	case '\t':
 		//table 转为多个空格处理
+	{
+		char cs[4] = { ' ', ' ', ' ', ' ' };
+		this->insert(cs, 4);
+	}
 		break;
 	case '\r':
 		//按下回车，创建新物理段
@@ -194,7 +198,10 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	default:
 		//字符输入
-		this->insert(nChar);
+	{
+		char ch = nChar;
+		this->insert(&ch, 1);
+	}
 		break;
 	}
 	CView::OnChar(nChar, nRepCnt, nFlags);
@@ -204,6 +211,14 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	LxCommand* locate_cmd = new LxCommand();
+	locate_cmd->add_child_cmd(new LxLocateCmd(point.x, point.y));
+	locate_cmd->set_dvctl(&doc_view_controler);
+	//ExecuteNormalCmd(locate_cmd);
+	CDC* pDC = GetDC();
+	locate_cmd->Excute(pDC);
+	ReleaseDC(pDC);
+	lx_command_mgr.insert_cmd(locate_cmd);
 
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -242,13 +257,36 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 
 // CCLexiView mydoc命令处理程序
 
-void CCLexiView::insert(char c)
+void CCLexiView::ExecuteNormalCmd(LxCommand* cmd)
+{
+	CRect rect;
+	GetClientRect(&rect);
+	CDC dcMem;
+	CBitmap bmp;
+	CDC* pDC = GetDC();
+	dcMem.CreateCompatibleDC(pDC);
+	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+	dcMem.SelectObject(&bmp);
+	dcMem.FillSolidRect(rect, pDC->GetBkColor());
+
+	cmd->Excute(&dcMem);
+
+	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
+		&dcMem, 0, 0, SRCCOPY);
+
+	dcMem.DeleteDC();
+	bmp.DeleteObject();
+	ReleaseDC(pDC);
+}
+
+void CCLexiView::insert(char* cs, int len)
 {
 	LxCommand* insert_cmd = new LxCommand();
-	insert_cmd->add_child_cmd(new LxInsertCmd(&c, 1));
+	insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
 	insert_cmd->set_dvctl(&doc_view_controler);
-	CDC* pDC = GetDC();
+	/*CDC* pDC = GetDC();
 	insert_cmd->Excute(pDC);
-	ReleaseDC(pDC);
+	ReleaseDC(pDC);*/
+	ExecuteNormalCmd(insert_cmd);
 	lx_command_mgr.insert_cmd(insert_cmd);
 }

@@ -60,15 +60,16 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 	int view_top = ViewWindow::GetViewWindowInstance()->get_top_pos();
 	int view_bottom = ViewWindow::GetViewWindowInstance()->get_bottom_pos();
 	int pages_space = ViewWindow::GetViewWindowInstance()->border_height;
+	int base_top = ViewWindow::GetViewWindowInstance()->offset_y;
 	for (page_iter page_ = compose_doc_->begin(); page_ != compose_doc_->end(); page_++)
 	{
 		if ((*page_)->get_top_pos() > view_top && (*page_)->get_top_pos() < view_bottom)
 		{
-			DrawPageSpace(pDC, (*page_)->get_top_pos(), pages_space);
+			DrawPageSpace(pDC, (*page_)->get_top_pos() - base_top, pages_space);
 		}
 		if ((*page_)->get_bottom_pos() > view_top && (*page_)->get_bottom_pos() < view_bottom)
 		{
-			DrawPageSpace(pDC, (*page_)->get_bottom_pos() + pages_space, pages_space);
+			DrawPageSpace(pDC, (*page_)->get_bottom_pos() + pages_space - base_top, pages_space);
 			page_++;
 			if (page_ == compose_doc_->end())
 				break;
@@ -78,8 +79,7 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 			break;
 	}
 	// draw bottom border if need
-	int doc_bottom_pos = (*(--compose_doc_->end()))->get_bottom_pos() + 
-		ViewWindow::GetViewWindowInstance()->border_height - 
+	int doc_bottom_pos = (*(--compose_doc_->end()))->get_bottom_pos() /*+ pages_space*/ - 
 		ViewWindow::GetViewWindowInstance()->offset_y;
 	if (doc_bottom_pos < ViewWindow::GetViewWindowInstance()->height)
 	{

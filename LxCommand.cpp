@@ -1,6 +1,19 @@
 #include "stdafx.h"
 #include "LxCommand.h"
 
+LxLocateCmd::LxLocateCmd(int point_x, int point_y)
+	: point_x(point_x), point_y(point_y)
+{}
+
+void LxLocateCmd::Excute(CDC* pDC)
+{
+	int doc_inner_point_x = point_x - ViewWindow::GetViewWindowInstance()->border_width_left + 
+		ViewWindow::GetViewWindowInstance()->offset_x;
+	int doc_inner_point_y = point_y + ViewWindow::GetViewWindowInstance()->offset_y;
+
+	doc_view_ctrl_->locate(pDC, doc_inner_point_x, doc_inner_point_y);
+}
+
 LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
 	: ins_pos(ins_pos), src_font(src_font), src_color(src_color)
 {

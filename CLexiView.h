@@ -34,7 +34,9 @@ public:
 	void hide_caret();
 	void show_caret(int x, int y);
 public:
-	void insert(char c);
+	void ExecuteNormalCmd(LxCommand* cmd);
+public:
+	void insert(char* cs, int len);
 
 // ÖØÐ´
 public:
