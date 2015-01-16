@@ -38,15 +38,21 @@ void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 {
 	for (page_iter page = begin(); page != end(); page++)
 	{
-		if ((*page)->get_top_pos() <= doc_y && doc_y <= (*page)->get_bottom_pos())
+		if ((*page)->get_top_pos() > doc_y)
+			break;
+		if (/*(*page)->get_top_pos() <= doc_y &&*/ doc_y <= (*page)->get_bottom_pos())
 		{
 			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); paragraph++)
 			{
-				if ((*paragraph)->get_top_pos() <= doc_y && doc_y <= (*paragraph)->get_bottom_pos())
+				if ((*paragraph)->get_top_pos() > doc_y)
+					break;
+				if (/*(*paragraph)->get_top_pos() <= doc_y &&*/ doc_y <= (*paragraph)->get_bottom_pos())
 				{
 					for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); row++)
 					{
-						if ((*row)->get_top_pos() <= doc_y && doc_y <= (*row)->get_bottom_pos())
+						if ((*row)->get_top_pos() > doc_y)
+							break;
+						if (/*(*row)->get_top_pos() <= doc_y &&*/ doc_y <= (*row)->get_bottom_pos())
 						{
 							cursor.row = row;
 							cursor.paragraph = paragraph;

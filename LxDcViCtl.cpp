@@ -8,7 +8,7 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-48, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	font->CreateFont(-36, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Î¢ÈíÑÅºÚ");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
@@ -99,8 +99,8 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 
 void LxDcViCtl::locate(CDC* pDC, int doc_x, int doc_y)
 {
-	compose_doc.locate(cursor, pDC, doc_x, doc_y);
 	render->hide_caret();
+	compose_doc.locate(cursor, pDC, doc_x, doc_y);
 	render->create_caret(cursor.height, cursor.height / 8);
 	render->show_caret(&cursor);
 }
@@ -112,9 +112,9 @@ void LxDcViCtl::compose_complete(CDC* pDC)
 }
 void LxDcViCtl::draw_complete(CDC* pDC)
 {
+	render->hide_caret();
 	pDC->SetBkMode(TRANSPARENT);
 	render->DrawDocument(pDC);
-	render->hide_caret();
 	render->create_caret(cursor.height, cursor.height/8);
 	render->show_caret(&cursor);
 }

@@ -27,6 +27,9 @@ void LxInsertCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->insert(cs_, len_);
 	doc_view_ctrl_->modify_layout(pDC, len_);
 	doc_view_ctrl_->draw_complete(pDC);
+	// !-- caution this
+	//每次插入排版前记录下一些调试需要知道的先前信息
+	//排版后安排ComposeDoc和cursor的自检程序来辅助调试(页产生空段和页偏移不连续的现象)
 }
 void LxInsertCmd::Undo()
 {
