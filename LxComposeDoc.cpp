@@ -34,6 +34,47 @@ LxParagraphInDocIter ComposeDoc::pargraph_end()
 	return LxParagraphInDocIter(this, end(), (*(--end()))->end());
 }
 
+bool ComposeDoc::self_check()
+{
+	size_t page_index_desire = 0;
+	size_t page_end_index = 0;
+	if (pages.empty())
+		return false;
+	for (ComposePage* _page : pages)
+	{
+		if (_page->get_area_begin() != page_index_desire)
+			return false;
+		page_end_index = _page->get_area_end();
+		size_t pragh_index_desire = page_index_desire;
+		size_t pragh_end_index = 0;
+		if (_page->paragraphs.empty())
+			return false;
+		for (ComposeParagraph* _pragh : _page->paragraphs)
+		{
+			if (_pragh->get_area_begin() != pragh_index_desire)
+				return false;
+			pragh_end_index = _pragh->get_area_end();
+			size_t row_index_desire = pragh_index_desire;
+			size_t row_end_index = 0;
+			if (_pragh->rows.empty())
+				return false;
+			for (ComposeRow* _row : _pragh->rows)
+			{
+				if (_row->get_area_begin() != row_index_desire)
+					return false;
+				row_index_desire += _row->size();
+			}
+			if ((*(--(_pragh->rows.end())))->get_area_end() != pragh_end_index)
+				return false;
+			pragh_index_desire = pragh_end_index + 1;
+		}
+		if ((*(--(_page->paragraphs.end())))->get_area_end() != page_end_index)
+			return false;
+		page_index_desire = page_end_index + 1;
+	}
+	return true;
+}
+
 void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 {
 	for (page_iter page = begin(); page != end(); page++)
@@ -343,10 +384,10 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 	}
 
 	//		2.删除当前物理段对应的所有逻辑段
-	for (LxParagraphInDocIter pgph_it = pagraph_iter; pgph_it != pargraph_end();)
+	for (LxParagraphInDocIter pgph_it = ++pagraph_iter/*pagraph_iter*/; pgph_it != pargraph_end();)
 	{
-		pgph_it++;
-		if (pgph_it == pargraph_end()) break;
+		/*pgph_it++;
+		if (pgph_it == pargraph_end()) break;*/
 		LxParagraphInDocIter temp_it = pgph_it;
 		pgph_it++;
 		//如果 temp_it 所指逻辑段为部分段则删除，否则退出

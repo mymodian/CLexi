@@ -30,6 +30,18 @@ public:
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
 	void locate(CDC* pDC, int doc_x, int doc_y);
+
+//member for test and debugger.
+public:
+	ComposeDoc* get_com_doc() { return &compose_doc; }
+	void get_cursor(LxCursor& _cursor)
+	{
+		_cursor.index_inner = cursor.index_inner;
+		_cursor.page = cursor.page;
+		_cursor.paragraph = cursor.paragraph;
+		_cursor.row = cursor.row;
+	}
+	bool self_check() { return compose_doc.self_check(); }
 private:
 	Document document;
 	ComposeDoc compose_doc;

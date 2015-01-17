@@ -207,6 +207,9 @@ public:
 	page_iter end() { return pages.end(); }
 	LxParagraphInDocIter pargraph_begin();
 	LxParagraphInDocIter pargraph_end();
+// only for test and debugger
+public:
+	bool self_check();
 private:
 	list<ComposePage*> pages;
 	TreeBase* font_tree;
