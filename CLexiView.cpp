@@ -195,6 +195,7 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	case 8:
 		//É¾³ý
+		backspace();
 		break;
 	default:
 		//×Ö·ûÊäÈë
@@ -289,4 +290,9 @@ void CCLexiView::insert(char* cs, int len)
 	ReleaseDC(pDC);*/
 	ExecuteNormalCmd(insert_cmd);
 	lx_command_mgr.insert_cmd(insert_cmd);
+}
+
+void CCLexiView::backspace()
+{
+
 }

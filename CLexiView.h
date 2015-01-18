@@ -37,7 +37,7 @@ public:
 	void ExecuteNormalCmd(LxCommand* cmd);
 public:
 	void insert(char* cs, int len);
-
+	void backspace();
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
