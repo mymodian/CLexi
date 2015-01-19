@@ -45,6 +45,20 @@ void LxDcViCtl::init(CDC* pDC)
 	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
 }
 
+void LxDcViCtl::backspace()
+{
+
+}
+
+void LxDcViCtl::single_remove()
+{
+	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
+	pgh->Delete(cursor.get_index_inner_paragraph() - 1);
+
+	font_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
+	color_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
+}
+
 void LxDcViCtl::insert(char* src, size_t  count)
 {
 	//在cursor处执行插入操作

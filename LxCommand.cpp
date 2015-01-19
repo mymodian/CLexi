@@ -22,9 +22,9 @@ LxInsertCmd::LxInsertCmd(char* cs, size_t len) : cs_(cs), len_(len) {}
 void LxInsertCmd::Excute(CDC* pDC)
 {
 	//获取插入前的状态信息 only for test and debugger
-	LxCursor cursor;
+	/*LxCursor cursor;
 	doc_view_ctrl_->get_cursor(cursor);
-	std::cout << cursor.index_inner <<endl;
+	std::cout << cursor.index_inner <<endl;*/
 	///////////////////////////////////////////
 	doc_view_ctrl_->insert(cs_, len_);
 	doc_view_ctrl_->modify_layout(pDC, len_);
@@ -33,11 +33,7 @@ void LxInsertCmd::Excute(CDC* pDC)
 	//每次插入排版前记录下一些调试需要知道的先前信息
 	//排版后安排ComposeDoc和cursor的自检程序来辅助调试(页产生空段和页偏移不连续的现象)
 	//document自检 only for test and debugger
-	if (!doc_view_ctrl_->self_check())
-	{
-		ComposeDoc* comdoc = doc_view_ctrl_->get_com_doc();
-		std::cout << cursor.index_inner << endl;
-	}
+	assert(doc_view_ctrl_->self_check());
 	///////////////////////////////////////////
 }
 void LxInsertCmd::Undo()
