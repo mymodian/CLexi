@@ -49,13 +49,13 @@ class LxInsertCmd : public LxCommandBase
 public:
 	LxInsertCmd() = delete;
 	virtual ~LxInsertCmd() = default;
-	LxInsertCmd(char* cs, size_t len);
+	LxInsertCmd(TCHAR* cs, size_t len);
 	LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	char* cs_;
+	TCHAR* cs_;
 	size_t len_;
 	size_t ins_pos;
 	size_t src_font;
@@ -84,7 +84,7 @@ private:
 	size_t pos_begin;
 	size_t pos_end;
 	size_t text_len;
-	char* deleted_text;
+	TCHAR* deleted_text;
 };
 
 class LxModifyViewCmd : public LxCommandBase

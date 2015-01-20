@@ -179,12 +179,13 @@ BOOL CCLexiView::OnEraseBkgnd(CDC* pDC)
 void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	static TCHAR character = 0;
 	switch (nChar)
 	{
 	case '\t':
 		//table 转为多个空格处理
 	{
-		char cs[4] = { ' ', ' ', ' ', ' ' };
+		TCHAR cs[4] = { ' ', ' ', ' ', ' ' };
 		this->insert(cs, 4);
 	}
 		break;
@@ -200,8 +201,22 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	default:
 		//字符输入
 	{
-		char ch = nChar;
-		this->insert(&ch, 1);
+		if (nChar & 0x80 != 1)
+		{
+			character = nChar;
+			this->insert(&character, 1);
+			character = 0;
+		}
+		else
+		{
+			character <<= 8;
+			character |= nChar;
+			if (character & 0xff00)
+			{
+				this->insert(&character, 1);
+				character = 0;
+			}
+		}
 	}
 		break;
 	}
@@ -280,7 +295,7 @@ void CCLexiView::ExecuteNormalCmd(LxCommand* cmd)
 	ReleaseDC(pDC);
 }
 
-void CCLexiView::insert(char* cs, int len)
+void CCLexiView::insert(TCHAR* cs, int len)
 {
 	LxCommand* insert_cmd = new LxCommand();
 	insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));

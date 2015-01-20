@@ -29,7 +29,7 @@ void Document::insert_paragraph(Paragraph* paragraph,int index)
 	paragraph_list.insert(it, paragraph);
 }
 
-void Document::insert(size_t pos, char* cs, size_t len)
+void Document::insert(size_t pos, TCHAR* cs, size_t len)
 {
 	size_t index = 0;
 	for (Paragraph* paragraph : paragraph_list)

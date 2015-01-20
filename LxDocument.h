@@ -21,7 +21,7 @@ public:
 	void add_paragraph(Paragraph* paragraph);
 	void insert_paragraph(Paragraph* paragraph,int index);
 public:
-	void insert(size_t pos, char* cs, size_t len);		//insert中不包括换行符
+	void insert(size_t pos, TCHAR* cs, size_t len);		//insert中不包括换行符
 private:
 	std::list<Paragraph*> paragraph_list;
 };
@@ -42,14 +42,14 @@ public:
 		context.store_stream(file);
 	}
 public:
-	const char* get_context_ptr() const { return context.get_context_ptr(); }
-	inline char Get(int index) { return context.Get(index); }
+	const TCHAR* get_context_ptr() const { return context.get_context_ptr(); }
+	inline TCHAR Get(int index) { return context.Get(index); }
 	inline size_t size() { return context.size(); }
-	inline void Insert(size_t position, char ch)
+	inline void Insert(size_t position, TCHAR ch)
 	{
 		context.Insert(position,ch);
 	}
-	inline void Insert(size_t position, char* str, size_t count)
+	inline void Insert(size_t position, TCHAR* str, size_t count)
 	{
 		context.Insert(position,str,count);
 	}

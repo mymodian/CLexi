@@ -62,7 +62,7 @@ bool LxDcViCtl::single_remove()
 	return true;
 }
 
-void LxDcViCtl::insert(char* src, size_t  count)
+void LxDcViCtl::insert(TCHAR* src, size_t  count)
 {
 	//在cursor处执行插入操作
 	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
@@ -71,7 +71,7 @@ void LxDcViCtl::insert(char* src, size_t  count)
 	font_tree.insert(cursor.get_index_global(), count);
 	color_tree.insert(cursor.get_index_global(), count);
 }
-void LxDcViCtl::insert(char* src, size_t  count, size_t src_index)
+void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_index)
 {
 }
 void LxDcViCtl::remove(size_t position)

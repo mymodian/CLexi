@@ -19,8 +19,8 @@ public:
 	void init(CDC* pDC);
 public:
 	void backspace();
-	void insert(char* src, size_t  count);
-	void insert(char* src, size_t  count, size_t font_src_index);
+	void insert(TCHAR* src, size_t  count);
+	void insert(TCHAR* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);
 	void remove(size_t position_begin, size_t position_end);
 	void modify_font(size_t position_begin, size_t position_end, size_t font_src_index);

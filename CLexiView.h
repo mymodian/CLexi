@@ -26,8 +26,8 @@ public:
 public:
 //获取信息
 public:
-	int GetTextTrueWidth(char* text, size_t src_font);
-	int GetTextTrueHeight(char text, size_t src_font);
+	int GetTextTrueWidth(TCHAR* text, size_t src_font);
+	int GetTextTrueHeight(TCHAR text, size_t src_font);
 
 public:
 	void create_caret(int height, int width);
@@ -36,7 +36,7 @@ public:
 public:
 	void ExecuteNormalCmd(LxCommand* cmd);
 public:
-	void insert(char* cs, int len);
+	void insert(TCHAR* cs, int len);
 	void backspace();
 // 重写
 public:

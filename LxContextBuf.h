@@ -44,14 +44,14 @@ public:
 			fwrite(&str_buf[0],sizeof(char),str_buf.size(),file);
 	}
 public:
-	const char* get_context_ptr() const { return &str_buf[0]; }
-	inline char Get(int index) { return str_buf[index]; }
+	const TCHAR* get_context_ptr() const { return &str_buf[0]; }
+	inline TCHAR Get(int index) { return str_buf[index]; }
 	inline size_t size() { return str_buf.size(); }
-	inline void Insert(size_t position, char ch)
+	inline void Insert(size_t position, TCHAR ch)
 	{
 		str_buf.insert(str_buf.begin()+position,ch);
 	}
-	inline void Insert(size_t position, char* str, size_t count)
+	inline void Insert(size_t position, TCHAR* str, size_t count)
 	{
 		str_buf.insert(str_buf.begin()+position,str,str+count);
 	}
@@ -64,7 +64,7 @@ public:
 		str_buf.erase(str_buf.begin()+section_begin,str_buf.begin()+section_end+1);
 	}
 private:
-	std::vector<char> str_buf;
+	std::vector<TCHAR> str_buf;
 };
 
 class TrivalStrBuf

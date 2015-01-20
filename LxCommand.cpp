@@ -18,7 +18,7 @@ LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
 	: ins_pos(ins_pos), src_font(src_font), src_color(src_color)
 {
 }
-LxInsertCmd::LxInsertCmd(char* cs, size_t len) : cs_(cs), len_(len) {}
+LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len) : cs_(cs), len_(len) {}
 void LxInsertCmd::Excute(CDC* pDC)
 {
 	//获取插入前的状态信息 only for test and debugger
