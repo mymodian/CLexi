@@ -15,7 +15,7 @@ public:
 		if (logfont1.lfHeight < logfont2.lfHeight)
 			return true;
 		//if (logfont1.lfItalic && )
-		if (strcmp(logfont1.lfFaceName, logfont2.lfFaceName) < 0)
+		if (_tcscmp(logfont1.lfFaceName, logfont2.lfFaceName) < 0)
 			return true;
 		return false;
 	}

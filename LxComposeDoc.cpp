@@ -866,7 +866,7 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 		for (int i = 0; i < count; i++)
 		{
 			size = pDC->GetTextExtent(pagraph->get_context_ptr() + inner_index, 1);
-			pDC->TextOutA(x, top_offset_session + baseline_offset_inner - trx.tmAscent - base_top,
+			pDC->TextOut(x, top_offset_session + baseline_offset_inner - trx.tmAscent - base_top,
 				pagraph->get_context_ptr() + inner_index, 1);
 			inner_index++;
 			x += size.cx + words_space;

@@ -108,7 +108,7 @@ void CCLexiView::OnDraw(CDC* pDC)
 	//nScreenWidth = GetDeviceCaps(hdcScreen, HORZSIZE);
 	//nScreenHeight = GetDeviceCaps(hdcScreen, VERTSIZE);
 	//screen_size.Format("·Ö±æÂÊ:%d,%d   ³ß´ç:%d,%d", cx, cy, nScreenWidth, nScreenHeight);
-	//dcMem.TextOutA(100, 200, screen_size);
+	//dcMem.TextOut(100, 200, screen_size);
 
 	//pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
 	//	&dcMem, 0, 0, SRCCOPY);
@@ -167,6 +167,7 @@ LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 	doc_view_controler.draw_complete(pDC);
 	ReleaseDC(pDC);
 	bInitialized = TRUE;
+	::SetFocus(m_hWnd);
 	return 0;
 }
 
@@ -236,6 +237,7 @@ void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 	ReleaseDC(pDC);
 	lx_command_mgr.insert_cmd(locate_cmd);
 
+	::SetFocus(m_hWnd);
 	CView::OnLButtonDown(nFlags, point);
 }
 

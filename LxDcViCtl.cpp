@@ -8,8 +8,8 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-36, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, "Î¢ÈíÑÅºÚ");
+	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Î¢ÈíÑÅºÚ");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
 	size_t font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
