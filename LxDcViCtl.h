@@ -31,7 +31,7 @@ public:
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
 	void locate(CDC* pDC, int doc_x, int doc_y);
-	void single_remove();
+	bool single_remove();
 
 //member for test and debugger.
 public:

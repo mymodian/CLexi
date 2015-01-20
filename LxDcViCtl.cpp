@@ -50,13 +50,16 @@ void LxDcViCtl::backspace()
 
 }
 
-void LxDcViCtl::single_remove()
+bool LxDcViCtl::single_remove()
 {
 	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
+	if (pgh->size() == 0 || cursor.get_index_inner_paragraph() == 0)
+		return false;
 	pgh->Delete(cursor.get_index_inner_paragraph() - 1);
 
 	font_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
 	color_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
+	return true;
 }
 
 void LxDcViCtl::insert(char* src, size_t  count)
@@ -93,21 +96,35 @@ void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t 
 //partial
 void LxDcViCtl::modify_layout(CDC* pDC, int count)
 {
-	LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
-	size_t cur_gbl_index_old = cursor.get_index_global();
+	assert(count != 0);
+	size_t cur_gbl_index_old = cursor.get_index_global() + count;
 	Paragraph* phy_pgh = cursor.get_phy_paragraph();
 
+	//删除时计算新的cursor
+	if (count < 0)
+		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+
+	LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
 	compose_doc.modify_index(pgh_doc_it, count);
 	pgh_doc_it = compose_doc.modify(pgh_doc_it, cursor.row, pDC);
 	compose_doc.relayout(pgh_doc_it);
 
-	//计算新的cursor
-	cur_gbl_index_old += count;
-	compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	//插入时计算新的cursor
+	if (count > 0)
+		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	//删除时由于先计算的cursor的row会被清除，所以需要再次计算cursor
+	if (count < 0)
+		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+
 	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
 	{
 		ViewWindow::GetViewWindowInstance()->offset_y += 
 			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
+	}
+	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y -=
+			ViewWindow::GetViewWindowInstance()->get_top_pos() - cursor.point_y;
 	}
 }
 

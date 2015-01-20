@@ -41,6 +41,25 @@ void LxInsertCmd::Undo()
 
 }
 
+LxSingleRemoveCmd::~LxSingleRemoveCmd() {}
+void LxSingleRemoveCmd::Undo()
+{
+
+}
+void LxSingleRemoveCmd::Excute(CDC* pDC)
+{
+	if (!doc_view_ctrl_->single_remove())
+	{
+		doc_view_ctrl_->draw_complete(pDC);
+		return;
+	}
+	doc_view_ctrl_->modify_layout(pDC, -1);
+	doc_view_ctrl_->draw_complete(pDC);
+	//document×Ô¼ì only for test and debugger
+	assert(doc_view_ctrl_->self_check());
+	///////////////////////////////////////////
+}
+
 LxDeleteCmd::~LxDeleteCmd()
 {
 

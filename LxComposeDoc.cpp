@@ -178,7 +178,7 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 								cursor.index_inner = cur_gbl_index - (*row)->get_area_begin();
 								//cursor在row的第index_inner个字符后
 								int x = LxPaper::left_margin;
-								int y;
+								int y = cursor.point_y;
 								size_t index = (*row)->get_area_begin();
 								size_t font_index, same_font_cnt;
 								for (int i = 0; i < cursor.index_inner; )

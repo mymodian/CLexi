@@ -62,6 +62,16 @@ private:
 	COLORREF src_color;
 };
 
+class LxSingleRemoveCmd : public LxCommandBase
+{
+public:
+	LxSingleRemoveCmd() = default;
+	virtual ~LxSingleRemoveCmd();
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+};
+
 class LxDeleteCmd : public LxCommandBase
 {
 public:

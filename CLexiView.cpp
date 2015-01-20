@@ -294,5 +294,12 @@ void CCLexiView::insert(char* cs, int len)
 
 void CCLexiView::backspace()
 {
-
+	LxCommand* backspace_cmd = new LxCommand();
+	backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
+	backspace_cmd->set_dvctl(&doc_view_controler);
+	/*CDC* pDC = GetDC();
+	insert_cmd->Excute(pDC);
+	ReleaseDC(pDC);*/
+	ExecuteNormalCmd(backspace_cmd);
+	lx_command_mgr.insert_cmd(backspace_cmd);
 }
