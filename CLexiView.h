@@ -33,6 +33,7 @@ public:
 	void create_caret(int height, int width);
 	void hide_caret();
 	void show_caret(int x, int y);
+	void move_caret(unsigned direction);
 public:
 	void ExecuteNormalCmd(LxCommand* cmd);
 public:
@@ -72,6 +73,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg LRESULT OnLexiInit(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

@@ -331,6 +331,17 @@ public:
 		}
 		return *this;
 	}
+	LxParagraphInDocIter& operator--()
+	{
+		if (paragraph == (*page)->begin())
+		{
+			page--;
+			paragraph = --(*page)->end();
+		}
+		else
+			paragraph--;
+		return *this;
+	}
 	LxParagraphInDocIter operator++(int)
 	{
 		LxParagraphInDocIter tmp = *this;
@@ -341,6 +352,18 @@ public:
 			if (page != doc->end())
 				paragraph = (*page)->begin();
 		}
+		return tmp;
+	}
+	LxParagraphInDocIter operator--(int)
+	{
+		LxParagraphInDocIter tmp = *this;
+		if (paragraph == (*page)->begin())
+		{
+			page--;
+			paragraph = --(*page)->end();
+		}
+		else
+			paragraph--;
 		return tmp;
 	}
 	ComposeParagraph* operator*()

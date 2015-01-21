@@ -45,6 +45,69 @@ void LxDcViCtl::init(CDC* pDC)
 	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
 }
 
+void LxDcViCtl::move_cursor(CDC* pDC, unsigned direction)
+{
+	switch (direction)
+	{
+	case VK_LEFT:
+	{
+		LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
+		size_t cur_gbl_index_old = cursor.get_index_global() - 1;
+		Paragraph* phy_pgh = cursor.get_phy_paragraph();
+		if (cursor.get_index_inner_paragraph() == 0)
+		{
+			if (pgh_doc_it == compose_doc.pargraph_begin()) return;
+			--pgh_doc_it;
+			cur_gbl_index_old++;
+			phy_pgh = (*(pgh_doc_it.get_paragraph()))->get_phy_paragraph();
+		}
+		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	}
+		break;
+	case VK_RIGHT:
+	{
+		LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
+		size_t cur_gbl_index_old = cursor.get_index_global() + 1;
+		Paragraph* phy_pgh = cursor.get_phy_paragraph();
+		if (cursor.get_index_inner_paragraph() == (*(cursor.paragraph))->get_phy_paragraph()->size())
+		{
+			++pgh_doc_it;
+			if (pgh_doc_it == compose_doc.pargraph_end()) return;
+			cur_gbl_index_old--;
+			phy_pgh = (*(pgh_doc_it.get_paragraph()))->get_phy_paragraph();
+		}
+		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	}
+		break;
+	case VK_UP:
+		compose_doc.locate(cursor, pDC, cursor.point_x, cursor.point_y - 3);
+		break;
+	case VK_DOWN:
+		compose_doc.locate(cursor, pDC, cursor.point_x, cursor.point_y + cursor.height + 3);
+		break;
+	default:
+		return;
+	}
+	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y +=
+			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
+		draw_complete(pDC);
+	}
+	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y -=
+			ViewWindow::GetViewWindowInstance()->get_top_pos() - cursor.point_y;
+		draw_complete(pDC);
+	}
+	else
+	{
+		render->hide_caret();
+		render->create_caret(cursor.height, cursor.height / 8);
+		render->show_caret(&cursor);
+	}
+}
+
 void LxDcViCtl::backspace()
 {
 

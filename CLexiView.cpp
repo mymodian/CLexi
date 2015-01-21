@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CCLexiView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 // CCLexiView 构造/析构
@@ -74,6 +75,16 @@ void CCLexiView::show_caret(int x, int y)
 	point.y = y;
 	SetCaretPos(point);
 	ShowCaret();
+}
+void CCLexiView::move_caret(unsigned direction)
+{
+	LxCommand* move_cmd = new LxCommand();
+	move_cmd->add_child_cmd(new LxMoveCmd(direction));
+	move_cmd->set_dvctl(&doc_view_controler);
+	CDC* pDC = GetDC();
+	move_cmd->Excute(pDC);
+	ReleaseDC(pDC);
+	lx_command_mgr.insert_cmd(move_cmd);
 }
 
 void CCLexiView::OnDraw(CDC* pDC)
@@ -167,7 +178,7 @@ LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 	doc_view_controler.draw_complete(pDC);
 	ReleaseDC(pDC);
 	bInitialized = TRUE;
-	::SetFocus(m_hWnd);
+	//::SetFocus(m_hWnd);
 	return 0;
 }
 
@@ -177,10 +188,26 @@ BOOL CCLexiView::OnEraseBkgnd(CDC* pDC)
 	//return CView::OnEraseBkgnd(pDC);
 }
 
+void CCLexiView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	switch (nChar)
+	{
+	case VK_UP:
+	case VK_DOWN:
+	case VK_LEFT:
+	case VK_RIGHT:
+		move_caret(nChar);
+		break;
+	default:
+		break;
+	}
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
 void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	static TCHAR character = 0;
 	switch (nChar)
 	{
 	case '\t':
@@ -202,22 +229,8 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	default:
 		//字符输入
 	{
-		if (nChar & 0x80 != 1)
-		{
-			character = nChar;
-			this->insert(&character, 1);
-			character = 0;
-		}
-		else
-		{
-			character <<= 8;
-			character |= nChar;
-			if (character & 0xff00)
-			{
-				this->insert(&character, 1);
-				character = 0;
-			}
-		}
+		TCHAR character = nChar;
+		this->insert(&character, 1);
 	}
 		break;
 	}
@@ -237,7 +250,7 @@ void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 	ReleaseDC(pDC);
 	lx_command_mgr.insert_cmd(locate_cmd);
 
-	::SetFocus(m_hWnd);
+	//::SetFocus(m_hWnd);
 	CView::OnLButtonDown(nFlags, point);
 }
 

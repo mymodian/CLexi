@@ -1,15 +1,23 @@
 #include "stdafx.h"
 #include "LxCommand.h"
 
+LxMoveCmd::LxMoveCmd(unsigned int direction)
+	: direction_(direction)
+{}
+void LxMoveCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->move_cursor(pDC, direction_);
+}
+
 LxLocateCmd::LxLocateCmd(int point_x, int point_y)
-	: point_x(point_x), point_y(point_y)
+	: point_x_(point_x), point_y_(point_y)
 {}
 
 void LxLocateCmd::Excute(CDC* pDC)
 {
-	int doc_inner_point_x = point_x - ViewWindow::GetViewWindowInstance()->border_width_left + 
+	int doc_inner_point_x = point_x_ - ViewWindow::GetViewWindowInstance()->border_width_left + 
 		ViewWindow::GetViewWindowInstance()->offset_x;
-	int doc_inner_point_y = point_y + ViewWindow::GetViewWindowInstance()->offset_y;
+	int doc_inner_point_y = point_y_ + ViewWindow::GetViewWindowInstance()->offset_y;
 
 	doc_view_ctrl_->locate(pDC, doc_inner_point_x, doc_inner_point_y);
 }

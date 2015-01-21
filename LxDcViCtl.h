@@ -32,7 +32,7 @@ public:
 	void draw_complete(CDC* pDC);
 	void locate(CDC* pDC, int doc_x, int doc_y);
 	bool single_remove();
-
+	void move_cursor(CDC* pDC, unsigned direction);
 //member for test and debugger.
 public:
 	ComposeDoc* get_com_doc() { return &compose_doc; }

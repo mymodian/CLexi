@@ -8,8 +8,8 @@ class LxCursor
 public:
 	LxCursor() :point_x(0), point_y(0), index_inner(0) {}
 	~LxCursor() {}
-	LxCursor& operator++();
-	LxCursor operator++(int);
+	/*LxCursor& operator++();
+	LxCursor operator++(int);*/
 	size_t get_index_global()
 	{
 		return (*row)->get_area_begin() + index_inner;

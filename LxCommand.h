@@ -31,6 +31,18 @@ public:
 	virtual bool CanUndo() override { return false; }
 };
 
+class LxMoveCmd : public LxCommandBase
+{
+public:
+	LxMoveCmd() = delete;
+	LxMoveCmd(unsigned int direction);
+	virtual ~LxMoveCmd() = default;
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return false; }
+private:
+	unsigned int direction_;
+};
+
 class LxLocateCmd : public LxCommandBase
 {
 public:
@@ -40,8 +52,8 @@ public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return false; }
 private:
-	int point_x;
-	int point_y;
+	int point_x_;
+	int point_y_;
 };
 
 class LxInsertCmd : public LxCommandBase
