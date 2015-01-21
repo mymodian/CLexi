@@ -26,6 +26,7 @@ typedef list<ComposeParagraph*>::iterator paragraph_iter;
 typedef list<ComposeRow*>::iterator row_iter;
 
 class LxRowInPageIter;
+class LxRowInDocIter;
 class LxParagraphInDocIter;
 
 class LxCursor;
