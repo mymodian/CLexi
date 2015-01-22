@@ -7,10 +7,10 @@ TrivalStrBuf::~TrivalStrBuf() {}
 void TrivalStrBuf::store_stream(FILE* file)
 {
 	if( size_ > 0 )
-		fwrite(str_buf,sizeof(char),size_,file);
+		fwrite(str_buf,sizeof(TCHAR),size_,file);
 }
 
-size_t TrivalStrBuf::Insert(size_t position, char ch)
+size_t TrivalStrBuf::Insert(size_t position, TCHAR ch)
 {
 	if( remaining_capacity() == 0 ) return 0;
 	if( position > size_ ) return 0;
@@ -24,7 +24,7 @@ size_t TrivalStrBuf::Insert(size_t position, char ch)
 	size_++;
 	return 1;
 }
-size_t TrivalStrBuf::Insert(size_t position, char* str, size_t count)
+size_t TrivalStrBuf::Insert(size_t position, TCHAR* str, size_t count)
 {
 	if( remaining_capacity() < count ) return 0;
 	if( position > size_ ) return 0;
@@ -73,7 +73,7 @@ void RandomAccessStrBuf::store_stream(FILE* file)
 		(*it_b)->store_stream(file);
 }
 
-void RandomAccessStrBuf::Insert(size_t position, char ch)
+void RandomAccessStrBuf::Insert(size_t position, TCHAR ch)
 {
 	size_t cursor=0;
 	auto it_b=str_buffer_list.begin();
@@ -81,7 +81,7 @@ void RandomAccessStrBuf::Insert(size_t position, char ch)
 	for(;it_b != it_e;it_b++)
 		cursor+=(*it_b)->size();
 }
-void RandomAccessStrBuf::Insert(size_t position, char* str, size_t count)
+void RandomAccessStrBuf::Insert(size_t position, TCHAR* str, size_t count)
 {
 }
 void RandomAccessStrBuf::Delete(size_t section_begin, size_t section_end)

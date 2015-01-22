@@ -24,8 +24,8 @@ public:
 public:
 	void store_stream(FILE* file);
 public:
-	void Insert(size_t position, char ch);
-	void Insert(size_t position, char* str, size_t count);
+	void Insert(size_t position, TCHAR ch);
+	void Insert(size_t position, TCHAR* str, size_t count);
 	void Delete(size_t section_begin, size_t section_end);
 private:
 	typedef std::list<TrivalStrBuf*>::iterator buf_it;
@@ -41,7 +41,7 @@ public:
 	inline void store_stream(FILE* file)
 	{
 		if( ! str_buf.empty() )
-			fwrite(&str_buf[0],sizeof(char),str_buf.size(),file);
+			fwrite(&str_buf[0], sizeof(TCHAR), str_buf.size(), file);
 	}
 public:
 	const TCHAR* get_context_ptr() const { return &str_buf[0]; }
@@ -79,11 +79,11 @@ public:
 	inline size_t remaining_capacity() { return TRIVAL_STR_BUF_CAPACITY-size_; }
 	inline size_t size() { return size_; }
 public:
-	size_t Insert(size_t position, char ch);
-	size_t Insert(size_t position, char* str, size_t count);
+	size_t Insert(size_t position, TCHAR ch);
+	size_t Insert(size_t position, TCHAR* str, size_t count);
 	size_t Delete(size_t section_begin, size_t section_end);
 private:
-	char str_buf[TRIVAL_STR_BUF_CAPACITY];
+	TCHAR str_buf[TRIVAL_STR_BUF_CAPACITY];
 	size_t size_;
 };
 
