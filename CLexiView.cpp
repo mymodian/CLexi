@@ -12,6 +12,9 @@
 #include "CLexiDoc.h"
 #include "CLexiView.h"
 
+#include <imm.h>
+#pragma comment(lib,"imm32.lib")
+
 #include "LxSrcFontFactory.h"
 
 #ifdef _DEBUG
@@ -44,6 +47,8 @@ CCLexiView::CCLexiView()
 {
 	// TODO: 在此处添加构造代码
 	bInitialized = FALSE;
+	IMECharLeft = 0;
+	IMECharSize = 0;
 }
 
 CCLexiView::~CCLexiView()
@@ -171,6 +176,20 @@ CCLexiDoc* CCLexiView::GetDocument() const // 非调试版本是内联的
 
 // CCLexiView 消息处理程序
 
+
+BOOL CCLexiView::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO:  在此添加专用代码和/或调用基类
+	if (pMsg->message == WM_IME_ENDCOMPOSITION)
+	{
+		HIMC himc = ImmGetContext(this->m_hWnd);
+		IMECharSize = IMECharLeft = ImmGetCompositionString(himc, GCS_RESULTSTR, 0, 0);
+		ImmReleaseContext(this->m_hWnd, himc);
+	}
+	return CView::PreTranslateMessage(pMsg);
+}
+
+
 LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 {
 	CDC* pDC = GetDC();
@@ -208,31 +227,47 @@ void CCLexiView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	switch (nChar)
+	if (IMECharLeft == 0)
 	{
-	case '\t':
-		//table 转为多个空格处理
-	{
-		TCHAR cs[4] = { ' ', ' ', ' ', ' ' };
-		this->insert(cs, 4);
+		switch (nChar)
+		{
+		case '\t':
+			//table 转为多个空格处理
+		{
+			TCHAR cs[4] = { ' ', ' ', ' ', ' ' };
+			this->insert(cs, 4);
+		}
+			break;
+		case '\r':
+			//按下回车，创建新物理段
+			break;
+		case '\n':
+			break;
+		case 8:
+			//删除
+			backspace();
+			break;
+		default:
+			//字符输入
+		{
+			TCHAR character = nChar;
+			this->insert(&character, 1);
+		}
+			break;
+		}
 	}
-		break;
-	case '\r':
-		//按下回车，创建新物理段
-		break;
-	case '\n':
-		break;
-	case 8:
-		//删除
-		backspace();
-		break;
-	default:
-		//字符输入
+	else
 	{
-		TCHAR character = nChar;
-		this->insert(&character, 1);
-	}
-		break;
+		IMECharLeft -= 2;
+		if (IMECharLeft == 0)
+		{
+			HIMC himc = ImmGetContext(this->m_hWnd);
+			TCHAR* result_str = new TCHAR[IMECharSize/2];
+			ImmGetCompositionString(himc, GCS_RESULTSTR, (BYTE*)result_str, IMECharSize);
+			ImmReleaseContext(this->m_hWnd, himc);
+			this->insert(result_str, IMECharSize/2);
+			delete[] result_str;
+		}
 	}
 	CView::OnChar(nChar, nRepCnt, nFlags);
 }

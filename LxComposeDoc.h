@@ -208,6 +208,8 @@ public:
 	page_iter end() { return pages.end(); }
 	LxParagraphInDocIter pargraph_begin();
 	LxParagraphInDocIter pargraph_end();
+	LxRowInDocIter row_begin();
+	LxRowInDocIter row_end();
 // only for test and debugger
 public:
 	bool self_check();
@@ -283,14 +285,163 @@ private:
 	row_iter row;
 };
 
+class LxRowInDocIter
+{
+public:
+	LxRowInDocIter() = delete;
+	LxRowInDocIter(ComposeDoc* the_doc, page_iter page_it, paragraph_iter pagraph_it, row_iter row_it) :
+		doc(the_doc), page(page_it), paragraph(pagraph_it), row(row_it)
+	{
+	}
+	LxRowInDocIter(const LxRowInDocIter& other)
+	{
+		this->doc = other.doc;
+		this->row = other.row;
+		this->page = other.page;
+		this->paragraph = other.paragraph;
+	}
+	~LxRowInDocIter() = default;
+	ComposeRow* operator*()
+	{
+		return *row;
+	}
+	bool operator==(const LxRowInDocIter& other) const
+	{
+		if (page != other.page)
+			return false;
+		if (paragraph != other.paragraph)
+			return false;
+		if (row != other.row)
+			return false;
+		return true;
+	}
+	bool operator!=(const LxRowInDocIter& other) const
+	{
+		if (page != other.page)
+			return true;
+		if (paragraph != other.paragraph)
+			return true;
+		if (row != other.row)
+			return true;
+		return false;
+	}
+	LxRowInDocIter& operator=(LxRowInDocIter& other)
+	{
+		paragraph = other.paragraph;
+		page = other.page;
+		row = other.row;
+		doc = other.doc;
+		return *this;
+	}
+
+	LxRowInDocIter& operator++()
+	{
+		row++;
+		if (row == (*paragraph)->end())
+		{
+			paragraph++;
+			if (paragraph == (*page)->end())
+			{
+				page++;
+				if (page != doc->end())
+				{
+					paragraph = (*page)->begin();
+					row = (*paragraph)->begin();
+				}
+			}
+			else
+			{
+				row = (*paragraph)->begin();
+			}
+		}
+		return *this;
+	}
+	LxRowInDocIter& operator--()
+	{
+		if (row == (*paragraph)->begin())
+		{
+			if (paragraph == (*page)->begin())
+			{
+				page--;
+				paragraph = --(*page)->end();
+				row = --(*paragraph)->end();
+			}
+			else
+			{
+				paragraph--;
+				row = --(*paragraph)->end();
+			}
+		}
+		else
+			row--;
+		return *this;
+	}
+	LxRowInDocIter operator++(int)
+	{
+		LxRowInDocIter tmp = *this;
+		row++;
+		if (row == (*paragraph)->end())
+		{
+			paragraph++;
+			if (paragraph == (*page)->end())
+			{
+				page++;
+				if (page != doc->end())
+				{
+					paragraph = (*page)->begin();
+					row = (*paragraph)->begin();
+				}
+			}
+			else
+			{
+				row = (*paragraph)->begin();
+			}
+		}
+		return tmp;
+	}
+	LxRowInDocIter operator--(int)
+	{
+		LxRowInDocIter tmp = *this;
+		if (row == (*paragraph)->begin())
+		{
+			if (paragraph == (*page)->begin())
+			{
+				page--;
+				paragraph = --(*page)->end();
+				row = --(*paragraph)->end();
+			}
+			else
+			{
+				paragraph--;
+				row = --(*paragraph)->end();
+			}
+		}
+		else
+			row--;
+		return tmp;
+	}
+private:
+	ComposeDoc* doc;
+	paragraph_iter paragraph;
+	page_iter page;
+	row_iter row;
+};
+
 class LxParagraphInDocIter
 {
 public:
-	LxParagraphInDocIter() = default;
+	LxParagraphInDocIter() = delete;
 	LxParagraphInDocIter(ComposeDoc* the_doc, page_iter page_it, paragraph_iter pagraph_it) :
 		doc(the_doc), page(page_it), paragraph(pagraph_it)
 	{
 	}
+	LxParagraphInDocIter(const LxParagraphInDocIter& other)
+	{
+		this->doc = other.doc;
+		this->page = other.page;
+		this->paragraph = other.paragraph;
+	}
+	~LxParagraphInDocIter() = default;
 	inline page_iter get_page() { return page; }
 	inline paragraph_iter get_paragraph() { return paragraph; }
 	bool operator==(const LxParagraphInDocIter& other) const

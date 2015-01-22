@@ -158,6 +158,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 //	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+//	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -191,4 +192,12 @@ void CCLexiApp::OnAppAbout()
 //	// TODO:  在此添加消息处理程序代码和/或调用默认值
 //
 //	return CDialogEx::OnEraseBkgnd(pDC);
+//}
+
+
+//BOOL CAboutDlg::PreTranslateMessage(MSG* pMsg)
+//{
+//	// TODO:  在此添加专用代码和/或调用基类
+//
+//	return CDialogEx::PreTranslateMessage(pMsg);
 //}

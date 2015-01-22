@@ -52,6 +52,9 @@ private:
 	LxCursor cursor;
 	GD_proxy_base gd_proxy;
 	LxRender* render;
+private:
+	size_t default_font_index;
+	size_t default_color_index;
 };
 
 #endif

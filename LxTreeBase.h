@@ -43,6 +43,7 @@ public:
 	size_t get_src_index(size_t position);
 public:
 	void clear();
+	bool empty();
 	void print_leafs();
 	void print_hole_tree();
 	void store_stream(FILE* file);

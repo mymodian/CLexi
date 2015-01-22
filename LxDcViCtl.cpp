@@ -12,8 +12,8 @@ void LxDcViCtl::init(CDC* pDC)
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"微软雅黑");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
-	size_t font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
-	font_tree.insert(0, 0, font_index);
+	default_font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
+	font_tree.insert(0, 0, default_font_index);
 
 	pDC->SelectObject(font);
 	TEXTMETRIC trx;
@@ -21,7 +21,8 @@ void LxDcViCtl::init(CDC* pDC)
 	cursor.height = trx.tmHeight;
 
 	delete font;
-	color_tree.insert(0, 0, RGB(0, 0, 0));
+	default_color_index = RGB(0, 50, 150);
+	color_tree.insert(0, 0, default_color_index);
 
 	Paragraph* paragraph = new Paragraph();
 	//设置默认的排版算法，对象应从排版算法管理结构中获取
@@ -59,7 +60,7 @@ void LxDcViCtl::move_cursor(CDC* pDC, unsigned direction)
 			if (pgh_doc_it == compose_doc.pargraph_begin()) return;
 			--pgh_doc_it;
 			cur_gbl_index_old++;
-			phy_pgh = (*(pgh_doc_it.get_paragraph()))->get_phy_paragraph();
+			phy_pgh = (*pgh_doc_it)->get_phy_paragraph();
 		}
 		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 	}
@@ -74,16 +75,26 @@ void LxDcViCtl::move_cursor(CDC* pDC, unsigned direction)
 			++pgh_doc_it;
 			if (pgh_doc_it == compose_doc.pargraph_end()) return;
 			cur_gbl_index_old--;
-			phy_pgh = (*(pgh_doc_it.get_paragraph()))->get_phy_paragraph();
+			phy_pgh = (*pgh_doc_it)->get_phy_paragraph();
 		}
 		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 	}
 		break;
 	case VK_UP:
-		compose_doc.locate(cursor, pDC, cursor.point_x, cursor.point_y - 3);
+	{
+		LxRowInDocIter row_doc_it(&compose_doc, cursor.page, cursor.paragraph, cursor.row);
+		if (row_doc_it == compose_doc.row_begin()) return;
+		--row_doc_it;
+		compose_doc.locate(cursor, pDC, cursor.point_x, (*row_doc_it)->get_top_pos() + (*row_doc_it)->get_base_line());
+	}
 		break;
 	case VK_DOWN:
-		compose_doc.locate(cursor, pDC, cursor.point_x, cursor.point_y + cursor.height + 3);
+	{
+		LxRowInDocIter row_doc_it(&compose_doc, cursor.page, cursor.paragraph, cursor.row);
+		++row_doc_it;
+		if (row_doc_it == compose_doc.row_end()) return;
+		compose_doc.locate(cursor, pDC, cursor.point_x, (*row_doc_it)->get_top_pos() + (*row_doc_it)->get_base_line());
+	}
 		break;
 	default:
 		return;
@@ -122,6 +133,11 @@ bool LxDcViCtl::single_remove()
 
 	font_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
 	color_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
+	if (font_tree.empty() && color_tree.empty())
+	{
+		font_tree.insert(0, 0, default_font_index);
+		color_tree.insert(0, 0, default_color_index);
+	}
 	return true;
 }
 

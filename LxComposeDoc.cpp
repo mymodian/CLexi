@@ -34,6 +34,17 @@ LxParagraphInDocIter ComposeDoc::pargraph_end()
 	return LxParagraphInDocIter(this, end(), (*(--end()))->end());
 }
 
+LxRowInDocIter ComposeDoc::row_begin()
+{
+	paragraph_iter pgh = (*begin())->begin();
+	return LxRowInDocIter(this, begin(), pgh, (*pgh)->begin());
+}
+LxRowInDocIter ComposeDoc::row_end()
+{
+	paragraph_iter pgh = --(*(--end()))->end();
+	return LxRowInDocIter(this, end(), (*(--end()))->end(), (*pgh)->end());
+}
+
 bool ComposeDoc::self_check()
 {
 	size_t page_index_desire = 0;

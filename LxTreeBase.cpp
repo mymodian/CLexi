@@ -981,6 +981,11 @@ void TreeBase::showleafchilds(node_branch* parent, int whitspace, vector<int>& I
 	}
 }
 
+bool TreeBase::empty()
+{
+	assert(root_ != NULL);
+	return root_->childs.empty();
+}
 void TreeBase::clear()
 {
 	if (!root_) return;

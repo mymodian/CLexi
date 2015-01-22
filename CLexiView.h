@@ -50,7 +50,8 @@ protected:
 
 // 实现
 private:
-
+	long IMECharLeft;
+	long IMECharSize;
 //状态
 private:
 	BOOL bInitialized;
@@ -74,6 +75,7 @@ public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg LRESULT OnLexiInit(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

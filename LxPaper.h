@@ -93,7 +93,7 @@ struct LxPaper
 		LxPaper::bottom_margin	=	72;
 		return true;
 	}
-	//A0 841¡Á1189	A1 594¡Á841		A2 420¡Á594		A3 297¡Á420		A4 210¡Á297  thisPC 595¡Á842
+	//A0 841¡Á1189	A1 594¡Á841		A2 420¡Á594		A3 297¡Á420		A4 210¡Á297  thisPC 595¡Á842xxx  770¡Á1090
 };
 
 #endif
