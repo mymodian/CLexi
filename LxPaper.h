@@ -41,12 +41,12 @@ struct LxPaper
 		LxPaper::pixel_height	=	842;
 		return true;
 	}
-	static bool set_to_custom(int pixel_width, int pixel_height)
+	static bool set_to_custom(int _pixel_width, int _pixel_height)
 	{
-		if( LxPaper::pixel_width == pixel_width && LxPaper::pixel_height == pixel_height )
+		if (LxPaper::pixel_width == _pixel_width && LxPaper::pixel_height == _pixel_height)
 			return false;
-		LxPaper::pixel_width = pixel_width < MIN_PAPER_WIDTH ? MIN_PAPER_WIDTH : pixel_width;
-		LxPaper::pixel_height = pixel_height < MIN_PAPER_HEIGHT ? MIN_PAPER_HEIGHT : pixel_height;
+		LxPaper::pixel_width = _pixel_width < MIN_PAPER_WIDTH ? MIN_PAPER_WIDTH : _pixel_width;
+		LxPaper::pixel_height = _pixel_height < MIN_PAPER_HEIGHT ? MIN_PAPER_HEIGHT : _pixel_height;
 		return true;
 	}
 	static bool set_narrow_margin()

@@ -232,18 +232,32 @@ void FlushRect(CDC* pDC, CRect* rect, COLORREF back_color);
 class LxRowInPageIter
 {
 public:
-	LxRowInPageIter() = default;
+	LxRowInPageIter() = delete;
 	LxRowInPageIter(ComposePage* page, paragraph_iter pagraph, row_iter irow) :
 		this_page(page), paragraph(pagraph), row(irow)
 	{
 	}
+	LxRowInPageIter(const LxRowInPageIter& other)
+	{
+		this->this_page = other.this_page;
+		this->row = other.row;
+		this->paragraph = other.paragraph;
+	}
 	bool operator==(const LxRowInPageIter& other) const
 	{
+		if (this_page != other.this_page)
+			return false;
+		if (paragraph != other.paragraph)
+			return false;
 		return row == other.row;
 	}
 	bool operator!=(const LxRowInPageIter& other) const
 	{
-		return row != other.row;
+		if (this_page != other.this_page)
+			return true;
+		if (paragraph != other.paragraph)
+			return true;
+		return row == other.row;
 	}
 	LxRowInPageIter& operator=(LxRowInPageIter& other)
 	{

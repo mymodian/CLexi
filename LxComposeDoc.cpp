@@ -88,19 +88,19 @@ bool ComposeDoc::self_check()
 
 void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 {
-	for (page_iter page = begin(); page != end(); page++)
+	for (page_iter page = begin(); page != end(); ++page)
 	{
 		if ((*page)->get_top_pos() > doc_y)
 			break;
 		if (/*(*page)->get_top_pos() <= doc_y &&*/ doc_y <= (*page)->get_bottom_pos())
 		{
-			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); paragraph++)
+			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); ++paragraph)
 			{
 				if ((*paragraph)->get_top_pos() > doc_y)
 					break;
 				if (/*(*paragraph)->get_top_pos() <= doc_y &&*/ doc_y <= (*paragraph)->get_bottom_pos())
 				{
-					for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); row++)
+					for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); ++row)
 					{
 						if ((*row)->get_top_pos() > doc_y)
 							break;
@@ -169,17 +169,17 @@ void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 
 void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC)
 {
-	for (page_iter page = begin(); page != end(); page++)
+	for (page_iter page = begin(); page != end(); ++page)
 	{
 		if ((*page)->get_area_end() + 1 >= cur_gbl_index)
 		{
-			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); paragraph++)
+			for (paragraph_iter paragraph = (*page)->begin(); paragraph != (*page)->end(); ++paragraph)
 			{
 				if ((*paragraph)->get_area_end() + 1 >= cur_gbl_index)
 				{
 					if ((*paragraph)->get_phy_paragraph() == phy_pgh)
 					{
-						for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); row++)
+						for (row_iter row = (*paragraph)->begin(); row != (*paragraph)->end(); ++row)
 						{
 							if ((*row)->get_area_end() + 1 >= cur_gbl_index)
 							{
@@ -253,7 +253,7 @@ void ComposeDoc::compose_complete(CDC* pDC)
 	page->set_top_pos(0 + ViewWindow::GetViewWindowInstance()->border_height);
 	add_page(page);
 
-	for (contex_pgh_iter phy_pagph = phy_document->begin(); phy_pagph != phy_document->end(); phy_pagph++)
+	for (contex_pgh_iter phy_pagph = phy_document->begin(); phy_pagph != phy_document->end(); ++phy_pagph)
 	{
 		size_t index_inner = 0;
 		ComposeParagraph* paragraph = new ComposeParagraph();
@@ -347,19 +347,19 @@ void ComposeDoc::compose_complete(CDC* pDC)
 void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
 {
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
-	pgraph_cusr++;
+	++pgraph_cusr;
 	page_iter page_cusr = pagraph_iter.get_page();
 	(*page_cusr)->set_area((*page_cusr)->get_area_begin(), (*page_cusr)->get_area_end() + count);
 
 	for (;;)
 	{
-		for (; pgraph_cusr != (*page_cusr)->end(); pgraph_cusr++)
+		for (; pgraph_cusr != (*page_cusr)->end(); ++pgraph_cusr)
 		{
 			(*pgraph_cusr)->set_area((*pgraph_cusr)->get_area_begin() + count, (*pgraph_cusr)->get_area_end() + count);
-			for (row_iter row = (*pgraph_cusr)->begin(); row != (*pgraph_cusr)->end(); row++)
+			for (row_iter row = (*pgraph_cusr)->begin(); row != (*pgraph_cusr)->end(); ++row)
 				(*row)->set_area((*row)->get_area_begin() + count, (*row)->get_area_end() + count);
 		}
-		page_cusr++;
+		++page_cusr;
 		if (page_cusr == end())
 			break;
 		(*page_cusr)->set_area((*page_cusr)->get_area_begin() + count, (*page_cusr)->get_area_end() + count);
@@ -389,7 +389,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 	for (row_iter row_it = pos; row_it != (*pgraph_cusr)->end();)
 	{
 		row_iter temp_it = row_it;
-		row_it++;
+		++row_it;
 		delete *temp_it;
 		(*pgraph_cusr)->remove_row(temp_it);
 	}
@@ -400,7 +400,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 		/*pgph_it++;
 		if (pgph_it == pargraph_end()) break;*/
 		LxParagraphInDocIter temp_it = pgph_it;
-		pgph_it++;
+		++pgph_it;
 		//如果 temp_it 所指逻辑段为部分段则删除，否则退出
 		if ((*temp_it)->get_offset_inner() == 0) break;
 		//删除该逻辑段
@@ -443,7 +443,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 		}
 		delete *pgraph_cusr;
 		(*page_cusr)->remove_paragraph(pgraph_cusr);
-		page_cusr--;
+		--page_cusr;
 		pgraph_cusr = --((*page_cusr)->end());
 		LxParagraphInDocIter last_PD(this, page_cusr, pgraph_cusr);
 		return last_PD;
@@ -457,7 +457,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 			//新加入行后会导致超越当前的页范围
 			//1.1如果当前页为最后一页，新建一个页
 			page_iter next_page = page_cusr;
-			next_page++;
+			++next_page;
 			if (next_page == end())
 			{
 				ComposePage* new_page = new ComposePage();
@@ -467,12 +467,12 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 			}
 			//1.2将之后的逻辑段都移入下一页(++page_cusr)
 			page_iter prev_page = page_cusr;
-			page_cusr++;
+			++page_cusr;
 
 			for (paragraph_iter reverse_it = --((*prev_page)->end()); reverse_it != pgraph_cusr;)
 			{
 				paragraph_iter deleted = reverse_it;
-				reverse_it--;
+				--reverse_it;
 				(*deleted)->set_parent_page(*page_cusr);
 				(*page_cusr)->add_paragraph(*deleted, 0);
 				(*prev_page)->remove_paragraph(deleted);
@@ -532,14 +532,14 @@ paragraph_iter ComposeDoc::do_logic_combine(ComposePage* page, paragraph_iter pa
 	if( (*paragraph_it)->get_offset_inner() == 0 )
 	return;*/
 	paragraph_iter prev_pragraph = paragraph_it;
-	prev_pragraph--;
+	--prev_pragraph;
 
 	(*prev_pragraph)->set_area((*prev_pragraph)->get_area_begin(), (*paragraph_it)->get_area_end());
 	(*prev_pragraph)->set_pos((*prev_pragraph)->get_top_pos(), (*paragraph_it)->get_bottom_pos());
 	for (row_iter row_it = (*paragraph_it)->begin(); row_it != (*paragraph_it)->end();)
 	{
 		row_iter to_move = row_it;
-		row_it++;
+		++row_it;
 		(*prev_pragraph)->add_row(*to_move);
 		(*paragraph_it)->remove_row(to_move);
 	}
@@ -557,7 +557,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 	page_iter container_page = page_cusr;
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
 	int y_offset = (*(--(*pgraph_cusr)->end()))->get_next_allowed_pos();
-	pgraph_cusr++;
+	++pgraph_cusr;
 
 	for (;;)
 	{
@@ -573,7 +573,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 				int offset_ = y_offset - (*pgraph_cusr)->get_top_pos();
 				(*pgraph_cusr)->set_pos(y_offset, y_offset + (*pgraph_cusr)->get_height());
 				//平移该段的每一行
-				for (row_iter row_it = (*pgraph_cusr)->begin(); row_it != (*pgraph_cusr)->end(); row_it++)
+				for (row_iter row_it = (*pgraph_cusr)->begin(); row_it != (*pgraph_cusr)->end(); ++row_it)
 				{
 					(*row_it)->set_top_pos((*row_it)->get_top_pos() + offset_);
 					y_offset = (*row_it)->get_next_allowed_pos();
@@ -589,7 +589,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 					to_check_combine = --((*container_page)->end());
 				}
 				else
-					pgraph_cusr++;
+					++pgraph_cusr;
 				//检查是否需要将该段与上一个段融合
 				if ((*to_check_combine)->get_offset_inner() != 0 && to_check_combine != (*container_page)->begin())
 					do_logic_combine(*container_page, to_check_combine);
@@ -598,7 +598,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 			{
 				//1.3如果当前页为最后一页，新建一个页
 				page_iter next_page = container_page;
-				next_page++;
+				++next_page;
 				if (next_page == end())
 				{
 					ComposePage* new_page = new ComposePage();

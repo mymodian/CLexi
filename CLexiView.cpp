@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CCLexiView, CView)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_KEYDOWN()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 // CCLexiView 构造/析构
@@ -189,6 +190,12 @@ BOOL CCLexiView::PreTranslateMessage(MSG* pMsg)
 	return CView::PreTranslateMessage(pMsg);
 }
 
+BOOL CCLexiView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	
+	return CView::OnSetCursor(pWnd, nHitTest, message);
+}
 
 LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 {
@@ -198,6 +205,7 @@ LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 	ReleaseDC(pDC);
 	bInitialized = TRUE;
 	//::SetFocus(m_hWnd);
+	SetClassLong(GetSafeHwnd(), GCL_HCURSOR, (long)::LoadCursor(NULL, IDC_CROSS));
 	return 0;
 }
 

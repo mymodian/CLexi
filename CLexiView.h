@@ -76,6 +76,7 @@ public:
 	afx_msg LRESULT OnLexiInit(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

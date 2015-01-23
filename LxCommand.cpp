@@ -146,7 +146,7 @@ void LxCommand::Undo()
 	{
 		auto rit = command.rbegin();
 		auto rite = command.rend();
-		for (; rit != rite; rit++)
+		for (; rit != rite; ++rit)
 		{
 			(*(rit))->Undo();
 		}
@@ -180,29 +180,29 @@ void LxCommandMgr::insert_cmd(LxCommand* lx_cmd)
 	if (curr_ == command_list.begin())
 	{
 		command_list.push_back(lx_cmd);
-		curr_++;
+		++curr_;
 		return;
 	}
 	auto it = curr_;
-	it++;
+	++it;
 	for (; it != command_list.end();)
 	{
 		delete *it;
 		it = command_list.erase(it);
 	}
 	command_list.push_back(lx_cmd);
-	curr_++;
+	++curr_;
 }
 LxCommand* LxCommandMgr::get_redo_cmd()
 {
 	if (curr_ == --command_list.end()) return nullptr;
-	curr_++;
+	++curr_;
 	return *curr_;
 }
 LxCommand* LxCommandMgr::get_undo_cmd()
 {
 	if (curr_ == command_list.begin()) return nullptr;
 	LxCommand* cmd = *curr_;
-	curr_--;
+	--curr_;
 	return cmd;
 }
