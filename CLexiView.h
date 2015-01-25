@@ -6,12 +6,12 @@
 
 #define LEXI_INIT WM_USER + 0x01
 
-#include "LxCommand.h"
+#include "LxDcViCtl.h"
+#include "ChromiumTask.h"
 
 class CCLexiView : public CView
 {
 private:
-	LxCommandMgr lx_command_mgr;		//命令管理
 	LxDcViCtl doc_view_controler;				//文档和排版控制
 
 protected: // 仅从序列化创建
@@ -33,9 +33,9 @@ public:
 	void create_caret(int height, int width);
 	void hide_caret();
 	void show_caret(int x, int y);
-	void move_caret(unsigned direction);
+	void move_caret(unsigned int direction);
 public:
-	void ExecuteNormalCmd(LxCommand* cmd);
+	void ExecuteNormalCmd(Task<CDC>* task);
 public:
 	void insert(TCHAR* cs, int len);
 	void backspace();

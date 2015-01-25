@@ -150,9 +150,9 @@ void LxDcViCtl::insert(TCHAR* src, size_t  count)
 	font_tree.insert(cursor.get_index_global(), count);
 	color_tree.insert(cursor.get_index_global(), count);
 }
-void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_index)
-{
-}
+//void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_index)
+//{
+//}
 void LxDcViCtl::remove(size_t position)
 {
 	if( position != 0 )
@@ -227,4 +227,38 @@ void LxDcViCtl::draw_complete(CDC* pDC)
 	render->DrawDocument(pDC);
 	render->create_caret(cursor.height, cursor.height/8);
 	render->show_caret(&cursor);
+}
+
+// user operation handler
+void LxDcViCtl::usr_mouse_lbutton_down(CDC* pDC, int x, int y)
+{
+	LxCommand* locate_cmd = new LxCommand();
+	locate_cmd->add_child_cmd(new LxLocateCmd(x, y));
+	locate_cmd->set_dvctl(this);
+	locate_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(locate_cmd);
+}
+void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len)
+{
+	LxCommand* insert_cmd = new LxCommand();
+	insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
+	insert_cmd->set_dvctl(this);
+	insert_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(insert_cmd);
+}
+void LxDcViCtl::usr_backspace(CDC* pDC)
+{
+	LxCommand* backspace_cmd = new LxCommand();
+	backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
+	backspace_cmd->set_dvctl(this);
+	backspace_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(backspace_cmd);
+}
+void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
+{
+	LxCommand* move_cmd = new LxCommand();
+	move_cmd->add_child_cmd(new LxMoveCmd(direction));
+	move_cmd->set_dvctl(this);
+	move_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(move_cmd);
 }

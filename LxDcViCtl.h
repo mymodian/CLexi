@@ -7,6 +7,7 @@
 #include "LxCursor.h"
 #include "LxComposeAlgom.h"
 #include "LxRender.h"
+#include "LxCommand.h"
 
 #ifndef __LX_DOCUMENT_VIEW_CONTROL_H
 #define __LX_DOCUMENT_VIEW_CONTROL_H
@@ -17,10 +18,16 @@ public:
 	LxDcViCtl();
 	~LxDcViCtl();
 	void init(CDC* pDC);
+	//用户操作
+public:
+	void usr_mouse_lbutton_down(CDC* pDC, int x, int y);
+	void usr_insert(CDC* pDC, TCHAR* cs, int len);
+	void usr_backspace(CDC* pDC);
+	void usr_move_cursor(CDC* pDC, unsigned int direction);
 public:
 	void backspace();
 	void insert(TCHAR* src, size_t  count);
-	void insert(TCHAR* src, size_t  count, size_t font_src_index);
+	//void insert(TCHAR* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);
 	void remove(size_t position_begin, size_t position_end);
 	void modify_font(size_t position_begin, size_t position_end, size_t font_src_index);
@@ -52,6 +59,8 @@ private:
 	LxCursor cursor;
 	GD_proxy_base gd_proxy;
 	LxRender* render;
+private:
+	LxCommandMgr lx_command_mgr;		//命令管理
 private:
 	size_t default_font_index;
 	size_t default_color_index;

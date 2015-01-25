@@ -1,10 +1,12 @@
 #include "stdafx.h"
-#include "LxDcViCtl.h"
+#include "LxComposeDoc.h"
 #include <list>
 using namespace std;
 
 #ifndef __LEXI_COMMAND_H
 #define __LEXI_COMMAND_H
+
+class LxDcViCtl;
 
 class LxCommandBase
 {

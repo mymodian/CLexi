@@ -101,6 +101,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChromiumTask.h" />
     <ClInclude Include="CLexi.h" />
     <ClInclude Include="CLexiDoc.h" />
     <ClInclude Include="CLexiView.h" />
@@ -125,6 +126,7 @@
     <ClInclude Include="LxTreeBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChromiumTask.cpp" />
     <ClCompile Include="CLexi.cpp" />
     <ClCompile Include="CLexiDoc.cpp" />
     <ClCompile Include="CLexiView.cpp" />

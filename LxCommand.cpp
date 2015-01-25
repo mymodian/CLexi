@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "LxCommand.h"
+#include "LxDcViCtl.h"
 
 LxMoveCmd::LxMoveCmd(unsigned int direction)
 	: direction_(direction)

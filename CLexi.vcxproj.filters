@@ -19,6 +19,9 @@
     <Filter Include="源文件\GD_base">
       <UniqueIdentifier>{0ab2cc64-2099-4b10-a981-696fd71b7821}</UniqueIdentifier>
     </Filter>
+    <Filter Include="generic">
+      <UniqueIdentifier>{8082310e-5a92-4a2b-9235-1efd18287dc9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -90,6 +93,9 @@
     <ClInclude Include="GD_proxy_base.h">
       <Filter>头文件\GD_base</Filter>
     </ClInclude>
+    <ClInclude Include="ChromiumTask.h">
+      <Filter>generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLexi.cpp">
@@ -148,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="GD_proxy_base.cpp">
       <Filter>源文件\GD_base</Filter>
+    </ClCompile>
+    <ClCompile Include="ChromiumTask.cpp">
+      <Filter>generic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

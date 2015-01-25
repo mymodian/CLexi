@@ -82,15 +82,11 @@ void CCLexiView::show_caret(int x, int y)
 	SetCaretPos(point);
 	ShowCaret();
 }
-void CCLexiView::move_caret(unsigned direction)
+void CCLexiView::move_caret(unsigned int direction)
 {
-	LxCommand* move_cmd = new LxCommand();
-	move_cmd->add_child_cmd(new LxMoveCmd(direction));
-	move_cmd->set_dvctl(&doc_view_controler);
 	CDC* pDC = GetDC();
-	move_cmd->Excute(pDC);
+	doc_view_controler.usr_move_cursor(pDC, direction);
 	ReleaseDC(pDC);
-	lx_command_mgr.insert_cmd(move_cmd);
 }
 
 void CCLexiView::OnDraw(CDC* pDC)
@@ -205,7 +201,7 @@ LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 	ReleaseDC(pDC);
 	bInitialized = TRUE;
 	//::SetFocus(m_hWnd);
-	SetClassLong(GetSafeHwnd(), GCL_HCURSOR, (long)::LoadCursor(NULL, IDC_CROSS));
+	SetClassLong(GetSafeHwnd(), GCL_HCURSOR, (long)::LoadCursor(NULL, IDC_IBEAM));
 	return 0;
 }
 
@@ -284,14 +280,9 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	LxCommand* locate_cmd = new LxCommand();
-	locate_cmd->add_child_cmd(new LxLocateCmd(point.x, point.y));
-	locate_cmd->set_dvctl(&doc_view_controler);
-	//ExecuteNormalCmd(locate_cmd);
 	CDC* pDC = GetDC();
-	locate_cmd->Excute(pDC);
+	doc_view_controler.usr_mouse_lbutton_down(pDC, point.x, point.y);
 	ReleaseDC(pDC);
-	lx_command_mgr.insert_cmd(locate_cmd);
 
 	//::SetFocus(m_hWnd);
 	CView::OnLButtonDown(nFlags, point);
@@ -330,8 +321,8 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 }
 
 // CCLexiView mydoc命令处理程序
-
-void CCLexiView::ExecuteNormalCmd(LxCommand* cmd)
+//此处的LxCommand* 换为函数指针
+void CCLexiView::ExecuteNormalCmd(Task<CDC>* task)
 {
 	CRect rect;
 	GetClientRect(&rect);
@@ -343,7 +334,8 @@ void CCLexiView::ExecuteNormalCmd(LxCommand* cmd)
 	dcMem.SelectObject(&bmp);
 	dcMem.FillSolidRect(rect, pDC->GetBkColor());
 
-	cmd->Excute(&dcMem);
+	//cmd->Excute(&dcMem);
+	task->run(&dcMem);
 
 	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
 		&dcMem, 0, 0, SRCCOPY);
@@ -355,24 +347,45 @@ void CCLexiView::ExecuteNormalCmd(LxCommand* cmd)
 
 void CCLexiView::insert(TCHAR* cs, int len)
 {
-	LxCommand* insert_cmd = new LxCommand();
-	insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
-	insert_cmd->set_dvctl(&doc_view_controler);
-	/*CDC* pDC = GetDC();
-	insert_cmd->Excute(pDC);
-	ReleaseDC(pDC);*/
-	ExecuteNormalCmd(insert_cmd);
-	lx_command_mgr.insert_cmd(insert_cmd);
+	Task<CDC>* task = NewRunnableMethod<LxDcViCtl, CDC, void LxDcViCtl::*(TCHAR*,size_t)), TCHAR*, size_t>(&doc_view_controler, &LxDcViCtl::insert, cs, len);
+	CRect rect;
+	GetClientRect(&rect);
+	CDC dcMem;
+	CBitmap bmp;
+	CDC* pDC = GetDC();
+	dcMem.CreateCompatibleDC(pDC);
+	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+	dcMem.SelectObject(&bmp);
+	dcMem.FillSolidRect(rect, pDC->GetBkColor());
+
+	doc_view_controler.usr_insert(&dcMem, cs, len);
+
+	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
+		&dcMem, 0, 0, SRCCOPY);
+
+	dcMem.DeleteDC();
+	bmp.DeleteObject();
+	ReleaseDC(pDC);
 }
 
 void CCLexiView::backspace()
 {
-	LxCommand* backspace_cmd = new LxCommand();
-	backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
-	backspace_cmd->set_dvctl(&doc_view_controler);
-	/*CDC* pDC = GetDC();
-	insert_cmd->Excute(pDC);
-	ReleaseDC(pDC);*/
-	ExecuteNormalCmd(backspace_cmd);
-	lx_command_mgr.insert_cmd(backspace_cmd);
+	CRect rect;
+	GetClientRect(&rect);
+	CDC dcMem;
+	CBitmap bmp;
+	CDC* pDC = GetDC();
+	dcMem.CreateCompatibleDC(pDC);
+	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+	dcMem.SelectObject(&bmp);
+	dcMem.FillSolidRect(rect, pDC->GetBkColor());
+
+	doc_view_controler.usr_backspace(&dcMem);
+
+	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
+		&dcMem, 0, 0, SRCCOPY);
+
+	dcMem.DeleteDC();
+	bmp.DeleteObject();
+	ReleaseDC(pDC);
 }
