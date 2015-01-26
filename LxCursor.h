@@ -7,7 +7,28 @@ class LxCursor
 {
 public:
 	LxCursor() :point_x(0), point_y(0), index_inner(0) {}
+	LxCursor(const LxCursor& other)
+	{
+		this->point_x = other.point_x;
+		this->point_y = other.point_y;
+		this->height = other.height;
+		this->index_inner = other.index_inner;
+		this->page = other.page;
+		this->paragraph = other.paragraph;
+		this->row = other.row;
+	}
 	~LxCursor() {}
+	LxCursor& operator=(const LxCursor& other)
+	{
+		this->point_x = other.point_x;
+		this->point_y = other.point_y;
+		this->height = other.height;
+		this->index_inner = other.index_inner;
+		this->page = other.page;
+		this->paragraph = other.paragraph;
+		this->row = other.row;
+		return *this;
+	}
 	/*LxCursor& operator++();
 	LxCursor operator++(int);*/
 	size_t get_index_global()
@@ -27,7 +48,7 @@ public:
 	int point_y;
 	int height;				//光标的高度随字体而改变
 	int index_inner;		//在当前行的第几个字符后,如果此处没有字符，则为0 //need
-	int width_used;		//当前行在此处达到的宽度 //don't need
+	//int width_used;		//当前行在此处达到的宽度 //don't need
 	page_iter page;
 	paragraph_iter paragraph;
 	row_iter row;
@@ -42,6 +63,10 @@ struct Section
 {
 	LxCursor cursor_begin;
 	LxCursor cursor_end;
+	bool active()
+	{
+		return false;
+	}
 };
 
 //

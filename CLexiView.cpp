@@ -315,14 +315,15 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 	//同样offset_x也保持不变，当客户区域的宽度大于等于文档页面宽度时，将offset_x设为0
 	if (!bInitialized)
 		return;
-	CDC* pDC = GetDC();
-	doc_view_controler.draw_complete(pDC);
-	ReleaseDC(pDC);
+	CDC* take_place = NULL;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::draw_complete);
+	ExecuteNormalTask(task);
+	delete task;
 }
 
 // CCLexiView mydoc命令处理程序
-//此处的LxCommand* 换为函数指针
-void CCLexiView::ExecuteNormalCmd(Task<CDC>* task)
+
+void CCLexiView::ExecuteNormalTask(Task<CDC>* task)
 {
 	CRect rect;
 	GetClientRect(&rect);
@@ -334,7 +335,6 @@ void CCLexiView::ExecuteNormalCmd(Task<CDC>* task)
 	dcMem.SelectObject(&bmp);
 	dcMem.FillSolidRect(rect, pDC->GetBkColor());
 
-	//cmd->Excute(&dcMem);
 	task->run(&dcMem);
 
 	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
@@ -347,45 +347,16 @@ void CCLexiView::ExecuteNormalCmd(Task<CDC>* task)
 
 void CCLexiView::insert(TCHAR* cs, int len)
 {
-	Task<CDC>* task = NewRunnableMethod<LxDcViCtl, CDC, void LxDcViCtl::*(TCHAR*,size_t)), TCHAR*, size_t>(&doc_view_controler, &LxDcViCtl::insert, cs, len);
-	CRect rect;
-	GetClientRect(&rect);
-	CDC dcMem;
-	CBitmap bmp;
-	CDC* pDC = GetDC();
-	dcMem.CreateCompatibleDC(pDC);
-	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	dcMem.SelectObject(&bmp);
-	dcMem.FillSolidRect(rect, pDC->GetBkColor());
-
-	doc_view_controler.usr_insert(&dcMem, cs, len);
-
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
-		&dcMem, 0, 0, SRCCOPY);
-
-	dcMem.DeleteDC();
-	bmp.DeleteObject();
-	ReleaseDC(pDC);
+	CDC* take_place = NULL;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_insert, cs, len);
+	ExecuteNormalTask(task);
+	delete task;
 }
 
 void CCLexiView::backspace()
 {
-	CRect rect;
-	GetClientRect(&rect);
-	CDC dcMem;
-	CBitmap bmp;
-	CDC* pDC = GetDC();
-	dcMem.CreateCompatibleDC(pDC);
-	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	dcMem.SelectObject(&bmp);
-	dcMem.FillSolidRect(rect, pDC->GetBkColor());
-
-	doc_view_controler.usr_backspace(&dcMem);
-
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(),
-		&dcMem, 0, 0, SRCCOPY);
-
-	dcMem.DeleteDC();
-	bmp.DeleteObject();
-	ReleaseDC(pDC);
+	CDC* take_place = NULL;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_backspace);
+	ExecuteNormalTask(task);
+	delete task;
 }

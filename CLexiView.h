@@ -35,7 +35,7 @@ public:
 	void show_caret(int x, int y);
 	void move_caret(unsigned int direction);
 public:
-	void ExecuteNormalCmd(Task<CDC>* task);
+	void ExecuteNormalTask(Task<CDC>* task);
 public:
 	void insert(TCHAR* cs, int len);
 	void backspace();

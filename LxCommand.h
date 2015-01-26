@@ -105,7 +105,7 @@ class LxModifyViewCmd : public LxCommandBase
 {
 public:
 	LxModifyViewCmd() = default;
-	~LxModifyViewCmd() = default;
+	virtual ~LxModifyViewCmd() = default;
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return false; }
 };
