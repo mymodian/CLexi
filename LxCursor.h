@@ -29,6 +29,14 @@ public:
 		this->row = other.row;
 		return *this;
 	}
+	bool operator==(const LxCursor& other)
+	{
+		return point_x == other.point_x && point_y == other.point_y;
+	}
+	bool operator!=(const LxCursor& other)
+	{
+		return point_x != other.point_x || point_y != other.point_y;
+	}
 	/*LxCursor& operator++();
 	LxCursor operator++(int);*/
 	size_t get_index_global()
@@ -65,7 +73,7 @@ struct Section
 	LxCursor cursor_end;
 	bool active()
 	{
-		return false;
+		return cursor_begin != cursor_end;
 	}
 };
 
