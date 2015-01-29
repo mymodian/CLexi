@@ -41,6 +41,8 @@ void LxDcViCtl::init(CDC* pDC)
 	cursor.row = (*cursor.paragraph)->begin();
 	cursor.index_inner = 0;
 	//cursor.width_used = 0;
+	section.cursor_begin = cursor;
+	section.cursor_end = cursor;
 
 	gd_proxy.init();
 	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));

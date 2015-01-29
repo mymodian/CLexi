@@ -59,6 +59,7 @@ private:
 	LxCursor cursor;
 	GD_proxy_base gd_proxy;
 	LxRender* render;
+	Section section;
 private:
 	LxCommandMgr lx_command_mgr;		//√¸¡Óπ‹¿Ì
 private:
