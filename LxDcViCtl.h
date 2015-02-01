@@ -21,7 +21,12 @@ public:
 	//ÓÃ»§²Ù×÷
 public:
 	void usr_mouse_lbutton_down(CDC* pDC, int x, int y);
+	void usr_mouse_move(CDC* pDC, int x, int y);
+	void usr_mouse_lbutton_up(CDC* pDC, int x, int y);
+	void usr_mouse_rbutton_down(CDC* pDC, int x, int y);
+	void usr_mouse_rbutton_up(CDC* pDC, int x, int y);
 	void usr_insert(CDC* pDC, TCHAR* cs, int len);
+	void usr_wrap(CDC* pDC);
 	void usr_backspace(CDC* pDC);
 	void usr_move_cursor(CDC* pDC, unsigned int direction);
 public:

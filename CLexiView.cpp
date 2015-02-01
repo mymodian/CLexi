@@ -244,6 +244,7 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		case '\r':
 			//按下回车，创建新物理段
+			wrap();
 			break;
 		case '\n':
 			break;
@@ -284,6 +285,9 @@ void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 	doc_view_controler.usr_mouse_lbutton_down(pDC, point.x, point.y);
 	ReleaseDC(pDC);
 
+	/*CString info;
+	info.Format(L"down (%d,%d)\n", point.x, point.y);
+	OutputDebugString(info);*/
 	//::SetFocus(m_hWnd);
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -292,7 +296,13 @@ void CCLexiView::OnLButtonDown(UINT nFlags, CPoint point)
 void CCLexiView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	CDC* pDC = GetDC();
+	doc_view_controler.usr_mouse_lbutton_up(pDC, point.x, point.y);
+	ReleaseDC(pDC);
 
+	/*CString info;
+	info.Format(L"up (%d,%d)\n", point.x, point.y);
+	OutputDebugString(info);*/
 	CView::OnLButtonUp(nFlags, point);
 }
 
@@ -300,7 +310,13 @@ void CCLexiView::OnLButtonUp(UINT nFlags, CPoint point)
 void CCLexiView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	CDC* pDC = GetDC();
+	doc_view_controler.usr_mouse_move(pDC, point.x, point.y);
+	ReleaseDC(pDC);
 
+	/*CString info;
+	info.Format(L"move (%d,%d)\n", point.x, point.y);
+	OutputDebugString(info);*/
 	CView::OnMouseMove(nFlags, point);
 }
 
@@ -349,6 +365,14 @@ void CCLexiView::insert(TCHAR* cs, int len)
 {
 	CDC* take_place = NULL;
 	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_insert, cs, len);
+	ExecuteNormalTask(task);
+	delete task;
+}
+
+void CCLexiView::wrap()
+{
+	CDC* take_place = NULL;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_wrap);
 	ExecuteNormalTask(task);
 	delete task;
 }

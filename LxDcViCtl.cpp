@@ -43,6 +43,7 @@ void LxDcViCtl::init(CDC* pDC)
 	//cursor.width_used = 0;
 	section.cursor_begin = cursor;
 	section.cursor_end = cursor;
+	section.trace = false;
 
 	gd_proxy.init();
 	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
@@ -239,14 +240,73 @@ void LxDcViCtl::usr_mouse_lbutton_down(CDC* pDC, int x, int y)
 	locate_cmd->set_dvctl(this);
 	locate_cmd->Excute(pDC);
 	lx_command_mgr.insert_cmd(locate_cmd);
+	section.cursor_begin = cursor;
+	section.trace = true;
+}
+void LxDcViCtl::usr_mouse_move(CDC* pDC, int x, int y)
+{
+	if (!section.trace) return;
+	LxCommand* locate_cmd = new LxCommand();
+	locate_cmd->add_child_cmd(new LxLocateCmd(x, y));
+	locate_cmd->set_dvctl(this);
+	locate_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(locate_cmd);
+	section.cursor_end = cursor;
+}
+void LxDcViCtl::usr_mouse_lbutton_up(CDC* pDC, int x, int y)
+{
+	LxCommand* locate_cmd = new LxCommand();
+	locate_cmd->add_child_cmd(new LxLocateCmd(x, y));
+	locate_cmd->set_dvctl(this);
+	locate_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(locate_cmd);
+	section.cursor_end = cursor;
+	section.trace = false;
+}
+void LxDcViCtl::usr_mouse_rbutton_down(CDC* pDC, int x, int y)
+{
+
+}
+void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
+{
+
 }
 void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len)
 {
-	LxCommand* insert_cmd = new LxCommand();
-	insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
-	insert_cmd->set_dvctl(this);
-	insert_cmd->Excute(pDC);
-	lx_command_mgr.insert_cmd(insert_cmd);
+	if (!section.active())				//选择区域无效
+	{
+		LxCommand* insert_cmd = new LxCommand();
+		insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
+		insert_cmd->set_dvctl(this);
+		insert_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(insert_cmd);
+	}
+	else                                       //选择区域有效
+	{
+		
+	}
+}
+void LxDcViCtl::usr_wrap(CDC* pDC)
+{
+	if (!section.active())				//选择区域无效
+	{
+		if (cursor.tail_of_paragraph())
+		{
+			//在之后新建一个物理段
+		}
+		else if (cursor.head_of_paragraph())
+		{
+			//在之前新建一个物理段
+		}
+		else
+		{
+			//风格当前物理段
+		}
+	}
+	else                                       //选择区域有效
+	{
+
+	}
 }
 void LxDcViCtl::usr_backspace(CDC* pDC)
 {

@@ -38,6 +38,7 @@ public:
 	void ExecuteNormalTask(Task<CDC>* task);
 public:
 	void insert(TCHAR* cs, int len);
+	void wrap();
 	void backspace();
 // ÖØÐ´
 public:

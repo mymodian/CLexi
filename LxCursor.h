@@ -51,6 +51,14 @@ public:
 	{
 		return (*paragraph)->get_phy_paragraph();
 	}
+	bool tail_of_paragraph()
+	{
+		return get_index_global() == (*paragraph)->get_area_end() + 1;
+	}
+	bool head_of_paragraph()
+	{
+		return get_index_global() == (*paragraph)->get_area_begin();
+	}
 public:
 	int point_x;			//carset的位置相对于页面范围
 	int point_y;
@@ -71,6 +79,7 @@ struct Section
 {
 	LxCursor cursor_begin;
 	LxCursor cursor_end;
+	bool trace;		//点下左键之后设置，才能跟踪鼠标移动
 	bool active()
 	{
 		return cursor_begin != cursor_end;
