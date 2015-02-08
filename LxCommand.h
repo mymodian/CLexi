@@ -76,6 +76,16 @@ private:
 	COLORREF src_color;
 };
 
+class LxInsertParagraphCmd : public LxCommandBase
+{
+public:
+	LxInsertParagraphCmd() = delete;
+	virtual ~LxInsertParagraphCmd();
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+};
+
 class LxSingleRemoveCmd : public LxCommandBase
 {
 public:

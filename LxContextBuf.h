@@ -47,6 +47,7 @@ public:
 	const TCHAR* get_context_ptr() const { return &str_buf[0]; }
 	inline TCHAR Get(int index) { return str_buf[index]; }
 	inline size_t size() { return str_buf.size(); }
+	inline bool empty() { return str_buf.empty(); }
 	inline void Insert(size_t position, TCHAR ch)
 	{
 		str_buf.insert(str_buf.begin()+position,ch);

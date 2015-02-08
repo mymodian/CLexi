@@ -80,7 +80,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	// TODO: 在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
 	cs.cx = LxPaper::pixel_width + 100;
-	cs.cy = LxPaper::pixel_height*3/4;
+	cs.cy = LxPaper::pixel_height*2;
 
 	return TRUE;
 }

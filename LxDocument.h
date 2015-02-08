@@ -45,6 +45,7 @@ public:
 	const TCHAR* get_context_ptr() const { return context.get_context_ptr(); }
 	inline TCHAR Get(int index) { return context.Get(index); }
 	inline size_t size() { return context.size(); }
+	inline bool empty() { return context.empty(); }
 	inline void Insert(size_t position, TCHAR ch)
 	{
 		context.Insert(position,ch);

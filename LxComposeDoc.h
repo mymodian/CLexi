@@ -69,7 +69,7 @@ public:
 	int get_words_space() { return words_space; }
 public:
 	void FlushOwnArea(CDC* pDC);
-	void Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index);
+	void Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index, bool bParaFlag = false);
 private:
 	size_t index_begin;
 	size_t index_end;
@@ -210,6 +210,7 @@ public:
 	LxParagraphInDocIter pargraph_end();
 	LxRowInDocIter row_begin();
 	LxRowInDocIter row_end();
+	bool first_phy_paragraph(LxCursor& cursor);
 // only for test and debugger
 public:
 	bool self_check();

@@ -44,6 +44,10 @@ LxRowInDocIter ComposeDoc::row_end()
 	paragraph_iter pgh = --(*(--end()))->end();
 	return LxRowInDocIter(this, end(), (*(--end()))->end(), (*pgh)->end());
 }
+bool ComposeDoc::first_phy_paragraph(LxCursor& cursor)
+{
+	return cursor.page == pages.begin() && cursor.paragraph == (*cursor.page)->begin();
+}
 
 bool ComposeDoc::self_check()
 {
@@ -122,7 +126,7 @@ void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 							size_t index = (*row)->get_area_begin();
 							size_t font_index, same_font_cnt;
 							Paragraph* phy_pgh = (*paragraph)->get_phy_paragraph();
-							for (int i=0; i<(*row)->size(); )
+							for (int i = 0; i < (*row)->size();)
 							{
 								font_tree->get_src_index(index, font_index, same_font_cnt);
 								same_font_cnt = min((*row)->size() - i, same_font_cnt);
@@ -192,7 +196,7 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 								int y = cursor.point_y;
 								size_t index = (*row)->get_area_begin();
 								size_t font_index, same_font_cnt;
-								for (int i = 0; i < cursor.index_inner; )
+								for (int i = 0; i < cursor.index_inner;)
 								{
 									font_tree->get_src_index(index, font_index, same_font_cnt);
 									size_t count = min(cursor.index_inner - i, same_font_cnt);
@@ -452,7 +456,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 	{
 		ComposeRow* row_to_compose = new ComposeRow();
 		compose_algom->compose(row_to_compose, paragraph, index_global, index_inner, font_tree, pDC);
-		if (y_offset + row_to_compose->get_height() >(*page_cusr)->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
+		if (y_offset + row_to_compose->get_height() > (*page_cusr)->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
 		{
 			//新加入行后会导致超越当前的页范围
 			//1.1如果当前页为最后一页，新建一个页
@@ -828,13 +832,16 @@ void ComposeParagraph::add_row(ComposeRow* row, int index)
 }
 void ComposeParagraph::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree)
 {
+	int i = 0, s = row_size();
+	bool last_pgh = offset_inner + size() == paragraph->size();
 	for (auto row_ : rows)
 	{
+		i++;
 		if (row_->get_bottom_pos() <= ViewWindow::GetViewWindowInstance()->offset_y)
 			continue;
 		if (row_->get_top_pos() >= ViewWindow::GetViewWindowInstance()->get_bottom_pos())
 			break;
-		row_->Draw(pDC, font_tree, color_tree, get_phy_paragraph(), index_begin - offset_inner);
+		row_->Draw(pDC, font_tree, color_tree, get_phy_paragraph(), index_begin - offset_inner, i == s && last_pgh);
 	}
 }
 
@@ -852,17 +859,30 @@ void ComposeRow::FlushOwnArea(CDC* pDC)
 	FlushRect(pDC, &rect, LxPaper::paper_back_color);
 }
 
-void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index)
+void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index, bool bParaFlag)
 {
-	if (this->size() == 0)
-		return;
 	size_t inner_index = this->index_begin - base_index;
 	size_t font_index, same_font_cnt;
 	size_t color_index, same_color_cnt;
 	size_t index = this->index_begin;
+	TEXTMETRIC trx;
 	int x = ViewWindow::GetViewWindowInstance()->border_width_left -
 		ViewWindow::GetViewWindowInstance()->offset_x + LxPaper::left_margin;
 	int base_top = ViewWindow::GetViewWindowInstance()->offset_y;
+	if (this->size() == 0)
+	{
+		if (bParaFlag)
+		{
+			font_tree->get_src_index(index, font_index, same_font_cnt);
+			CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(font_index);
+			pDC->SelectObject(font);
+			pDC->GetTextMetrics(&trx);
+			pDC->SetTextColor(RGB(150, 150, 150));
+			pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"↓", 1);
+		}
+		return;
+	}
+
 	for (; index <= this->index_end;)
 	{
 		font_tree->get_src_index(index, font_index, same_font_cnt);
@@ -871,7 +891,6 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 		CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(font_index);
 		pDC->SelectObject(font);
 		pDC->SetTextColor(color_index);
-		TEXTMETRIC trx;
 		pDC->GetTextMetrics(&trx);
 		CSize size;
 		for (int i = 0; i < count; i++)
@@ -883,6 +902,11 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 			x += size.cx + words_space;
 		}
 		index += count;
+	}
+	if (bParaFlag)
+	{
+		pDC->SetTextColor(RGB(150, 150, 150));
+		pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"↓", 1);
 	}
 }
 //do not need again

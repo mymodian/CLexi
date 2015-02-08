@@ -158,8 +158,8 @@ void LxDcViCtl::insert(TCHAR* src, size_t  count)
 //}
 void LxDcViCtl::remove(size_t position)
 {
-	if( position != 0 )
-		remove(position-1, position);
+	if (position != 0)
+		remove(position - 1, position);
 }
 void LxDcViCtl::remove(size_t position_begin, size_t position_end)
 {
@@ -168,11 +168,11 @@ void LxDcViCtl::remove(size_t position_begin, size_t position_end)
 }
 void LxDcViCtl::modify_font(size_t position_begin, size_t position_end, size_t font_src_index)
 {
-	font_tree.modify(position_begin,position_end,font_src_index);
+	font_tree.modify(position_begin, position_end, font_src_index);
 }
 void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t color_src_index)
 {
-	color_tree.modify(position_begin,position_end,color_src_index);
+	color_tree.modify(position_begin, position_end, color_src_index);
 }
 
 //partial
@@ -200,7 +200,7 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 
 	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
 	{
-		ViewWindow::GetViewWindowInstance()->offset_y += 
+		ViewWindow::GetViewWindowInstance()->offset_y +=
 			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
 	}
 	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
@@ -228,7 +228,7 @@ void LxDcViCtl::draw_complete(CDC* pDC)
 	render->hide_caret();
 	pDC->SetBkMode(TRANSPARENT);
 	render->DrawDocument(pDC);
-	render->create_caret(cursor.height, cursor.height/8);
+	render->create_caret(cursor.height, cursor.height / 8);
 	render->show_caret(&cursor);
 }
 
@@ -283,7 +283,7 @@ void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len)
 	}
 	else                                       //选择区域有效
 	{
-		
+
 	}
 }
 void LxDcViCtl::usr_wrap(CDC* pDC)
@@ -293,6 +293,7 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 		if (cursor.tail_of_paragraph())
 		{
 			//在之后新建一个物理段
+			//now create new phy paragraph
 		}
 		else if (cursor.head_of_paragraph())
 		{
@@ -300,7 +301,7 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 		}
 		else
 		{
-			//风格当前物理段
+			//分割当前物理段
 		}
 	}
 	else                                       //选择区域有效
@@ -310,11 +311,42 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 }
 void LxDcViCtl::usr_backspace(CDC* pDC)
 {
-	LxCommand* backspace_cmd = new LxCommand();
-	backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
-	backspace_cmd->set_dvctl(this);
-	backspace_cmd->Excute(pDC);
-	lx_command_mgr.insert_cmd(backspace_cmd);
+	if (!section.active())				//选择区域无效
+	{
+		if (cursor.head_of_paragraph())		//物理段首
+		{
+			//该段为第一个物理段 什么也不做
+			if (compose_doc.first_phy_paragraph(cursor))
+			{
+				draw_complete(pDC);
+				return;
+			}
+			else
+			{
+				//当前物理段为空
+				if ((*cursor.paragraph)->get_phy_paragraph()->empty())
+				{
+					//删除当前物理段
+				}
+				else
+				{
+					//和前一个物理段合并
+				}
+			}
+		}
+		else
+		{
+			LxCommand* backspace_cmd = new LxCommand();
+			backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
+			backspace_cmd->set_dvctl(this);
+			backspace_cmd->Excute(pDC);
+			lx_command_mgr.insert_cmd(backspace_cmd);
+		}
+	}
+	else                                       //选择区域有效
+	{
+
+	}
 }
 void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
 {
