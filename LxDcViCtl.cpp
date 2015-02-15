@@ -232,6 +232,14 @@ void LxDcViCtl::draw_complete(CDC* pDC)
 	render->show_caret(&cursor);
 }
 
+//operation of phy paragraph
+void LxDcViCtl::insert_null_phy_paragraph(int index)
+{
+	Paragraph* new_phy_pragh = new Paragraph();
+	new_phy_pragh->SetComposeAlgom(new LxSimpleComposeAlgo());
+	document.insert_paragraph(new_phy_pragh, index);
+}
+
 // user operation handler
 void LxDcViCtl::usr_mouse_lbutton_down(CDC* pDC, int x, int y)
 {
@@ -294,6 +302,11 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 		{
 			//在之后新建一个物理段
 			//now create new phy paragraph
+			LxCommand* newphypragh_cmd = new LxCommand();
+			newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor)));
+			newphypragh_cmd->set_dvctl(this);
+			newphypragh_cmd->Excute(pDC);
+			lx_command_mgr.insert_cmd(newphypragh_cmd);
 		}
 		else if (cursor.head_of_paragraph())
 		{

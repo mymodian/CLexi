@@ -48,6 +48,15 @@ bool ComposeDoc::first_phy_paragraph(LxCursor& cursor)
 {
 	return cursor.page == pages.begin() && cursor.paragraph == (*cursor.page)->begin();
 }
+int ComposeDoc::current_phypgh_index(LxCursor& cursor)
+{
+	Paragraph* phy_pgh = (*cursor.paragraph)->get_phy_paragraph();
+	int index = 0;
+	for (auto pghit = phy_document->begin(); pghit != phy_document->end(); ++pghit, ++index)
+		if (*pghit == phy_pgh)
+			return index;
+	assert(index < phy_document->size());
+}
 
 bool ComposeDoc::self_check()
 {

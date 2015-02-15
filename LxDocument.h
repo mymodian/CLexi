@@ -16,6 +16,7 @@ public:
 	virtual ~Document();
 	contex_pgh_iter begin() { return paragraph_list.begin(); }
 	contex_pgh_iter end() { return paragraph_list.end(); }
+	size_t size() { return paragraph_list.size(); }
 public:
 	void store_stream(FILE* file);
 	void add_paragraph(Paragraph* paragraph);

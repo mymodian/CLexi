@@ -187,6 +187,8 @@ public:
 	void remove_page(page_iter it) { pages.erase(it); }
 public:
 	void clear();
+	//对某一个物理段进行排版
+	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, ComposePage* page, int offset_y);
 	//全部重新排版
 	void compose_complete(CDC* pDC);
 	//插入或删除文本时修改和重布局
@@ -211,6 +213,7 @@ public:
 	LxRowInDocIter row_begin();
 	LxRowInDocIter row_end();
 	bool first_phy_paragraph(LxCursor& cursor);
+	int current_phypgh_index(LxCursor& cursor);
 // only for test and debugger
 public:
 	bool self_check();

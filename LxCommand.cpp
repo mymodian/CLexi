@@ -50,6 +50,21 @@ void LxInsertCmd::Undo()
 
 }
 
+LxInsertPhyParagraphCmd::LxInsertPhyParagraphCmd(int index)
+	: index_(index)
+{
+}
+void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
+{
+	//1.安插物理段
+	doc_view_ctrl_->insert_null_phy_paragraph(index_);
+	//2.排版安插的物理段并对后续逻辑段重排版
+}
+void LxInsertPhyParagraphCmd::Undo()
+{
+
+}
+
 LxSingleRemoveCmd::~LxSingleRemoveCmd() {}
 void LxSingleRemoveCmd::Undo()
 {

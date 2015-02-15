@@ -1,3 +1,8 @@
+/**
+	当前存在的问题：所有操作如果要实现undo和redo，必定不能在execute和undo的实现中直接使用cursor。
+	然而当前的诸多操作都是直接使用cursor。尽早将接口改过来，将cursor和操作的实现解耦
+*/
+
 #include "stdafx.h"
 #include "LxComposeDoc.h"
 #include <list>
@@ -76,14 +81,17 @@ private:
 	COLORREF src_color;
 };
 
-class LxInsertParagraphCmd : public LxCommandBase
+class LxInsertPhyParagraphCmd : public LxCommandBase
 {
 public:
-	LxInsertParagraphCmd() = delete;
-	virtual ~LxInsertParagraphCmd();
+	LxInsertPhyParagraphCmd() = delete;
+	virtual ~LxInsertPhyParagraphCmd() = default;
+	LxInsertPhyParagraphCmd(int index);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
+private:
+	int index_;		//在插入后该段的index
 };
 
 class LxSingleRemoveCmd : public LxCommandBase

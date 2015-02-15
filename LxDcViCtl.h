@@ -37,6 +37,9 @@ public:
 	void remove(size_t position_begin, size_t position_end);
 	void modify_font(size_t position_begin, size_t position_end, size_t font_src_index);
 	void modify_color(size_t position_begin, size_t position_end, size_t color_src_index);
+//操作物理文档
+public:
+	void insert_null_phy_paragraph(int index);
 //排版相关
 public:
 	void modify_layout(CDC* pDC, int count);
