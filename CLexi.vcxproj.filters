@@ -96,6 +96,9 @@
     <ClInclude Include="ChromiumTask.h">
       <Filter>generic</Filter>
     </ClInclude>
+    <ClInclude Include="plan.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLexi.cpp">

@@ -39,13 +39,15 @@ public:
 	void modify_color(size_t position_begin, size_t position_end, size_t color_src_index);
 //操作物理文档
 public:
-	void insert_null_phy_paragraph(int index);
+	Paragraph* insert_null_phy_paragraph(int index);
 //排版相关
 public:
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
+	size_t get_current_cur_index();
 	void locate(CDC* pDC, int doc_x, int doc_y);
+	void locate(CDC* pDC, Paragraph* pgh, int global_index);
 	bool single_remove();
 	void move_cursor(CDC* pDC, unsigned direction);
 //member for test and debugger.

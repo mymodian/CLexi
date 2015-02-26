@@ -202,10 +202,10 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 								cursor.index_inner = cur_gbl_index - (*row)->get_area_begin();
 								//cursor在row的第index_inner个字符后
 								int x = LxPaper::left_margin;
-								int y = cursor.point_y;
+								int y = (*row)->get_top_pos();
 								size_t index = (*row)->get_area_begin();
 								size_t font_index, same_font_cnt;
-								for (int i = 0; i < cursor.index_inner;)
+								for (int i = 0; i < (cursor.index_inner == 0 ? 1 : cursor.index_inner);)
 								{
 									font_tree->get_src_index(index, font_index, same_font_cnt);
 									size_t count = min(cursor.index_inner - i, same_font_cnt);
@@ -215,6 +215,8 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 									pDC->GetTextMetrics(&trx);
 									cursor.height = trx.tmHeight;
 									y = (*row)->get_top_pos() + (*row)->get_base_line() - trx.tmAscent;
+									if (cursor.index_inner == 0)
+										break;
 									CSize size;
 									for (int j = 0; j < count; j++)
 									{
@@ -254,6 +256,11 @@ void ComposeDoc::clear()
 	for (auto page : pages)
 		delete page;
 	pages.clear();
+}
+
+LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* &page, ComposeParagraph* pgh, CDC* pDC)
+{
+
 }
 
 void ComposeDoc::compose_complete(CDC* pDC)
@@ -355,6 +362,7 @@ void ComposeDoc::compose_complete(CDC* pDC)
 			page->add_paragraph(paragraph);
 		}
 	}
+	page->set_area(page->get_area_begin(), (*(--page->end()))->get_area_end());
 }
 
 void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
@@ -687,7 +695,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 					//新建一个段并将剩余的行加入其中
 					ComposeParagraph* new_paragraph = new ComposeParagraph();
 					new_paragraph->set_area((*row_it_)->get_area_begin(), (*pgraph_cusr)->get_area_end());
-					new_paragraph->set_offset_inner((*row_it_)->get_area_begin() - (*pgraph_cusr)->get_area_begin());
+					new_paragraph->set_offset_inner((*row_it_)->get_area_begin() - (*pgraph_cusr)->get_area_begin() + (*pgraph_cusr)->get_offset_inner());
 					if (page_cusr == container_page)
 						new_paragraph->set_parent_page(*next_page);
 					else
@@ -725,6 +733,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 		pgraph_cusr = (*page_cusr)->begin();
 	}
 	//处理完所有页后，删除container_page之后的所有页
+	(*container_page)->set_area((*container_page)->get_area_begin(), (*(--(*container_page)->end()))->get_area_end());
 	container_page++;
 	for (; container_page != end();)
 	{

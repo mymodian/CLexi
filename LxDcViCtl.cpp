@@ -9,7 +9,7 @@ void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
 	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"微软雅黑");
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
 	default_font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
@@ -218,6 +218,16 @@ void LxDcViCtl::locate(CDC* pDC, int doc_x, int doc_y)
 	render->show_caret(&cursor);
 }
 
+void LxDcViCtl::locate(CDC* pDC, Paragraph* pgh, int global_index)
+{
+	compose_doc.calc_cursor(cursor, global_index, pgh, pDC);
+}
+
+size_t LxDcViCtl::get_current_cur_index()
+{
+	return cursor.get_index_global();
+}
+
 //full text
 void LxDcViCtl::compose_complete(CDC* pDC)
 {
@@ -233,11 +243,12 @@ void LxDcViCtl::draw_complete(CDC* pDC)
 }
 
 //operation of phy paragraph
-void LxDcViCtl::insert_null_phy_paragraph(int index)
+Paragraph* LxDcViCtl::insert_null_phy_paragraph(int index)
 {
 	Paragraph* new_phy_pragh = new Paragraph();
 	new_phy_pragh->SetComposeAlgom(new LxSimpleComposeAlgo());
 	document.insert_paragraph(new_phy_pragh, index);
+	return new_phy_pragh;
 }
 
 // user operation handler
@@ -298,19 +309,17 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 {
 	if (!section.active())				//选择区域无效
 	{
-		if (cursor.tail_of_paragraph())
+		if (cursor.tail_of_paragraph() || cursor.head_of_paragraph())
 		{
-			//在之后新建一个物理段
 			//now create new phy paragraph
 			LxCommand* newphypragh_cmd = new LxCommand();
-			newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor)));
+			if (cursor.tail_of_paragraph())		//在之后新建一个物理段
+				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor) + 1));
+			else			//在之前新建一个物理段
+				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor)));
 			newphypragh_cmd->set_dvctl(this);
 			newphypragh_cmd->Excute(pDC);
 			lx_command_mgr.insert_cmd(newphypragh_cmd);
-		}
-		else if (cursor.head_of_paragraph())
-		{
-			//在之前新建一个物理段
 		}
 		else
 		{

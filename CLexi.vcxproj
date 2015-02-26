@@ -120,6 +120,7 @@
     <ClInclude Include="LxPaper.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="LxContextBuf.h" />
+    <ClInclude Include="plan.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

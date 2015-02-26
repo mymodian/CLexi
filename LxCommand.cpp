@@ -57,8 +57,13 @@ LxInsertPhyParagraphCmd::LxInsertPhyParagraphCmd(int index)
 void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 {
 	//1.安插物理段
-	doc_view_ctrl_->insert_null_phy_paragraph(index_);
+	Paragraph* pgh = doc_view_ctrl_->insert_null_phy_paragraph(index_);
+	size_t cur_index = doc_view_ctrl_->get_current_cur_index();
 	//2.排版安插的物理段并对后续逻辑段重排版
+	doc_view_ctrl_->compose_complete(pDC);
+	doc_view_ctrl_->locate(pDC, pgh, cur_index);
+	doc_view_ctrl_->draw_complete(pDC);
+	assert(doc_view_ctrl_->self_check());
 }
 void LxInsertPhyParagraphCmd::Undo()
 {
