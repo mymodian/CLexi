@@ -190,7 +190,7 @@ public:
 	//对某一个物理段进行排版
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int index, ComposePage* &page, size_t& index_global, int& y_offset, CDC* pDC);
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int page_index, int pagh_index, CDC* pDC);
-	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, ComposePage* &page, ComposeParagraph* pgh, CDC* pDC);
+	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC);
 	//全部重新排版
 	void compose_complete(CDC* pDC);
 	//插入或删除文本时修改和重布局

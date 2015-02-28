@@ -258,9 +258,15 @@ void ComposeDoc::clear()
 	pages.clear();
 }
 
-LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* &page, ComposeParagraph* pgh, CDC* pDC)
+LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
 {
+	//需要哪些变量参考compose_complete和modify
+	int index_global;
 
+	if (cpgh == nullptr)		//只有compose_complete第一个段才可能出现
+	{
+		index_global = 0;
+	}
 }
 
 void ComposeDoc::compose_complete(CDC* pDC)
