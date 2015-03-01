@@ -260,13 +260,189 @@ void ComposeDoc::clear()
 
 LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
 {
+	assert(direction == -1 || direction == 1);
 	//需要哪些变量参考compose_complete和modify
-	int index_global;
-
+	size_t index_global;
+	size_t index_inner = 0;
+	int y_offset;
+	int phy_pgh_index = 0;
+	page_iter page_cursor = this->begin();
+	for (; page_cursor != this->end(); ++page_cursor)
+		if (*page_cursor == page)
+			break;
+	assert(page_cursor != this->end());
 	if (cpgh == nullptr)		//只有compose_complete第一个段才可能出现
 	{
 		index_global = 0;
+		y_offset = ViewWindow::GetViewWindowInstance()->border_height + LxPaper::top_margin;
+		phy_pgh_index = 0;
 	}
+	else
+	{
+		for (auto _pgh : page->paragraphs)
+		{
+			if (_pgh == cpgh) break;
+			phy_pgh_index++;
+		}
+		if (direction == -1)
+		{
+			index_global = cpgh->get_area_begin();
+			y_offset = cpgh->get_top_pos();
+		}
+		else if (direction == 1)
+		{
+			index_global = cpgh->get_area_end() + 1;
+			y_offset = cpgh->get_next_allowed_pos();
+			phy_pgh_index += 1;
+		}
+	}
+
+	ComposeParagraph* paragraph = new ComposeParagraph();
+	paragraph->set_area(index_global, index_global - 1);
+	paragraph->set_offset_inner(index_inner);
+	paragraph->set_phy_paragraph(pagph);
+	paragraph->set_pos(y_offset, 0);
+
+	if (pagph->size() == 0)
+	{
+		ComposeRow* row = new ComposeRow();
+		row->set_area(index_global, index_global - 1);
+		paragraph->set_area(index_global, index_global - 1);
+
+		CFont* font = SrcFontFactory::GetFontFactInstance()->get_src_font(font_tree->get_src_index(index_global));
+		pDC->SelectObject(font);
+		TEXTMETRIC text_metric;
+		GetTextMetrics(*pDC, &text_metric);
+
+		row->set_height(text_metric.tmHeight);
+		row->set_base_line(text_metric.tmAscent);
+		row->set_external_leading(text_metric.tmExternalLeading);
+		row->set_line_space(LxPaper::pixel_width - LxPaper::left_margin - LxPaper::right_margin);
+
+		paragraph->add_row(row);
+
+		//包含一个空行的空段超过当前页的容纳范围
+		if (y_offset + row->get_height() > page->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
+		{
+			page->set_area(page->get_area_begin(), index_global - 1);
+			ComposePage* prev_page = page;
+			++page_cursor;
+			if (page_cursor == this->end())
+			{
+				int new_page_pos = page->get_top_pos() + LxPaper::pixel_height +
+					ViewWindow::GetViewWindowInstance()->border_height;
+				page = new ComposePage();
+				page->set_area(index_global, index_global - 1);
+				page->set_top_pos(new_page_pos);
+				add_page(page);
+				--page_cursor;
+			}
+			page = *page_cursor;
+			//将 prev_page 在 cpgh 之后的段都移入 page;
+			if (cpgh)
+			{
+				for (paragraph_iter reverse_it = --prev_page->end();;)
+				{
+					if (direction == 1 && *reverse_it == cpgh)
+						break;
+					paragraph_iter deleted = reverse_it;
+					bool bdone = true;
+					if (*reverse_it != cpgh)
+					{
+						bdone = false;
+						--reverse_it;
+					}
+					(*deleted)->set_parent_page(page);
+					page->add_paragraph(*deleted, 0);
+					prev_page->remove_paragraph(deleted);
+					if (bdone)
+						break;
+				}
+			}
+
+			y_offset = page->get_top_pos() + LxPaper::top_margin;
+			phy_pgh_index = 0;
+		}
+		row->set_top_pos(y_offset);
+		paragraph->set_parent_page(page);
+		paragraph->set_pos(y_offset, row->get_bottom_pos());
+		page->add_paragraph(paragraph, phy_pgh_index);
+	}
+	else
+	{
+		for (; index_inner < pagph->size();)
+		{
+			ComposeRow* row_to_compose = new ComposeRow();
+			pagph->GetComposeAlgom()->compose(row_to_compose, pagph, index_global, index_inner, font_tree, pDC);
+			if (y_offset + row_to_compose->get_height() > page->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
+			{
+				//当前页无法容纳新行
+				//1.修改当前页的属性
+				page->set_area(page->get_area_begin(), index_global - row_to_compose->size() - 1);
+
+				//当前段已有内容，保存
+				bool bAdded = false;
+				if (paragraph->row_size() != 0)
+				{
+					paragraph->set_area(paragraph->get_area_begin(), index_global - row_to_compose->size() - 1);
+					paragraph->set_pos(paragraph->get_top_pos(), (*(--paragraph->end()))->get_bottom_pos());
+					paragraph->set_parent_page(page);
+					page->add_paragraph(paragraph, phy_pgh_index);
+					paragraph = new ComposeParagraph();
+					bAdded = true;
+				}
+
+				ComposePage* prev_page = page;
+				++page_cursor;
+				if (page_cursor == this->end())
+				{
+					int new_page_pos = page->get_top_pos() + LxPaper::pixel_height +
+						ViewWindow::GetViewWindowInstance()->border_height;
+					page = new ComposePage();
+					page->set_area(index_global - row_to_compose->size(), -1);
+					page->set_top_pos(new_page_pos);
+					add_page(page);
+					--page_cursor;
+				}
+				page = *page_cursor;
+
+				//1.有段插入--->phy_pgh_index之后的段移出
+				//2.无段插入--->phy_pgh_index及之后的段移出
+				int to_remove_index = phy_pgh_index;
+				to_remove_index += bAdded ? 1 : 0;
+				int removed_cnt = prev_page->pgh_size() - to_remove_index;
+				if (removed_cnt > 0)
+				{
+					for (int i = 0; i < removed_cnt; i++)
+					{
+						paragraph_iter reverse_it = --prev_page->end();
+						(*reverse_it)->set_parent_page(page);
+						page->add_paragraph(*reverse_it, 0);
+						prev_page->remove_paragraph(reverse_it);
+					}
+				}
+
+				y_offset = page->get_top_pos() + LxPaper::top_margin;
+
+				paragraph->set_phy_paragraph(pagph);
+				paragraph->set_area(index_global - row_to_compose->size(), -1);
+				paragraph->set_offset_inner(index_inner - row_to_compose->size());
+				paragraph->set_pos(y_offset, -1);
+				phy_pgh_index = 0;
+			}
+			row_to_compose->set_top_pos(y_offset);
+			paragraph->add_row(row_to_compose);
+			y_offset = row_to_compose->get_next_allowed_pos();
+		}
+		paragraph->set_area(paragraph->get_area_begin(), index_global - 1);
+		paragraph->set_pos(paragraph->get_top_pos(), (*(--paragraph->end()))->get_bottom_pos());
+		paragraph->set_parent_page(page);
+		page->add_paragraph(paragraph, phy_pgh_index);
+	}
+	paragraph_iter pgh_cursor = page->begin();
+	advance(pgh_cursor, phy_pgh_index);
+	LxParagraphInDocIter last_PD(this, page_cursor, pgh_cursor);
+	return last_PD;
 }
 
 void ComposeDoc::compose_complete(CDC* pDC)
@@ -632,7 +808,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 					add_page(new_page);
 					new_page->set_top_pos((*container_page)->get_top_pos() + LxPaper::pixel_height +
 						ViewWindow::GetViewWindowInstance()->border_height);
-					next_page--;
+					--next_page;
 				}
 				//2.当前页无法容纳该段的任意行
 				if ((*(*pgraph_cusr)->begin())->get_height() > (*container_page)->get_top_pos() + LxPaper::pixel_height -

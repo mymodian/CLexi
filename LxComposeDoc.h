@@ -111,6 +111,7 @@ public:
 	}
 	int get_top_pos() { return top_offset_session; }
 	int get_bottom_pos() { return bottom_offset_session; }
+	int get_next_allowed_pos() { return (*(--rows.end()))->get_next_allowed_pos(); }
 	void set_offset_inner(size_t offset_inner) { this->offset_inner = offset_inner; }
 	size_t get_offset_inner() { return offset_inner; }
 	size_t size() { return index_end - index_begin + 1; }
@@ -157,6 +158,7 @@ public:
 	int get_bottom_pos() { return top_pos_global + LxPaper::pixel_height; }
 	int get_last_space() { return last_space; }
 	size_t size() { return index_end - index_begin + 1; }
+	size_t pgh_size() { return paragraphs.size(); }
 public:
 	paragraph_iter begin() { return paragraphs.begin(); }
 	paragraph_iter end() { return paragraphs.end(); }

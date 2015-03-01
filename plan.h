@@ -6,10 +6,10 @@ ComposeDoc实现 LxParagraphInDocIter add_paragraph(Paragraph* pgh, LxParagraphInD
   add
   1.先计算出插入的段的 index, global_index, top_pos
   2.生成段,插入
-  3.modify_index(pgh->size());
-  4.对段进行排版
-  5.排版过程中如果超出当前页,将页之后的段移入下一页
-  6.排版完成返回
+  3.对段进行排版
+  4.排版过程中如果超出当前页,将页之后的段移入下一页
+  5.排版完成
+  6.modify_index(pgh->size());返回
  }
  splitcmd exec
  1.modify_index(calc);
