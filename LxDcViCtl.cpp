@@ -8,7 +8,7 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	font->CreateFont(-64, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
@@ -228,6 +228,25 @@ size_t LxDcViCtl::get_current_cur_index()
 	return cursor.get_index_global();
 }
 
+void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t offset_inner, Paragraph* seprated_phy_pgh)
+{
+	//1.先在排版文档中找到对应的逻辑段和所在逻辑行
+	page_iter page_cursor;
+	paragraph_iter pagraph_cursor;
+	row_iter row_cursor;
+	compose_doc.locate(page_cursor, pagraph_cursor, row_cursor, phy_pgh_index, offset_inner);
+	LxParagraphInDocIter pgh_doc_it(&compose_doc, page_cursor, pagraph_cursor);
+	
+	int modified_cnt = offset_inner - (*pgh_doc_it)->size() - (*pgh_doc_it)->get_offset_inner();
+	compose_doc.modify_index(pgh_doc_it, offset_inner - (*pgh_doc_it)->size() - (*pgh_doc_it)->get_offset_inner());
+
+	pgh_doc_it = compose_doc.modify(pgh_doc_it, row_cursor, pDC);
+	pgh_doc_it = compose_doc.compose_phy_pagph(seprated_phy_pgh, *(pgh_doc_it.get_page()), *pgh_doc_it, 1, pDC);
+	compose_doc.modify_index(pgh_doc_it, -modified_cnt);
+	compose_doc.relayout(pgh_doc_it);
+	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin(), seprated_phy_pgh, pDC);
+}
+
 //full text
 void LxDcViCtl::compose_complete(CDC* pDC)
 {
@@ -249,6 +268,20 @@ Paragraph* LxDcViCtl::insert_null_phy_paragraph(int index)
 	new_phy_pragh->SetComposeAlgom(new LxSimpleComposeAlgo());
 	document.insert_paragraph(new_phy_pragh, index);
 	return new_phy_pragh;
+}
+Paragraph* LxDcViCtl::split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner)
+{
+	contex_pgh_iter phy_pgh_iter = document.begin();
+	advance(phy_pgh_iter, phy_paragraph_index);
+	Paragraph* new_phy_pgh = new Paragraph();
+	new_phy_pgh->SetComposeAlgom(new LxSimpleComposeAlgo());
+	new_phy_pgh->Insert(0, (*phy_pgh_iter)->get_context_ptr() + offset_inner, (*phy_pgh_iter)->size() - offset_inner);
+
+	(*phy_pgh_iter)->Delete(offset_inner, (*phy_pgh_iter)->size() - 1);
+	phy_pgh_iter++;
+	document.insert_paragraph(new_phy_pgh, phy_pgh_iter);
+
+	return new_phy_pgh;
 }
 
 // user operation handler
@@ -324,6 +357,12 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 		else
 		{
 			//分割当前物理段
+			LxCommand* split_phypragh_cmd = new LxCommand();
+			split_phypragh_cmd->add_child_cmd(new LxSplitCmd(compose_doc.current_phypgh_index(cursor), 
+				cursor.get_index_inner_paragraph()));
+			split_phypragh_cmd->set_dvctl(this);
+			split_phypragh_cmd->Excute(pDC);
+			lx_command_mgr.insert_cmd(split_phypragh_cmd);
 		}
 	}
 	else                                       //选择区域有效

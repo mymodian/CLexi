@@ -160,6 +160,7 @@ public:
 	size_t size() { return index_end - index_begin + 1; }
 	size_t pgh_size() { return paragraphs.size(); }
 public:
+	ComposeParagraph* get_last_pgh();
 	paragraph_iter begin() { return paragraphs.begin(); }
 	paragraph_iter end() { return paragraphs.end(); }
 	typedef LxRowInPageIter inner_row_iter;
@@ -204,6 +205,7 @@ public:
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
 	void Draw(CDC* pDC);
+	void locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner);
 	void locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y);
 	void calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC);
 	void AttachFontInfo(TreeBase* font_tree) { this->font_tree = font_tree; }

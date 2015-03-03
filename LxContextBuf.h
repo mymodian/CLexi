@@ -52,7 +52,7 @@ public:
 	{
 		str_buf.insert(str_buf.begin()+position,ch);
 	}
-	inline void Insert(size_t position, TCHAR* str, size_t count)
+	inline void Insert(size_t position, const TCHAR* str, size_t count)
 	{
 		str_buf.insert(str_buf.begin()+position,str,str+count);
 	}

@@ -124,8 +124,8 @@ void LxMergeCmd::Undo()
 
 }
 
-LxSplitCmd::LxSplitCmd(ComposeParagraph* paragraph)
-	: paragraph(paragraph)
+LxSplitCmd::LxSplitCmd(size_t phy_paragraph_index, size_t offset_inner)
+	: _phy_paragraph_index(phy_paragraph_index), _offset_inner(offset_inner)
 {
 }
 LxSplitCmd::~LxSplitCmd()
@@ -134,7 +134,11 @@ LxSplitCmd::~LxSplitCmd()
 }
 void LxSplitCmd::Excute(CDC* pDC)
 {
+	Paragraph* new_phy_pgh = doc_view_ctrl_->split_phy_paragraph(_phy_paragraph_index, _offset_inner);
+	doc_view_ctrl_->compose_splited_paragraph(pDC, _phy_paragraph_index, _offset_inner, new_phy_pgh);
+	doc_view_ctrl_->draw_complete(pDC);
 
+	assert(doc_view_ctrl_->self_check());
 }
 void LxSplitCmd::Undo()
 {

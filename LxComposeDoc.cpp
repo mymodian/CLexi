@@ -99,6 +99,39 @@ bool ComposeDoc::self_check()
 	return true;
 }
 
+void ComposeDoc::locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner)
+{
+	LxParagraphInDocIter pgh_doc_it = this->pargraph_begin();
+	int _index = -1;
+	for (; pgh_doc_it != this->pargraph_end(); ++pgh_doc_it)
+	{
+		if ((*pgh_doc_it)->get_offset_inner() == 0)
+			_index++;
+		if (_index == phy_pgh_index)
+		{
+			if ((*pgh_doc_it)->get_offset_inner() <= offset_inner && offset_inner <= (*pgh_doc_it)->get_offset_inner() + (*pgh_doc_it)->size())
+			{
+				//finded
+				page_it = pgh_doc_it.get_page();
+				pgh_it = pgh_doc_it.get_paragraph();
+				size_t _offset = (*pgh_doc_it)->get_offset_inner();
+				auto _row = (*pgh_doc_it)->begin();
+				for (; _row != (*pgh_doc_it)->end(); ++_row)
+				{
+					_offset += (*_row)->size();
+					if (_offset >= offset_inner)
+					{
+						row_it = _row;
+						return;
+					}
+				}
+				assert(_row != (*pgh_doc_it)->end());
+			}
+		}
+	}
+	assert(pgh_doc_it != this->pargraph_end());
+}
+
 void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
 {
 	for (page_iter page = begin(); page != end(); ++page)
@@ -339,25 +372,14 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 			}
 			page = *page_cursor;
 			//将 prev_page 在 cpgh 之后的段都移入 page;
-			if (cpgh)
+			int removed_cnt = prev_page->pgh_size() - phy_pgh_index;
+
+			for (int i = 0; i < removed_cnt; i++)
 			{
-				for (paragraph_iter reverse_it = --prev_page->end();;)
-				{
-					if (direction == 1 && *reverse_it == cpgh)
-						break;
-					paragraph_iter deleted = reverse_it;
-					bool bdone = true;
-					if (*reverse_it != cpgh)
-					{
-						bdone = false;
-						--reverse_it;
-					}
-					(*deleted)->set_parent_page(page);
-					page->add_paragraph(*deleted, 0);
-					prev_page->remove_paragraph(deleted);
-					if (bdone)
-						break;
-				}
+				paragraph_iter reverse_it = --prev_page->end();
+				(*reverse_it)->set_parent_page(page);
+				page->add_paragraph(*reverse_it, 0);
+				prev_page->remove_paragraph(reverse_it);
 			}
 
 			y_offset = page->get_top_pos() + LxPaper::top_margin;
@@ -411,15 +433,13 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				int to_remove_index = phy_pgh_index;
 				to_remove_index += bAdded ? 1 : 0;
 				int removed_cnt = prev_page->pgh_size() - to_remove_index;
-				if (removed_cnt > 0)
+				
+				for (int i = 0; i < removed_cnt; i++)
 				{
-					for (int i = 0; i < removed_cnt; i++)
-					{
-						paragraph_iter reverse_it = --prev_page->end();
-						(*reverse_it)->set_parent_page(page);
-						page->add_paragraph(*reverse_it, 0);
-						prev_page->remove_paragraph(reverse_it);
-					}
+					paragraph_iter reverse_it = --prev_page->end();
+					(*reverse_it)->set_parent_page(page);
+					page->add_paragraph(*reverse_it, 0);
+					prev_page->remove_paragraph(reverse_it);
 				}
 
 				y_offset = page->get_top_pos() + LxPaper::top_margin;
@@ -439,6 +459,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 		paragraph->set_parent_page(page);
 		page->add_paragraph(paragraph, phy_pgh_index);
 	}
+	page->set_area(page->get_area_begin(), page->get_last_pgh()->get_area_end());
 	paragraph_iter pgh_cursor = page->begin();
 	advance(pgh_cursor, phy_pgh_index);
 	LxParagraphInDocIter last_PD(this, page_cursor, pgh_cursor);
@@ -941,6 +962,11 @@ void ComposePage::add_paragraph(ComposeParagraph* paragraph, int index)
 	auto it = paragraphs.begin();
 	advance(it, index);
 	paragraphs.insert(it, paragraph);
+}
+ComposeParagraph* ComposePage::get_last_pgh()
+{
+	assert(!paragraphs.empty());
+	return *paragraphs.rbegin();
 }
 ComposePage::inner_row_iter ComposePage::rowiter_begin()
 {

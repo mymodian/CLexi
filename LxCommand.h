@@ -147,14 +147,15 @@ class LxSplitCmd : public LxCommandBase
 {
 public:
 	LxSplitCmd() = delete;
-	LxSplitCmd(ComposeParagraph* paragraph);
+	LxSplitCmd(size_t phy_paragraph_index, size_t offset_inner);
 	virtual ~LxSplitCmd();
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	ComposeParagraph* paragraph;
+	size_t _phy_paragraph_index;
+	size_t _offset_inner;
 };
 
 class LxCommand : public LxCommandBase

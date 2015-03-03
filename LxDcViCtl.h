@@ -40,8 +40,10 @@ public:
 //操作物理文档
 public:
 	Paragraph* insert_null_phy_paragraph(int index);
+	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
 //排版相关
 public:
+	void compose_splited_paragraph(CDC* pDC, size_t phy_paragraph_index, size_t offset_inner, Paragraph* seprated_phy_pgh);
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
