@@ -53,11 +53,11 @@ public:
 	}
 	bool tail_of_paragraph()
 	{
-		return get_index_global() == (*paragraph)->get_area_end() + 1;
+		return get_index_inner_paragraph() == (*paragraph)->get_phy_paragraph()->size();
 	}
 	bool head_of_paragraph()
 	{
-		return get_index_global() == (*paragraph)->get_area_begin();
+		return get_index_inner_paragraph() == 0;
 	}
 public:
 	int point_x;			//carset的位置相对于页面范围

@@ -379,6 +379,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				paragraph_iter reverse_it = --prev_page->end();
 				(*reverse_it)->set_parent_page(page);
 				page->add_paragraph(*reverse_it, 0);
+				page->set_area((*reverse_it)->get_area_begin(), page->get_area_end());
 				prev_page->remove_paragraph(reverse_it);
 			}
 
@@ -427,6 +428,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 					--page_cursor;
 				}
 				page = *page_cursor;
+				page->set_area(index_global - row_to_compose->size(), page->get_area_end());
 
 				//1.有段插入--->phy_pgh_index之后的段移出
 				//2.无段插入--->phy_pgh_index及之后的段移出

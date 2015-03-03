@@ -8,7 +8,7 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-64, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
@@ -187,8 +187,8 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 
 	LxParagraphInDocIter pgh_doc_it(&compose_doc, cursor.page, cursor.paragraph);
-	compose_doc.modify_index(pgh_doc_it, count);
 	pgh_doc_it = compose_doc.modify(pgh_doc_it, cursor.row, pDC);
+	compose_doc.modify_index(pgh_doc_it, count);
 	compose_doc.relayout(pgh_doc_it);
 
 	//插入时计算新的cursor
@@ -236,13 +236,11 @@ void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t
 	row_iter row_cursor;
 	compose_doc.locate(page_cursor, pagraph_cursor, row_cursor, phy_pgh_index, offset_inner);
 	LxParagraphInDocIter pgh_doc_it(&compose_doc, page_cursor, pagraph_cursor);
-	
-	int modified_cnt = offset_inner - (*pgh_doc_it)->size() - (*pgh_doc_it)->get_offset_inner();
-	compose_doc.modify_index(pgh_doc_it, offset_inner - (*pgh_doc_it)->size() - (*pgh_doc_it)->get_offset_inner());
 
 	pgh_doc_it = compose_doc.modify(pgh_doc_it, row_cursor, pDC);
+	compose_doc.modify_index(pgh_doc_it, 0 - seprated_phy_pgh->size());
 	pgh_doc_it = compose_doc.compose_phy_pagph(seprated_phy_pgh, *(pgh_doc_it.get_page()), *pgh_doc_it, 1, pDC);
-	compose_doc.modify_index(pgh_doc_it, -modified_cnt);
+	compose_doc.modify_index(pgh_doc_it, seprated_phy_pgh->size());
 	compose_doc.relayout(pgh_doc_it);
 	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin(), seprated_phy_pgh, pDC);
 }
