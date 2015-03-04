@@ -50,18 +50,16 @@ void LxInsertCmd::Undo()
 
 }
 
-LxInsertPhyParagraphCmd::LxInsertPhyParagraphCmd(int index)
-	: index_(index)
+LxInsertPhyParagraphCmd::LxInsertPhyParagraphCmd(int index, int direction)
+	: index_(index), direction_(direction)
 {
 }
 void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 {
 	//1.安插物理段
-	Paragraph* pgh = doc_view_ctrl_->insert_null_phy_paragraph(index_);
-	size_t cur_index = doc_view_ctrl_->get_current_cur_index();
-	//2.排版安插的物理段并对后续逻辑段重排版
-	doc_view_ctrl_->compose_complete(pDC);
-	doc_view_ctrl_->locate(pDC, pgh, cur_index);
+	Paragraph* pgh = doc_view_ctrl_->insert_null_phy_paragraph(index_ + direction_);
+	doc_view_ctrl_->add_phy_paragraph(pDC, pgh, index_, direction_);
+
 	doc_view_ctrl_->draw_complete(pDC);
 	assert(doc_view_ctrl_->self_check());
 }
@@ -125,7 +123,7 @@ void LxMergeCmd::Undo()
 }
 
 LxSplitCmd::LxSplitCmd(size_t phy_paragraph_index, size_t offset_inner)
-	: _phy_paragraph_index(phy_paragraph_index), _offset_inner(offset_inner)
+	: phy_paragraph_index_(phy_paragraph_index), offset_inner_(offset_inner)
 {
 }
 LxSplitCmd::~LxSplitCmd()
@@ -134,8 +132,8 @@ LxSplitCmd::~LxSplitCmd()
 }
 void LxSplitCmd::Excute(CDC* pDC)
 {
-	Paragraph* new_phy_pgh = doc_view_ctrl_->split_phy_paragraph(_phy_paragraph_index, _offset_inner);
-	doc_view_ctrl_->compose_splited_paragraph(pDC, _phy_paragraph_index, _offset_inner, new_phy_pgh);
+	Paragraph* new_phy_pgh = doc_view_ctrl_->split_phy_paragraph(phy_paragraph_index_, offset_inner_);
+	doc_view_ctrl_->compose_splited_paragraph(pDC, phy_paragraph_index_, offset_inner_, new_phy_pgh);
 	doc_view_ctrl_->draw_complete(pDC);
 
 	assert(doc_view_ctrl_->self_check());

@@ -99,6 +99,38 @@ bool ComposeDoc::self_check()
 	return true;
 }
 
+void ComposeDoc::locate(ComposePage*& page, ComposeParagraph*& cpgh, int index, int direction)
+{
+	assert(direction == 0 || direction == 1);
+	LxParagraphInDocIter pgh_doc_it = this->pargraph_begin();
+	int _index = -1;
+	for (; pgh_doc_it != this->pargraph_end(); ++pgh_doc_it)
+	{
+		if ((*pgh_doc_it)->get_offset_inner() == 0)
+			_index++;
+		if (_index == index)
+		{
+			if (direction == 0)
+			{
+				page = *(pgh_doc_it.get_page());
+				cpgh = *pgh_doc_it;
+				return;
+			}
+			else
+			{
+				ComposeParagraph* _pgh = *pgh_doc_it;
+				if (_pgh->get_offset_inner() + _pgh->size() == _pgh->get_phy_paragraph()->size())
+				{
+					page = *(pgh_doc_it.get_page());
+					cpgh = *pgh_doc_it;
+					return;
+				}
+			}
+		}
+	}
+	assert(pgh_doc_it != this->pargraph_end());
+}
+
 void ComposeDoc::locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner)
 {
 	LxParagraphInDocIter pgh_doc_it = this->pargraph_begin();
@@ -293,7 +325,7 @@ void ComposeDoc::clear()
 
 LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
 {
-	assert(direction == -1 || direction == 1);
+	assert(direction == 0 || direction == 1);
 	//需要哪些变量参考compose_complete和modify
 	size_t index_global;
 	size_t index_inner = 0;
@@ -317,7 +349,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 			if (_pgh == cpgh) break;
 			phy_pgh_index++;
 		}
-		if (direction == -1)
+		if (direction == 0)
 		{
 			index_global = cpgh->get_area_begin();
 			y_offset = cpgh->get_top_pos();

@@ -86,12 +86,13 @@ class LxInsertPhyParagraphCmd : public LxCommandBase
 public:
 	LxInsertPhyParagraphCmd() = delete;
 	virtual ~LxInsertPhyParagraphCmd() = default;
-	LxInsertPhyParagraphCmd(int index);
+	LxInsertPhyParagraphCmd(int index, int direction);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	int index_;		//在插入后该段的index
+	int index_;				//该段在哪个段(index)上下插入
+	int direction_;		//在index_段之前(0)还是之后(1)插入
 };
 
 class LxSingleRemoveCmd : public LxCommandBase
@@ -154,8 +155,8 @@ public:
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	size_t _phy_paragraph_index;
-	size_t _offset_inner;
+	size_t phy_paragraph_index_;
+	size_t offset_inner_;
 };
 
 class LxCommand : public LxCommandBase

@@ -43,6 +43,7 @@ public:
 	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
 //≈≈∞Êœ‡πÿ
 public:
+	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
 	void compose_splited_paragraph(CDC* pDC, size_t phy_paragraph_index, size_t offset_inner, Paragraph* seprated_phy_pgh);
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);

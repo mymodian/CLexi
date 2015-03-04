@@ -228,6 +228,17 @@ size_t LxDcViCtl::get_current_cur_index()
 	return cursor.get_index_global();
 }
 
+void LxDcViCtl::add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction)
+{
+	ComposePage* _page;
+	ComposeParagraph* _cpgh;
+	compose_doc.locate(_page, _cpgh, index, direction);
+	LxParagraphInDocIter pgh_doc_it = compose_doc.compose_phy_pagph(pgh, _page, _cpgh, direction, pDC);
+	compose_doc.modify_index(pgh_doc_it, pgh->size());
+	compose_doc.relayout(pgh_doc_it);
+	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner(), pgh, pDC);
+}
+
 void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t offset_inner, Paragraph* seprated_phy_pgh)
 {
 	//1.先在排版文档中找到对应的逻辑段和所在逻辑行
@@ -242,7 +253,7 @@ void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t
 	pgh_doc_it = compose_doc.compose_phy_pagph(seprated_phy_pgh, *(pgh_doc_it.get_page()), *pgh_doc_it, 1, pDC);
 	compose_doc.modify_index(pgh_doc_it, seprated_phy_pgh->size());
 	compose_doc.relayout(pgh_doc_it);
-	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin(), seprated_phy_pgh, pDC);
+	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner(), seprated_phy_pgh, pDC);
 }
 
 //full text
@@ -345,9 +356,9 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 			//now create new phy paragraph
 			LxCommand* newphypragh_cmd = new LxCommand();
 			if (cursor.tail_of_paragraph())		//在之后新建一个物理段
-				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor) + 1));
+				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor), 1));
 			else			//在之前新建一个物理段
-				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor)));
+				newphypragh_cmd->add_child_cmd(new LxInsertPhyParagraphCmd(compose_doc.current_phypgh_index(cursor), 0));
 			newphypragh_cmd->set_dvctl(this);
 			newphypragh_cmd->Excute(pDC);
 			lx_command_mgr.insert_cmd(newphypragh_cmd);

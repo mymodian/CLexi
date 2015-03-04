@@ -193,6 +193,7 @@ public:
 	//对某一个物理段进行排版
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int index, ComposePage* &page, size_t& index_global, int& y_offset, CDC* pDC);
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int page_index, int pagh_index, CDC* pDC);
+	// 段之前 direction = 0 , 段之后 direction = 1
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC);
 	//全部重新排版
 	void compose_complete(CDC* pDC);
@@ -206,6 +207,7 @@ public:
 public:
 	void Draw(CDC* pDC);
 	void locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner);
+	void locate(ComposePage*& page, ComposeParagraph*& cpgh, int index, int direction);
 	void locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y);
 	void calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* phy_pgh, CDC* pDC);
 	void AttachFontInfo(TreeBase* font_tree) { this->font_tree = font_tree; }
