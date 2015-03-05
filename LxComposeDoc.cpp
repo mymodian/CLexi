@@ -604,6 +604,8 @@ void ComposeDoc::compose_complete(CDC* pDC)
 
 void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
 {
+	if (count == 0)
+		return;
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
 	++pgraph_cusr;
 	page_iter page_cusr = pagraph_iter.get_page();

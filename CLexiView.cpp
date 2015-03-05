@@ -96,6 +96,12 @@ void CCLexiView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
+	if (!bInitialized)
+		return;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::draw_complete);
+	ExecuteNormalTask(task, pDC);
+	delete task;
+
 	// TODO: 在此处为本机数据添加绘制代码
 	/*CreateSolidCaret(2, 16);
 	SetCaretPos(CPoint(100, 100));
@@ -329,23 +335,18 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 	AdjustViewWindow(rect.Width(), rect.Height());
 	//size改变后，文档的offset_y保持不变，但当客户区域的高度大于等于文档总高度时，将offset_y设为0
 	//同样offset_x也保持不变，当客户区域的宽度大于等于文档页面宽度时，将offset_x设为0
-	if (!bInitialized)
-		return;
-	CDC* take_place = NULL;
-	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::draw_complete);
-	ExecuteNormalTask(task);
-	delete task;
+	
 }
 
 // CCLexiView mydoc命令处理程序
 
-void CCLexiView::ExecuteNormalTask(Task<CDC>* task)
+void CCLexiView::ExecuteNormalTask(Task<CDC>* task, CDC* pdc)
 {
 	CRect rect;
 	GetClientRect(&rect);
 	CDC dcMem;
 	CBitmap bmp;
-	CDC* pDC = GetDC();
+	CDC* pDC = pdc ? pdc : GetDC();
 	dcMem.CreateCompatibleDC(pDC);
 	bmp.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
 	dcMem.SelectObject(&bmp);
@@ -358,7 +359,8 @@ void CCLexiView::ExecuteNormalTask(Task<CDC>* task)
 
 	dcMem.DeleteDC();
 	bmp.DeleteObject();
-	ReleaseDC(pDC);
+	if(!pdc)
+		ReleaseDC(pDC);
 }
 
 void CCLexiView::insert(TCHAR* cs, int len)

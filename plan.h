@@ -1,4 +1,18 @@
 /**
+Attention!! 注意许多操作不仅仅会改变排版文档，还会改变 font_trrr 和 color_tree.
+next to do:
+	1.无选择区域的情况下的删除操作
+		1.1删除某一个物理段
+		1.2将某个物理段与她之前的物理段合并
+	2.完成保存和打开功能
+	3.添加滚动条
+	4.未选择区域下的字体和颜色设置
+	5.选择区域的显示(物理变化已实现)
+*/
+
+
+
+/**
 所有的command的Execute实现现在都依赖于当前cursor的位置，如果要实现undo和redo应该修改为与当前光标位置无关
 Document实现add_paragraph（paragraph）
 ComposeDoc实现 LxParagraphInDocIter add_paragraph(Paragraph* pgh, LxParagraphInDocIter pos, int before_after)
