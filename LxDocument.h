@@ -22,6 +22,8 @@ public:
 	void add_paragraph(Paragraph* paragraph);
 	void insert_paragraph(Paragraph* paragraph,int index);
 	void insert_paragraph(Paragraph* paragraph, contex_pgh_iter pos);
+	void remove_paragraph(int index);
+	void remove_paragraph(contex_pgh_iter pgh_it);
 public:
 	void insert(size_t pos, TCHAR* cs, size_t len);		//insert中不包括换行符
 private:

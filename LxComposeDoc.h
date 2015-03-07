@@ -52,6 +52,7 @@ public:
 	size_t get_area_begin() { return index_begin; }
 	size_t get_area_end() { return index_end; }
 	size_t size() { return index_end - index_begin + 1; }
+	bool empty() { return size() == 0; }
 public:
 	int get_line_space() { return last_line_space; }
 	void set_line_space(int space) { last_line_space = space; }
@@ -89,6 +90,7 @@ public:
 	ComposeParagraph() {}
 	~ComposeParagraph();
 public:
+	bool empty() { return rows.empty(); }
 	void add_row(ComposeRow* row);
 	void add_row(ComposeRow* row,int index);
 	void remove_row(row_iter row_it) { rows.erase(row_it); }
@@ -143,6 +145,7 @@ public:
 	friend class ComposeDoc;
 	ComposePage() {}
 	~ComposePage();
+	bool empty() { return paragraphs.empty(); }
 	void add_paragraph(ComposeParagraph* paragraph);
 	void add_paragraph(ComposeParagraph* paragraph,int index);
 	void remove_paragraph(paragraph_iter it) { paragraphs.erase(it); }
@@ -185,11 +188,13 @@ class ComposeDoc
 public:
 	ComposeDoc() = default;
 	~ComposeDoc();
+	bool empty() { return pages.empty(); }
 	void add_page(ComposePage* page);
 	void add_page(ComposePage* page, int index);
 	void remove_page(page_iter it) { pages.erase(it); }
 public:
 	void clear();
+	void remove_group_paragraph(LxParagraphInDocIter group_first);
 	//对某一个物理段进行排版
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int index, ComposePage* &page, size_t& index_global, int& y_offset, CDC* pDC);
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int page_index, int pagh_index, CDC* pDC);
@@ -503,9 +508,12 @@ public:
 		paragraph++;
 		if (paragraph == (*page)->end())
 		{
-			page++;
-			if (page != doc->end())
+			while (++page != doc->end())
+			{
 				paragraph = (*page)->begin();
+				if (!(*page)->empty())
+					break;
+			}
 		}
 		return *this;
 	}
@@ -526,9 +534,12 @@ public:
 		paragraph++;
 		if (paragraph == (*page)->end())
 		{
-			page++;
-			if (page != doc->end())
+			while (++page != doc->end())
+			{
 				paragraph = (*page)->begin();
+				if (!(*page)->empty())
+					break;
+			}
 		}
 		return tmp;
 	}

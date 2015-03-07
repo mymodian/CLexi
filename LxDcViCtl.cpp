@@ -8,7 +8,7 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-16, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	font->CreateFont(-32, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
@@ -256,6 +256,22 @@ void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t
 	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner(), seprated_phy_pgh, pDC);
 }
 
+void LxDcViCtl::compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t offset_para1)
+{
+	page_iter page_cursor;
+	paragraph_iter pagraph_cursor;
+	row_iter row_cursor;
+	compose_doc.locate(page_cursor, pagraph_cursor, row_cursor, index_para1, offset_para1);
+	LxParagraphInDocIter pgh_doc_it(&compose_doc, page_cursor, pagraph_cursor);
+	LxParagraphInDocIter to_delete = pgh_doc_it;
+	++to_delete;
+	compose_doc.remove_group_paragraph(to_delete);
+	pgh_doc_it = compose_doc.modify(pgh_doc_it, row_cursor, pDC);
+	compose_doc.relayout(pgh_doc_it);
+	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner() + offset_para1, 
+		(*pgh_doc_it)->get_phy_paragraph(), pDC);
+}
+
 //full text
 void LxDcViCtl::compose_complete(CDC* pDC)
 {
@@ -291,6 +307,19 @@ Paragraph* LxDcViCtl::split_phy_paragraph(size_t phy_paragraph_index, size_t off
 	document.insert_paragraph(new_phy_pgh, phy_pgh_iter);
 
 	return new_phy_pgh;
+}
+size_t LxDcViCtl::merge_phy_paragraph(size_t index_para2)
+{
+	assert(index_para2 > 0);
+	contex_pgh_iter phy_pgh_iter2 = document.begin();
+	advance(phy_pgh_iter2, index_para2);
+	contex_pgh_iter phy_pgh_iter1 = phy_pgh_iter2;
+	--phy_pgh_iter1;
+	size_t para1_size = (*phy_pgh_iter1)->size();
+	(*phy_pgh_iter1)->Insert((*phy_pgh_iter1)->size(), (*phy_pgh_iter2)->get_context_ptr(), (*phy_pgh_iter2)->size());
+	document.remove_paragraph(phy_pgh_iter2);
+
+	return para1_size;
 }
 
 // user operation handler
@@ -401,6 +430,11 @@ void LxDcViCtl::usr_backspace(CDC* pDC)
 				else
 				{
 					//和前一个物理段合并
+					LxCommand* merge_phypragh_cmd = new LxCommand();
+					merge_phypragh_cmd->add_child_cmd(new LxMergeCmd(compose_doc.current_phypgh_index(cursor)));
+					merge_phypragh_cmd->set_dvctl(this);
+					merge_phypragh_cmd->Excute(pDC);
+					lx_command_mgr.insert_cmd(merge_phypragh_cmd);
 				}
 			}
 		}

@@ -34,6 +34,18 @@ void Document::insert_paragraph(Paragraph* paragraph, contex_pgh_iter pos)
 	paragraph_list.insert(pos, paragraph);
 }
 
+void Document::remove_paragraph(int index)
+{
+	contex_pgh_iter it = paragraph_list.begin();
+	advance(it, index);
+	paragraph_list.erase(it);
+}
+
+void Document::remove_paragraph(contex_pgh_iter pgh_it)
+{
+	paragraph_list.erase(pgh_it);
+}
+
 void Document::insert(size_t pos, TCHAR* cs, size_t len)
 {
 	size_t index = 0;

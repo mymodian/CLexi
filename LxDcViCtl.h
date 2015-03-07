@@ -41,10 +41,12 @@ public:
 public:
 	Paragraph* insert_null_phy_paragraph(int index);
 	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
+	size_t merge_phy_paragraph(size_t index_para2);
 //≈≈∞Êœ‡πÿ
 public:
 	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
 	void compose_splited_paragraph(CDC* pDC, size_t phy_paragraph_index, size_t offset_inner, Paragraph* seprated_phy_pgh);
+	void compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t offset_para1);
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);

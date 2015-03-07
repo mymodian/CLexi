@@ -133,15 +133,15 @@ class LxMergeCmd : public LxCommandBase
 {
 public:
 	LxMergeCmd() = delete;
-	LxMergeCmd(ComposeParagraph* paragraph1, ComposeParagraph* paragraph2);
+	LxMergeCmd(size_t index_para2);
 	virtual ~LxMergeCmd();
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
-	ComposeParagraph* paragraph1_;
-	ComposeParagraph* paragraph2_;
+	size_t index_para2_;
+	size_t para1_size_;
 };
 
 class LxSplitCmd : public LxCommandBase

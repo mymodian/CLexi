@@ -105,8 +105,8 @@ void LxModifyViewCmd::Excute(CDC* pDC)
 
 }
 
-LxMergeCmd::LxMergeCmd(ComposeParagraph* paragraph1, ComposeParagraph* paragraph2)
-	: paragraph1_(paragraph1), paragraph2_(paragraph2)
+LxMergeCmd::LxMergeCmd(size_t index_para2)
+	: index_para2_(index_para2)
 {
 }
 LxMergeCmd::~LxMergeCmd()
@@ -115,7 +115,11 @@ LxMergeCmd::~LxMergeCmd()
 }
 void LxMergeCmd::Excute(CDC* pDC)
 {
+	para1_size_ = doc_view_ctrl_->merge_phy_paragraph(index_para2_);
+	doc_view_ctrl_->compose_merged_paragraph(pDC, index_para2_ - 1, para1_size_);
+	doc_view_ctrl_->draw_complete(pDC);
 
+	assert(doc_view_ctrl_->self_check());
 }
 void LxMergeCmd::Undo()
 {

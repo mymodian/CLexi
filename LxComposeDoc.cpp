@@ -56,6 +56,7 @@ int ComposeDoc::current_phypgh_index(LxCursor& cursor)
 		if (*pghit == phy_pgh)
 			return index;
 	assert(index < phy_document->size());
+	return -1;
 }
 
 bool ComposeDoc::self_check()
@@ -321,6 +322,18 @@ void ComposeDoc::clear()
 	for (auto page : pages)
 		delete page;
 	pages.clear();
+}
+
+void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
+{
+	for (; ;)
+	{
+		auto to_deleted = group_first;
+		++group_first;
+		(*(to_deleted.get_page()))->remove_paragraph(to_deleted.get_paragraph());
+		if (group_first == this->pargraph_end() || (*group_first)->get_offset_inner() == 0)
+			break;
+	}
 }
 
 LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
