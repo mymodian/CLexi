@@ -326,13 +326,34 @@ void ComposeDoc::clear()
 
 void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 {
+	//由于删除段可能会产生空页，需要在这之后立即删除空页.
+	page_iter may_null_page_start;
+	size_t _cnt = 0;
 	for (; ;)
 	{
 		auto to_deleted = group_first;
 		++group_first;
 		(*(to_deleted.get_page()))->remove_paragraph(to_deleted.get_paragraph());
+		if ((*(to_deleted.get_page()))->empty())
+		{
+			if (_cnt == 0)
+				may_null_page_start = to_deleted.get_page();
+			_cnt++;
+		}
 		if (group_first == this->pargraph_end() || (*group_first)->get_offset_inner() == 0)
 			break;
+	}
+	for (int i = 0; i < _cnt; i++)
+	{
+		auto to_deleted_page = may_null_page_start;
+		++may_null_page_start;
+		this->remove_page(to_deleted_page);
+	}
+	if (_cnt > 0)
+	{
+		int offset_y = 0 - _cnt*(ViewWindow::GetViewWindowInstance()->border_height + LxPaper::pixel_height);
+		for (; may_null_page_start != this->end(); ++may_null_page_start)
+			(*may_null_page_start)->modify_pos(offset_y);
 	}
 }
 
@@ -1060,6 +1081,13 @@ void ComposePage::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree)
 	}
 }
 
+void ComposePage::modify_pos(int offset_y)
+{
+	top_pos_global += offset_y;
+	for (auto pgh : paragraphs)
+		pgh->modify_pos(offset_y);
+}
+
 void ComposePage::FlushOwnArea(CDC* pDC)
 {
 	CRect rect(
@@ -1104,6 +1132,13 @@ void ComposeParagraph::add_row(ComposeRow* row, int index)
 	auto it = rows.begin();
 	advance(it, index);
 	rows.insert(it, row);
+}
+void ComposeParagraph::modify_pos(int offset_y)
+{
+	top_offset_session += offset_y;
+	bottom_offset_session += offset_y;
+	for (auto row : rows)
+		row->modify_pos(offset_y);
 }
 void ComposeParagraph::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree)
 {

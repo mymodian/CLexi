@@ -69,6 +69,7 @@ public:
 	void set_words_space(int words_space_) { words_space = words_space_; }
 	int get_words_space() { return words_space; }
 public:
+	void modify_pos(int offset_y) { top_offset_session += offset_y; }
 	void FlushOwnArea(CDC* pDC);
 	void Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index, bool bParaFlag = false);
 private:
@@ -123,6 +124,7 @@ public:
 	row_iter end() { return rows.end(); }
 public:
 	//将跨页的段的处理隐藏在操作中
+	void modify_pos(int offset_y);
 	void FlushOwnArea(CDC* pDC);
 	void Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree);
 private:
@@ -171,6 +173,7 @@ public:
 	inner_row_iter rowiter_end();
 public:
 	//将跨页的段的处理隐藏在操作中
+	void modify_pos(int offset_y);
 	void FlushOwnArea(CDC* pDC);
 	void Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree);
 private:
@@ -508,12 +511,9 @@ public:
 		paragraph++;
 		if (paragraph == (*page)->end())
 		{
-			while (++page != doc->end())
-			{
+			page++;
+			if (page != doc->end())
 				paragraph = (*page)->begin();
-				if (!(*page)->empty())
-					break;
-			}
 		}
 		return *this;
 	}
@@ -534,12 +534,9 @@ public:
 		paragraph++;
 		if (paragraph == (*page)->end())
 		{
-			while (++page != doc->end())
-			{
+			page++;
+			if (page != doc->end())
 				paragraph = (*page)->begin();
-				if (!(*page)->empty())
-					break;
-			}
 		}
 		return tmp;
 	}
