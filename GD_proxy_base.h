@@ -15,6 +15,8 @@ public:
 	void create_caret(int height, int width);
 	void hide_caret();
 	void show_caret(int x, int y);
+	void set_scroll_size_total(int width_total, int height_total);
+	void set_scroll_pos(int hscroll_pos, int vscroll_pos);
 private:
 	CCLexiView* the_view;
 };

@@ -230,6 +230,8 @@ public:
 	LxRowInDocIter row_end();
 	bool first_phy_paragraph(LxCursor& cursor);
 	int current_phypgh_index(LxCursor& cursor);
+	int total_width();
+	int total_height();
 // only for test and debugger
 public:
 	bool self_check();

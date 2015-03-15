@@ -65,4 +65,25 @@ private:
 	LxRender* base_render_;
 };
 
+class LxScrollRender : public LxRender
+{
+public:
+	LxScrollRender() = delete;
+	LxScrollRender(const LxScrollRender&) = delete;
+	LxScrollRender(LxRender* base_render);
+	virtual ~LxScrollRender();
+public:
+	virtual void create_caret(int height, int width) override;
+	virtual void show_caret(LxCursor* cursor) override;
+	virtual void hide_caret() override;
+	virtual void DrawDocument(CDC* pDC) override;
+	virtual ComposeDoc* get_compose_doc() override;
+	virtual GD_proxy_base* get_gd_proxy() override;
+public:
+	void set_scroll_size_total(int width_total, int height_total);
+	void set_scroll_pos(int hscroll_pos, int vscroll_pos);
+private:
+	LxRender* base_render_;
+};
+
 #endif

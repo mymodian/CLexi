@@ -9,7 +9,7 @@
 #include "LxDcViCtl.h"
 #include "ChromiumTask.h"
 
-class CCLexiView : public CView
+class CCLexiView : public CScrollView
 {
 private:
 	LxDcViCtl doc_view_controler;				//文档和排版控制
@@ -35,11 +35,22 @@ public:
 	void show_caret(int x, int y);
 	void move_caret(unsigned int direction);
 public:
+	void set_scroll_size_total(int width_total, int height_total);
+	void set_scroll_width_total(int width_total);
+	void set_scroll_height_total(int height_total);
+	void set_scroll_pos(int hscroll_pos, int vscroll_pos);
+	void set_hscroll_pos(int hscroll_pos);
+	void set_vscroll_pos(int vscroll_pos);
+private:
+	int width_total_;
+	int height_total_;
+public:
 	void ExecuteNormalTask(Task<CDC>* task, CDC* pdc = NULL);
 public:
 	void insert(TCHAR* cs, int len);
 	void wrap();
 	void backspace();
+	void redraw();
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -78,6 +89,10 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	virtual void OnInitialUpdate();
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

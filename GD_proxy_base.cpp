@@ -22,3 +22,11 @@ void GD_proxy_base::show_caret(int x, int y)
 {
 	the_view->show_caret(x, y);
 }
+void GD_proxy_base::set_scroll_size_total(int width_total, int height_total)
+{
+	the_view->set_scroll_size_total(width_total, height_total);
+}
+void GD_proxy_base::set_scroll_pos(int hscroll_pos, int vscroll_pos)
+{
+	the_view->set_scroll_pos(hscroll_pos, vscroll_pos);
+}

@@ -8,7 +8,7 @@ LxDcViCtl::~LxDcViCtl() {}
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;
-	font->CreateFont(-32, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+	font->CreateFont(-18, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
 	LOGFONT logfont;
 	font->GetLogFont(&logfont);
@@ -46,7 +46,60 @@ void LxDcViCtl::init(CDC* pDC)
 	section.trace = false;
 
 	gd_proxy.init();
-	render = new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy));
+	render = new LxScrollRender(new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy)));
+}
+
+void LxDcViCtl::modify_mouse_hscroll(CDC* pDC, int hdistanse)
+{
+	if (ViewWindow::GetViewWindowInstance()->width >= compose_doc.total_width())
+		return;
+	int old_offset_x = ViewWindow::GetViewWindowInstance()->offset_x;
+	int new_offset_x = ViewWindow::GetViewWindowInstance()->offset_x - hdistanse;
+	if (hdistanse > 0)
+	{
+		ViewWindow::GetViewWindowInstance()->offset_x = new_offset_x < 0 ? 0 : new_offset_x;
+	}
+	else
+	{
+		int offset_x_max = compose_doc.total_width() - ViewWindow::GetViewWindowInstance()->width;
+		ViewWindow::GetViewWindowInstance()->offset_x = new_offset_x > offset_x_max ? offset_x_max : new_offset_x;
+	}
+	if (ViewWindow::GetViewWindowInstance()->offset_x != old_offset_x)
+		draw_complete(pDC);
+}
+
+void LxDcViCtl::modify_mouse_vscroll(CDC* pDC, int vdistanse)
+{
+	if (ViewWindow::GetViewWindowInstance()->height >= compose_doc.total_height())
+		return;
+	int old_offset_y = ViewWindow::GetViewWindowInstance()->offset_y;
+	int new_offset_y = ViewWindow::GetViewWindowInstance()->offset_y - vdistanse;
+	if (vdistanse > 0)
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y = new_offset_y < 0 ? 0 : new_offset_y;
+	}
+	else
+	{
+		int offset_y_max = compose_doc.total_height() - ViewWindow::GetViewWindowInstance()->height;
+		ViewWindow::GetViewWindowInstance()->offset_y = new_offset_y > offset_y_max ? offset_y_max : new_offset_y;
+	}
+	if (ViewWindow::GetViewWindowInstance()->offset_y != old_offset_y)
+		draw_complete(pDC);
+}
+
+void LxDcViCtl::modify_view_size(int width, int height)
+{
+	AdjustViewWindow(width, height);
+	//size改变后，文档的offset_y保持不变，但当客户区域的高度大于等于文档总高度时，将offset_y设为0
+	//同样offset_x也保持不变，当客户区域的宽度大于等于文档页面宽度时，将offset_x设为0
+	if (height >= compose_doc.total_height())
+		ViewWindow::GetViewWindowInstance()->offset_y = 0;
+	if (width >= compose_doc.total_width())
+		ViewWindow::GetViewWindowInstance()->offset_x = 0;
+	else if (ViewWindow::GetViewWindowInstance()->offset_x + width > compose_doc.total_width())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_x = compose_doc.total_width() - width;
+	}
 }
 
 void LxDcViCtl::move_cursor(CDC* pDC, unsigned direction)
@@ -102,16 +155,8 @@ void LxDcViCtl::move_cursor(CDC* pDC, unsigned direction)
 	default:
 		return;
 	}
-	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+	if (modify_cursor_offset())
 	{
-		ViewWindow::GetViewWindowInstance()->offset_y +=
-			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
-		draw_complete(pDC);
-	}
-	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
-	{
-		ViewWindow::GetViewWindowInstance()->offset_y -=
-			ViewWindow::GetViewWindowInstance()->get_top_pos() - cursor.point_y;
 		draw_complete(pDC);
 	}
 	else
@@ -198,16 +243,7 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 	if (count < 0)
 		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 
-	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
-	{
-		ViewWindow::GetViewWindowInstance()->offset_y +=
-			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
-	}
-	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
-	{
-		ViewWindow::GetViewWindowInstance()->offset_y -=
-			ViewWindow::GetViewWindowInstance()->get_top_pos() - cursor.point_y;
-	}
+	modify_cursor_offset();
 }
 
 void LxDcViCtl::locate(CDC* pDC, int doc_x, int doc_y)
@@ -237,6 +273,7 @@ void LxDcViCtl::add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direc
 	compose_doc.modify_index(pgh_doc_it, pgh->size());
 	compose_doc.relayout(pgh_doc_it);
 	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner(), pgh, pDC);
+	modify_cursor_offset();
 }
 
 void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t offset_inner, Paragraph* seprated_phy_pgh)
@@ -254,6 +291,7 @@ void LxDcViCtl::compose_splited_paragraph(CDC* pDC, size_t phy_pgh_index, size_t
 	compose_doc.modify_index(pgh_doc_it, seprated_phy_pgh->size());
 	compose_doc.relayout(pgh_doc_it);
 	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner(), seprated_phy_pgh, pDC);
+	modify_cursor_offset();
 }
 
 void LxDcViCtl::compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t offset_para1)
@@ -270,6 +308,7 @@ void LxDcViCtl::compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t of
 	compose_doc.relayout(pgh_doc_it);
 	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner() + offset_para1, 
 		(*pgh_doc_it)->get_phy_paragraph(), pDC);
+	modify_cursor_offset();
 }
 
 //full text
@@ -277,9 +316,38 @@ void LxDcViCtl::compose_complete(CDC* pDC)
 {
 	compose_doc.compose_complete(pDC);
 }
+int LxDcViCtl::modify_cursor_offset()
+{
+	int rc = 0;
+	if (cursor.point_y + cursor.height > ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y +=
+			cursor.point_y + cursor.height - ViewWindow::GetViewWindowInstance()->get_bottom_pos();
+		rc = 1;
+	}
+	else if (cursor.point_y < ViewWindow::GetViewWindowInstance()->get_top_pos())
+	{
+		ViewWindow::GetViewWindowInstance()->offset_y -=
+			ViewWindow::GetViewWindowInstance()->get_top_pos() - cursor.point_y;
+		rc = 1;
+	}
+	if (cursor.point_x < ViewWindow::GetViewWindowInstance()->offset_x)
+	{
+		ViewWindow::GetViewWindowInstance()->offset_x = cursor.point_x;
+		rc = 1;
+	}
+	else if (cursor.point_x > ViewWindow::GetViewWindowInstance()->offset_x + ViewWindow::GetViewWindowInstance()->width)
+	{
+		ViewWindow::GetViewWindowInstance()->offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width;
+		rc = 1;
+	}
+	return rc;
+}
 void LxDcViCtl::draw_complete(CDC* pDC)
 {
 	render->hide_caret();
+	render->set_scroll_size_total(compose_doc.total_width(), compose_doc.total_height());
+	render->set_scroll_pos(ViewWindow::GetViewWindowInstance()->offset_x, ViewWindow::GetViewWindowInstance()->offset_y);
 	pDC->SetBkMode(TRANSPARENT);
 	render->DrawDocument(pDC);
 	render->create_caret(cursor.height, cursor.height / 8);
@@ -316,7 +384,8 @@ size_t LxDcViCtl::merge_phy_paragraph(size_t index_para2)
 	contex_pgh_iter phy_pgh_iter1 = phy_pgh_iter2;
 	--phy_pgh_iter1;
 	size_t para1_size = (*phy_pgh_iter1)->size();
-	(*phy_pgh_iter1)->Insert((*phy_pgh_iter1)->size(), (*phy_pgh_iter2)->get_context_ptr(), (*phy_pgh_iter2)->size());
+	if ((*phy_pgh_iter2)->size())
+		(*phy_pgh_iter1)->Insert((*phy_pgh_iter1)->size(), (*phy_pgh_iter2)->get_context_ptr(), (*phy_pgh_iter2)->size());
 	document.remove_paragraph(phy_pgh_iter2);
 
 	return para1_size;
@@ -423,11 +492,11 @@ void LxDcViCtl::usr_backspace(CDC* pDC)
 			else
 			{
 				//当前物理段为空
-				if ((*cursor.paragraph)->get_phy_paragraph()->empty())
-				{
-					//删除当前物理段
-				}
-				else
+				//if ((*cursor.paragraph)->get_phy_paragraph()->empty())
+				//{
+				//	//删除当前物理段
+				//}
+				//else
 				{
 					//和前一个物理段合并
 					LxCommand* merge_phypragh_cmd = new LxCommand();

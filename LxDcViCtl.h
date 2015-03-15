@@ -50,11 +50,15 @@ public:
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
+	int modify_cursor_offset();
 	size_t get_current_cur_index();
 	void locate(CDC* pDC, int doc_x, int doc_y);
 	void locate(CDC* pDC, Paragraph* pgh, int global_index);
 	bool single_remove();
 	void move_cursor(CDC* pDC, unsigned direction);
+	void modify_view_size(int width, int height);
+	void modify_mouse_hscroll(CDC* pDC, int hdistanse);
+	void modify_mouse_vscroll(CDC* pDC, int vdistanse);
 //member for test and debugger.
 public:
 	ComposeDoc* get_com_doc() { return &compose_doc; }
@@ -73,7 +77,7 @@ private:
 	TreeBase color_tree;
 	LxCursor cursor;
 	GD_proxy_base gd_proxy;
-	LxRender* render;
+	LxScrollRender* render;
 	Section section;
 private:
 	LxCommandMgr lx_command_mgr;		//√¸¡Óπ‹¿Ì

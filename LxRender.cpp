@@ -61,9 +61,9 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 	int view_bottom = ViewWindow::GetViewWindowInstance()->get_bottom_pos();
 	int pages_space = ViewWindow::GetViewWindowInstance()->border_height;
 	int base_top = ViewWindow::GetViewWindowInstance()->offset_y;
-	for (page_iter page_ = compose_doc_->begin(); page_ != compose_doc_->end(); page_++)
+	for (page_iter page_ = compose_doc_->begin(); page_ != compose_doc_->end(); ++page_)
 	{
-		if ((*page_)->get_top_pos() > view_top && (*page_)->get_top_pos() < view_bottom)
+		if ((*page_)->get_top_pos() > view_top /*&& (*page_)->get_top_pos() < view_bottom*/)
 		{
 			DrawPageSpace(pDC, (*page_)->get_top_pos() - base_top, pages_space);
 		}
@@ -120,6 +120,46 @@ ComposeDoc* LxBorderRender::get_compose_doc()
 	return base_render_->get_compose_doc();
 }
 GD_proxy_base* LxBorderRender::get_gd_proxy()
+{
+	return base_render_->get_gd_proxy();
+}
+
+//scroll render,draw scrollbar and the base render which is decorated.
+LxScrollRender::LxScrollRender(LxRender* base_render)
+	: base_render_(base_render) {}
+LxScrollRender::~LxScrollRender() {}
+
+void LxScrollRender::set_scroll_size_total(int width_total, int height_total)
+{
+	get_gd_proxy()->set_scroll_size_total(width_total, height_total);
+}
+void LxScrollRender::set_scroll_pos(int hscroll_pos, int vscroll_pos)
+{
+	get_gd_proxy()->set_scroll_pos(hscroll_pos, vscroll_pos);
+}
+
+void LxScrollRender::DrawDocument(CDC* pDC)
+{
+	base_render_->DrawDocument(pDC);
+}
+
+void LxScrollRender::create_caret(int height, int width)
+{
+	base_render_->create_caret(height, width);
+}
+void LxScrollRender::show_caret(LxCursor* cursor)
+{
+	base_render_->show_caret(cursor);
+}
+void LxScrollRender::hide_caret()
+{
+	base_render_->hide_caret();
+}
+ComposeDoc* LxScrollRender::get_compose_doc()
+{
+	return base_render_->get_compose_doc();
+}
+GD_proxy_base* LxScrollRender::get_gd_proxy()
 {
 	return base_render_->get_gd_proxy();
 }

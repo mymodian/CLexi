@@ -159,6 +159,8 @@ protected:
 public:
 //	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 //	virtual BOOL PreTranslateMessage(MSG* pMsg);
+//	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+//	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -172,6 +174,8 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 //	ON_WM_ERASEBKGND()
+//	ON_WM_HSCROLL()
+//	ON_WM_VSCROLL()
 END_MESSAGE_MAP()
 
 // 用于运行对话框的应用程序命令
@@ -200,4 +204,20 @@ void CCLexiApp::OnAppAbout()
 //	// TODO:  在此添加专用代码和/或调用基类
 //
 //	return CDialogEx::PreTranslateMessage(pMsg);
+//}
+
+
+//void CAboutDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+//{
+//	// TODO:  在此添加消息处理程序代码和/或调用默认值
+//
+//	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+//}
+
+
+//void CAboutDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+//{
+//	// TODO:  在此添加消息处理程序代码和/或调用默认值
+//
+//	CDialogEx::OnVScroll(nSBCode, nPos, pScrollBar);
 //}
