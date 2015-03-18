@@ -306,7 +306,7 @@ void LxDcViCtl::compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t of
 	compose_doc.remove_group_paragraph(to_delete);
 	pgh_doc_it = compose_doc.modify(pgh_doc_it, row_cursor, pDC);
 	compose_doc.relayout(pgh_doc_it);
-	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner() + offset_para1, 
+	compose_doc.calc_cursor(cursor, (*pgh_doc_it)->get_area_begin() - (*pgh_doc_it)->get_offset_inner() + offset_para1,
 		(*pgh_doc_it)->get_phy_paragraph(), pDC);
 	modify_cursor_offset();
 }
@@ -333,12 +333,16 @@ int LxDcViCtl::modify_cursor_offset()
 	}
 	if (cursor.point_x < ViewWindow::GetViewWindowInstance()->offset_x)
 	{
-		ViewWindow::GetViewWindowInstance()->offset_x = cursor.point_x;
+		int new_offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width / 6;
+		ViewWindow::GetViewWindowInstance()->offset_x = new_offset_x < 0 ? 0 : new_offset_x;
 		rc = 1;
 	}
 	else if (cursor.point_x > ViewWindow::GetViewWindowInstance()->offset_x + ViewWindow::GetViewWindowInstance()->width)
 	{
-		ViewWindow::GetViewWindowInstance()->offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width;
+		int new_offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width + 
+			ViewWindow::GetViewWindowInstance()->width / 6;
+		int offset_x_max = compose_doc.total_width() - ViewWindow::GetViewWindowInstance()->width;
+		ViewWindow::GetViewWindowInstance()->offset_x = new_offset_x > offset_x_max ? offset_x_max : new_offset_x;
 		rc = 1;
 	}
 	return rc;
@@ -465,7 +469,7 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 		{
 			//分割当前物理段
 			LxCommand* split_phypragh_cmd = new LxCommand();
-			split_phypragh_cmd->add_child_cmd(new LxSplitCmd(compose_doc.current_phypgh_index(cursor), 
+			split_phypragh_cmd->add_child_cmd(new LxSplitCmd(compose_doc.current_phypgh_index(cursor),
 				cursor.get_index_inner_paragraph()));
 			split_phypragh_cmd->set_dvctl(this);
 			split_phypragh_cmd->Excute(pDC);
