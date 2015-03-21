@@ -8,6 +8,7 @@ LxMoveCmd::LxMoveCmd(unsigned int direction)
 void LxMoveCmd::Excute(CDC* pDC)
 {
 	doc_view_ctrl_->move_cursor(pDC, direction_);
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxLocateCmd::LxLocateCmd(int point_x, int point_y)
@@ -21,13 +22,15 @@ void LxLocateCmd::Excute(CDC* pDC)
 	int doc_inner_point_y = point_y_ + ViewWindow::GetViewWindowInstance()->offset_y;
 
 	doc_view_ctrl_->locate(pDC, doc_inner_point_x, doc_inner_point_y);
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
-	: ins_pos(ins_pos), src_font(src_font), src_color(src_color)
+	: ins_pos_(ins_pos), src_font_(src_font), src_color_(src_color)
 {
 }
-LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len) : cs_(cs), len_(len) {}
+LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color)
+	: cs_(cs), len_(len), src_font_(src_font), src_color_(src_color) {}
 void LxInsertCmd::Excute(CDC* pDC)
 {
 	//获取插入前的状态信息 only for test and debugger
@@ -35,9 +38,10 @@ void LxInsertCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->get_cursor(cursor);
 	std::cout << cursor.index_inner <<endl;*/
 	///////////////////////////////////////////
-	doc_view_ctrl_->insert(cs_, len_);
+	doc_view_ctrl_->insert(cs_, len_, src_font_, src_color_);
 	doc_view_ctrl_->modify_layout(pDC, len_);
 	doc_view_ctrl_->draw_complete(pDC);
+	doc_view_ctrl_->calc_font_color();
 	// !-- caution this
 	//每次插入排版前记录下一些调试需要知道的先前信息
 	//排版后安排ComposeDoc和cursor的自检程序来辅助调试(页产生空段和页偏移不连续的现象)
@@ -62,6 +66,7 @@ void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 
 	doc_view_ctrl_->draw_complete(pDC);
 	assert(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
 }
 void LxInsertPhyParagraphCmd::Undo()
 {
@@ -85,6 +90,7 @@ void LxSingleRemoveCmd::Excute(CDC* pDC)
 	//document自检 only for test and debugger
 	assert(doc_view_ctrl_->self_check());
 	///////////////////////////////////////////
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxDeleteCmd::~LxDeleteCmd()
@@ -120,6 +126,7 @@ void LxMergeCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->draw_complete(pDC);
 
 	assert(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
 }
 void LxMergeCmd::Undo()
 {
@@ -141,6 +148,7 @@ void LxSplitCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->draw_complete(pDC);
 
 	assert(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
 }
 void LxSplitCmd::Undo()
 {

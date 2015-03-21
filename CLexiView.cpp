@@ -43,6 +43,8 @@ BEGIN_MESSAGE_MAP(CCLexiView, CScrollView)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
+	ON_COMMAND(ID_SET_FONT, &CCLexiView::OnSetFont)
+	ON_COMMAND(ID_SET_COLOR, &CCLexiView::OnSetColor)
 END_MESSAGE_MAP()
 
 // CCLexiView ¹¹Ôì/Îö¹¹
@@ -55,6 +57,7 @@ CCLexiView::CCLexiView()
 	IMECharSize = 0;
 	width_total_ = LxPaper::pixel_width;
 	height_total_ = LxPaper::pixel_height + 2 * ViewWindow::GetViewWindowInstance()->border_height;
+	font_index = 0;
 }
 
 CCLexiView::~CCLexiView()
@@ -413,8 +416,11 @@ void CCLexiView::ExecuteNormalTask(Task<CDC>* task, CDC* pdc)
 
 void CCLexiView::insert(TCHAR* cs, int len)
 {
+	size_t src_font = font_index;
+	if (font_index == 0)
+		src_font = SrcFontFactory::GetFontFactInstance()->insert_src_font(cur_logfont_);
 	CDC* take_place = NULL;
-	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_insert, cs, len);
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, take_place, &LxDcViCtl::usr_insert, cs, len, src_font, cur_color_);
 	ExecuteNormalTask(task);
 	delete task;
 }
@@ -500,4 +506,33 @@ void CCLexiView::redraw()
 	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::draw_complete);
 	ExecuteNormalTask(task, pDC);
 	delete task;
+}
+
+
+void CCLexiView::OnSetFont()
+{
+	CFontDialog FontDlg;
+	if (FontDlg.DoModal() == IDOK)
+	{
+		cur_logfont_ = *FontDlg.m_cf.lpLogFont;
+		font_index = 0;
+	}
+}
+void CCLexiView::OnSetColor()
+{
+	CColorDialog cDlg;
+	cDlg.m_cc.Flags |= CC_RGBINIT;
+	cDlg.m_cc.Flags |= CC_FULLOPEN;
+	if (cDlg.DoModal() == IDOK)
+	{
+		cur_color_ = cDlg.m_cc.rgbResult;
+	}
+}
+void CCLexiView::set_color(COLORREF color)
+{
+	cur_color_ = color;
+}
+void CCLexiView::set_font_index(size_t index)
+{
+	font_index = index;
 }

@@ -10,6 +10,14 @@ void GD_proxy_base::init()
 	the_view = (CCLexiView*)(p->GetActiveView());
 }
 
+void GD_proxy_base::set_font_index(size_t font_index)
+{
+	the_view->set_font_index(font_index);
+}
+void GD_proxy_base::set_color(COLORREF color)
+{
+	the_view->set_color(color);
+}
 void GD_proxy_base::create_caret(int height, int width)
 {
 	the_view->create_caret(height, width);

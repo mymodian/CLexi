@@ -89,7 +89,7 @@ void LxSimpleComposeAlgo::compose(LxCursor cursor)
 /*
 	index_begin		该行的起始全局索引
 	index_inner		该行起始位置在物理段内的偏移
-*/
+	*/
 void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph, size_t& index_begin, size_t& index_inner, TreeBase* font_tree, CDC* pDC)
 {
 	row_to_compose->set_line_space(LxPaper::pixel_width - LxPaper::left_margin - LxPaper::right_margin);
@@ -98,7 +98,7 @@ void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph
 	int base_pos = 0;
 	int external_leading = 0;
 	int index_inner_orig = index_inner;
-	for (; index_inner < pagraph->size(); )
+	for (; index_inner < pagraph->size();)
 	{
 		size_t src_index, count;
 		font_tree->get_src_index(index_begin + index_inner - index_inner_orig, src_index, count);
@@ -106,12 +106,6 @@ void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph
 		pDC->SelectObject(font);
 		TEXTMETRIC text_metric;
 		GetTextMetrics(*pDC, &text_metric);
-		if (text_metric.tmHeight > max_height)
-		{
-			max_height = text_metric.tmHeight; row_to_compose->set_height(max_height);
-			base_pos = text_metric.tmAscent; row_to_compose->set_base_line(base_pos);
-			external_leading = text_metric.tmExternalLeading; row_to_compose->set_external_leading(external_leading);
-		}
 		int desired_char_cnt = row_to_compose->get_line_space() / text_metric.tmAveCharWidth;
 		desired_char_cnt = desired_char_cnt ? desired_char_cnt : 1;
 		int measure_cnt = min(desired_char_cnt, min(count, pagraph->size() - index_inner));
@@ -127,11 +121,23 @@ void LxSimpleComposeAlgo::compose(ComposeRow* row_to_compose, Paragraph* pagraph
 			row_to_compose->set_area(index_begin, index_begin + index_inner - index_inner_orig - 1);
 			row_to_compose->set_words_space(row_to_compose->get_line_space() / (row_to_compose->size() - 1));
 			index_begin += index_inner - index_inner_orig;
+			if (measure_cnt > 0 && text_metric.tmHeight > max_height)
+			{
+				max_height = text_metric.tmHeight; row_to_compose->set_height(max_height);
+				base_pos = text_metric.tmAscent; row_to_compose->set_base_line(base_pos);
+				external_leading = text_metric.tmExternalLeading; row_to_compose->set_external_leading(external_leading);
+			}
 			return;
 		}
 		else
 		{
 			row_to_compose->set_line_space(row_to_compose->get_line_space() - char_length);
+			if (text_metric.tmHeight > max_height && measure_cnt > 0)
+			{
+				max_height = text_metric.tmHeight; row_to_compose->set_height(max_height);
+				base_pos = text_metric.tmAscent; row_to_compose->set_base_line(base_pos);
+				external_leading = text_metric.tmExternalLeading; row_to_compose->set_external_leading(external_leading);
+			}
 		}
 		index_inner += measure_cnt;
 	}

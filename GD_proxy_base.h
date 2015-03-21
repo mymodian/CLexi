@@ -17,6 +17,8 @@ public:
 	void show_caret(int x, int y);
 	void set_scroll_size_total(int width_total, int height_total);
 	void set_scroll_pos(int hscroll_pos, int vscroll_pos);
+	void set_font_index(size_t font_index);
+	void set_color(COLORREF color);
 private:
 	CCLexiView* the_view;
 };

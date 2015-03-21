@@ -25,13 +25,13 @@ public:
 	void usr_mouse_lbutton_up(CDC* pDC, int x, int y);
 	void usr_mouse_rbutton_down(CDC* pDC, int x, int y);
 	void usr_mouse_rbutton_up(CDC* pDC, int x, int y);
-	void usr_insert(CDC* pDC, TCHAR* cs, int len);
+	void usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORREF src_color);
 	void usr_wrap(CDC* pDC);
 	void usr_backspace(CDC* pDC);
 	void usr_move_cursor(CDC* pDC, unsigned int direction);
 public:
 	void backspace();
-	void insert(TCHAR* src, size_t  count);
+	void insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color);
 	//void insert(TCHAR* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);
 	void remove(size_t position_begin, size_t position_end);
@@ -59,6 +59,7 @@ public:
 	void modify_view_size(int width, int height);
 	void modify_mouse_hscroll(CDC* pDC, int hdistanse);
 	void modify_mouse_vscroll(CDC* pDC, int vdistanse);
+	void calc_font_color();
 //member for test and debugger.
 public:
 	ComposeDoc* get_com_doc() { return &compose_doc; }

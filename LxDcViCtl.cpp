@@ -46,6 +46,8 @@ void LxDcViCtl::init(CDC* pDC)
 	section.trace = false;
 
 	gd_proxy.init();
+	gd_proxy.set_color(default_color_index);
+	gd_proxy.set_font_index(default_font_index);
 	render = new LxScrollRender(new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy)));
 }
 
@@ -85,6 +87,23 @@ void LxDcViCtl::modify_mouse_vscroll(CDC* pDC, int vdistanse)
 	}
 	if (ViewWindow::GetViewWindowInstance()->offset_y != old_offset_y)
 		draw_complete(pDC);
+}
+
+void LxDcViCtl::calc_font_color()
+{
+	if (cursor.head_of_paragraph())
+	{
+		size_t src_index, last_cnt;
+		font_tree.get_src_index(cursor.get_index_global(), src_index, last_cnt);
+		gd_proxy.set_font_index(src_index);
+		color_tree.get_src_index(cursor.get_index_global(), src_index, last_cnt);
+		gd_proxy.set_color(src_index);
+	}
+	else
+	{
+		gd_proxy.set_font_index(font_tree.get_src_index(cursor.get_index_global()));
+		gd_proxy.set_color(color_tree.get_src_index(cursor.get_index_global()));
+	}
 }
 
 void LxDcViCtl::modify_view_size(int width, int height)
@@ -179,8 +198,8 @@ bool LxDcViCtl::single_remove()
 		return false;
 	pgh->Delete(cursor.get_index_inner_paragraph() - 1);
 
-	font_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
-	color_tree.remove(cursor.get_index_inner_paragraph() - 1, cursor.get_index_inner_paragraph());
+	font_tree.remove(cursor.get_index_global() - 1, cursor.get_index_global());
+	color_tree.remove(cursor.get_index_global() - 1, cursor.get_index_global());
 	if (font_tree.empty() && color_tree.empty())
 	{
 		font_tree.insert(0, 0, default_font_index);
@@ -189,14 +208,14 @@ bool LxDcViCtl::single_remove()
 	return true;
 }
 
-void LxDcViCtl::insert(TCHAR* src, size_t  count)
+void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color)
 {
 	//在cursor处执行插入操作
 	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
 	pgh->Insert(cursor.get_index_inner_paragraph(), src, count);
 
-	font_tree.insert(cursor.get_index_global(), count);
-	color_tree.insert(cursor.get_index_global(), count);
+	font_tree.insert(cursor.get_index_global(), count, src_font);
+	color_tree.insert(cursor.get_index_global(), count, src_color);
 }
 //void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_index)
 //{
@@ -434,12 +453,12 @@ void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
 {
 
 }
-void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len)
+void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORREF src_color)
 {
 	if (!section.active())				//选择区域无效
 	{
 		LxCommand* insert_cmd = new LxCommand();
-		insert_cmd->add_child_cmd(new LxInsertCmd(cs, len));
+		insert_cmd->add_child_cmd(new LxInsertCmd(cs, len, src_font, src_color));
 		insert_cmd->set_dvctl(this);
 		insert_cmd->Excute(pDC);
 		lx_command_mgr.insert_cmd(insert_cmd);

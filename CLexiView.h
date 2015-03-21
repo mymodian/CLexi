@@ -67,6 +67,15 @@ private:
 //状态
 private:
 	BOOL bInitialized;
+
+public:
+	void set_color(COLORREF color);
+	void set_font_index(size_t index);
+private:
+	COLORREF cur_color_;
+	LOGFONT cur_logfont_;
+	size_t font_index;
+
 public:
 	virtual ~CCLexiView();
 #ifdef _DEBUG
@@ -93,6 +102,8 @@ public:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	virtual void OnInitialUpdate();
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnSetFont();
+	afx_msg void OnSetColor();
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

@@ -6,7 +6,7 @@
 class LxCursor
 {
 public:
-	LxCursor() :point_x(0), point_y(0), index_inner(0) {}
+	LxCursor() : point_x(0), point_y(0), index_inner(0) {}
 	LxCursor(const LxCursor& other)
 	{
 		this->point_x = other.point_x;

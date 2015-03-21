@@ -14,6 +14,8 @@ public:
 	{
 		if (logfont1.lfHeight < logfont2.lfHeight)
 			return true;
+		else if (logfont1.lfHeight > logfont2.lfHeight)
+			return false;
 		//if (logfont1.lfItalic && )
 		if (_tcscmp(logfont1.lfFaceName, logfont2.lfFaceName) < 0)
 			return true;
@@ -29,17 +31,17 @@ public:
 		auto it = font_map.find(logfont);
 		if (it == font_map.end())
 		{
-			font_map.insert(std::make_pair(logfont, font_list.size()));
+			font_map.insert(std::make_pair(logfont, 1 + font_list.size()));
 			CFont* font_t = new CFont();
 			font_t->CreateFontIndirect(&logfont);
 			font_list.push_back(font_t);
-			return font_list.size() - 1;
+			return font_list.size();
 		}
 		return (*it).second;
 	}
 	CFont* get_src_font(size_t src_index)
 	{
-		return *(font_list.begin() + src_index);
+		return *(font_list.begin() + src_index - 1);
 	}
 public:
 	static SrcFontFactory* GetFontFactInstance()
