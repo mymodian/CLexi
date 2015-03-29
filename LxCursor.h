@@ -37,6 +37,18 @@ public:
 	{
 		return point_x != other.point_x || point_y != other.point_y;
 	}
+	bool operator<(const LxCursor& other)
+	{
+		if ((*this->row)->get_top_pos() == (*other.row)->get_top_pos())
+			return this->point_x < other.point_x;
+		return this->point_y < other.point_y;
+	}
+	bool operator>(const LxCursor& other)
+	{
+		if ((*this->row)->get_top_pos() == (*other.row)->get_top_pos())
+			return this->point_x > other.point_x;
+		return this->point_y > other.point_y;
+	}
 	/*LxCursor& operator++();
 	LxCursor operator++(int);*/
 	size_t get_index_global()

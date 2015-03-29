@@ -366,13 +366,38 @@ int LxDcViCtl::modify_cursor_offset()
 	}
 	return rc;
 }
+
+void LxDcViCtl::draw_section(CDC* pDC, Section* _section)
+{
+	if (!_section->active())
+		return;
+	render->hide_caret();
+	render->set_scroll_size_total(compose_doc.total_width(), compose_doc.total_height());
+	render->set_scroll_pos(ViewWindow::GetViewWindowInstance()->offset_x, ViewWindow::GetViewWindowInstance()->offset_y);
+	pDC->SetBkMode(TRANSPARENT);
+	render->DrawSection(pDC, _section);
+	render->create_caret(cursor.height, cursor.height / 8);
+	render->show_caret(&cursor);
+}
+void LxDcViCtl::clear_section(CDC* pDC, Section* _section)
+{
+	if (!_section->active())
+		return;
+	render->hide_caret();
+	render->set_scroll_size_total(compose_doc.total_width(), compose_doc.total_height());
+	render->set_scroll_pos(ViewWindow::GetViewWindowInstance()->offset_x, ViewWindow::GetViewWindowInstance()->offset_y);
+	pDC->SetBkMode(TRANSPARENT);
+	render->ClearSection(pDC, _section);
+	render->create_caret(cursor.height, cursor.height / 8);
+	render->show_caret(&cursor);
+}
 void LxDcViCtl::draw_complete(CDC* pDC)
 {
 	render->hide_caret();
 	render->set_scroll_size_total(compose_doc.total_width(), compose_doc.total_height());
 	render->set_scroll_pos(ViewWindow::GetViewWindowInstance()->offset_x, ViewWindow::GetViewWindowInstance()->offset_y);
 	pDC->SetBkMode(TRANSPARENT);
-	render->DrawDocument(pDC);
+	render->DrawDocument(pDC, &section);
 	render->create_caret(cursor.height, cursor.height / 8);
 	render->show_caret(&cursor);
 }
@@ -422,7 +447,12 @@ void LxDcViCtl::usr_mouse_lbutton_down(CDC* pDC, int x, int y)
 	locate_cmd->set_dvctl(this);
 	locate_cmd->Excute(pDC);
 	lx_command_mgr.insert_cmd(locate_cmd);
+	if (section.active())
+	{
+		clear_section(pDC, &section);
+	}
 	section.cursor_begin = cursor;
+	section.cursor_end = cursor;
 	section.trace = true;
 }
 void LxDcViCtl::usr_mouse_move(CDC* pDC, int x, int y)
@@ -433,7 +463,63 @@ void LxDcViCtl::usr_mouse_move(CDC* pDC, int x, int y)
 	locate_cmd->set_dvctl(this);
 	locate_cmd->Excute(pDC);
 	lx_command_mgr.insert_cmd(locate_cmd);
-	section.cursor_end = cursor;
+	if (section.cursor_end == cursor)
+		return;
+	if (section.cursor_end > section.cursor_begin)
+	{
+		if (cursor > section.cursor_end)
+		{
+			Section _section;
+			_section.cursor_begin = section.cursor_end;
+			_section.cursor_end = cursor;
+			draw_section(pDC, &_section);
+			section.cursor_end = cursor;
+		}
+		else if (cursor < section.cursor_begin)
+		{
+			clear_section(pDC, &section);
+			section.cursor_end = cursor;
+			draw_section(pDC, &section);
+		}
+		else
+		{
+			Section _section;
+			_section.cursor_begin = cursor;
+			_section.cursor_end = section.cursor_end;
+			clear_section(pDC, &_section);
+			section.cursor_end = cursor;
+		}
+	}
+	else if (section.cursor_end < section.cursor_begin)
+	{
+		if (cursor < section.cursor_end)
+		{
+			Section _section;
+			_section.cursor_begin = cursor;
+			_section.cursor_end = section.cursor_end;
+			draw_section(pDC, &_section);
+			section.cursor_end = cursor;
+		}
+		else if (cursor > section.cursor_begin)
+		{
+			clear_section(pDC, &section);
+			section.cursor_end = cursor;
+			draw_section(pDC, &section);
+		}
+		else
+		{
+			Section _section;
+			_section.cursor_begin = section.cursor_end;
+			_section.cursor_end = cursor;
+			clear_section(pDC, &_section);
+			section.cursor_end = cursor;
+		}
+	}
+	else
+	{
+		section.cursor_end = cursor;
+		draw_section(pDC, &section);
+	}
 }
 void LxDcViCtl::usr_mouse_lbutton_up(CDC* pDC, int x, int y)
 {
@@ -452,6 +538,34 @@ void LxDcViCtl::usr_mouse_rbutton_down(CDC* pDC, int x, int y)
 void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
 {
 
+}
+void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
+{
+	assert(section.active());
+	size_t src_font = SrcFontFactory::GetFontFactInstance()->insert_src_font(log_font);
+	font_tree.modify(section.cursor_begin.get_index_global(), section.cursor_end.get_index_global(), src_font);
+	gd_proxy.set_font_index(src_font);
+
+	size_t index_begin_g = section.cursor_begin.get_index_global();
+	size_t index_end_g = section.cursor_end.get_index_global();
+	Paragraph* phy_pgh_begin = section.cursor_begin.get_phy_paragraph();
+	Paragraph* phy_pgh_end = section.cursor_end.get_phy_paragraph();
+
+	LxParagraphInDocIter pghInDoc(&compose_doc, section.cursor_begin.page, section.cursor_begin.paragraph);
+	compose_doc.modify(pghInDoc, section.cursor_begin.row, pDC);
+	//重新计算cursor的左边位置
+	compose_doc.calc_cursor(section.cursor_begin, index_begin_g, phy_pgh_begin, pDC);
+	compose_doc.calc_cursor(section.cursor_end, index_end_g, phy_pgh_end, pDC);
+	cursor = section.cursor_end;
+
+	draw_complete(pDC);
+}
+void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
+{
+	assert(section.active());
+	color_tree.modify(section.cursor_begin.get_index_global(), section.cursor_end.get_index_global(), src_color);
+	draw_complete(pDC);
+	//此处drawcomplete可以改为部分绘制
 }
 void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORREF src_color)
 {
@@ -551,4 +665,10 @@ void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
 	move_cmd->set_dvctl(this);
 	move_cmd->Excute(pDC);
 	lx_command_mgr.insert_cmd(move_cmd);
+	if (section.active())
+	{
+		clear_section(pDC, &section);
+		section.cursor_begin = cursor;
+		section.cursor_end = cursor;
+	}
 }

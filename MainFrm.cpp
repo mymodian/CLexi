@@ -8,6 +8,9 @@
 #include "MainFrm.h"
 #include "LxPaper.h"
 
+#include "CLexiDoc.h"
+#include "CLexiView.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -24,6 +27,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnApplicationLook)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
+	ON_WM_SYSCOMMAND()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -176,3 +180,15 @@ void CMainFrame::OnUpdateApplicationLook(CCmdUI* pCmdUI)
 	pCmdUI->SetRadio(theApp.m_nAppLook == pCmdUI->m_nID);
 }
 
+
+
+void CMainFrame::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	CFrameWnd::OnSysCommand(nID, lParam);
+
+	if (nID == SC_RESTORE && lParam == 0)
+	{
+		((CCLexiView*)(GetActiveView()))->notify_recovery();
+	}
+}

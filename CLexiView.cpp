@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(CCLexiView, CScrollView)
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_SET_FONT, &CCLexiView::OnSetFont)
 	ON_COMMAND(ID_SET_COLOR, &CCLexiView::OnSetColor)
+	ON_WM_SYSCOMMAND()
 END_MESSAGE_MAP()
 
 // CCLexiView 构造/析构
@@ -516,6 +517,13 @@ void CCLexiView::OnSetFont()
 	{
 		cur_logfont_ = *FontDlg.m_cf.lpLogFont;
 		font_index = 0;
+		if (doc_view_controler.section_active())
+		{
+			CDC* pDC = NULL;
+			Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_font_change, cur_logfont_);
+			ExecuteNormalTask(task, pDC);
+			delete task;
+		}
 	}
 }
 void CCLexiView::OnSetColor()
@@ -526,6 +534,13 @@ void CCLexiView::OnSetColor()
 	if (cDlg.DoModal() == IDOK)
 	{
 		cur_color_ = cDlg.m_cc.rgbResult;
+		if (doc_view_controler.section_active())
+		{
+			CDC* pDC = NULL;
+			Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_color_change, cur_color_);
+			ExecuteNormalTask(task, pDC);
+			delete task;
+		}
 	}
 }
 void CCLexiView::set_color(COLORREF color)
@@ -535,4 +550,19 @@ void CCLexiView::set_color(COLORREF color)
 void CCLexiView::set_font_index(size_t index)
 {
 	font_index = index;
+}
+
+void CCLexiView::notify_recovery()
+{
+	CDC* pDC = NULL;
+	Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::draw_complete);
+	ExecuteNormalTask(task, pDC);
+	delete task;
+}
+
+void CCLexiView::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+
+	CScrollView::OnSysCommand(nID, lParam);
 }

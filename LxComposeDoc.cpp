@@ -312,7 +312,7 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 	}
 }
 
-void ComposeDoc::Draw(CDC* pDC)
+void ComposeDoc::flush_valid_pages(CDC* pDC)
 {
 	for (auto page_ : pages)
 	{
@@ -321,6 +321,103 @@ void ComposeDoc::Draw(CDC* pDC)
 		if (page_->get_top_pos() >= ViewWindow::GetViewWindowInstance()->get_bottom_pos())
 			break;
 		page_->FlushOwnArea(pDC);
+	}
+}
+void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, COLORREF back_color)
+{
+	LxCursor* _begin = &(section->cursor_begin);
+	LxCursor* _end = &(section->cursor_end);
+	if (section->cursor_end < section->cursor_begin)
+	{
+		_begin = &(section->cursor_end);
+		_end = &(section->cursor_begin);
+	}
+	LxRowInDocIter row_doc_b(this, _begin->page, _begin->paragraph, _begin->row);
+	LxRowInDocIter row_doc_e(this, _end->page, _end->paragraph, _end->row);
+	auto row_b = row_doc_b;
+	for (;; ++row_b)
+	{
+		if ((*row_b)->get_bottom_pos() > ViewWindow::GetViewWindowInstance()->offset_y)
+			break;
+		if (row_b == row_doc_e)
+			return;
+	}
+	if (row_doc_b == row_b)
+	{
+		if (row_doc_b == row_doc_e)
+		{
+			CRect rect(_begin->point_x + ViewWindow::GetViewWindowInstance()->border_width_left -
+				ViewWindow::GetViewWindowInstance()->offset_x,
+				(*row_doc_b)->get_top_pos() - ViewWindow::GetViewWindowInstance()->offset_y,
+				ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
+				ViewWindow::GetViewWindowInstance()->offset_x,
+				(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+			FlushRect(pDC, &rect, back_color);
+			if (!only_background)
+			{
+				(*row_doc_b)->Draw(pDC, font_tree, color_tree, row_doc_b.get_paragraph()->get_phy_paragraph(), 
+					row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner());
+			}
+			return;
+		}
+		++row_b;
+		CRect rect(_begin->point_x + ViewWindow::GetViewWindowInstance()->border_width_left -
+			ViewWindow::GetViewWindowInstance()->offset_x, 
+			(*row_doc_b)->get_top_pos() - ViewWindow::GetViewWindowInstance()->offset_y,
+			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_doc_b)->get_area_right() -
+			ViewWindow::GetViewWindowInstance()->offset_x,
+			(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		FlushRect(pDC, &rect, back_color);
+		if (!only_background)
+		{
+			(*row_doc_b)->Draw(pDC, font_tree, color_tree, row_doc_b.get_paragraph()->get_phy_paragraph(),
+				row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner());
+		}
+	}
+	for (; row_b != row_doc_e; ++row_b)
+	{
+		if ((*row_b)->get_top_pos() >= ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+			return;
+		CRect rect(LxPaper::left_margin + ViewWindow::GetViewWindowInstance()->border_width_left -
+			ViewWindow::GetViewWindowInstance()->offset_x,
+			(*row_b)->get_top_pos() - ViewWindow::GetViewWindowInstance()->offset_y,
+			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_b)->get_area_right() -
+			ViewWindow::GetViewWindowInstance()->offset_x,
+			(*row_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		FlushRect(pDC, &rect, back_color);
+		if (!only_background)
+		{
+			(*row_b)->Draw(pDC, font_tree, color_tree, row_b.get_paragraph()->get_phy_paragraph(),
+				row_b.get_paragraph()->get_area_begin() - row_b.get_paragraph()->get_offset_inner());
+		}
+	}
+	if ((*row_doc_e)->get_top_pos() < ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+	{
+		CRect rect(LxPaper::left_margin + ViewWindow::GetViewWindowInstance()->border_width_left -
+			ViewWindow::GetViewWindowInstance()->offset_x,
+			(*row_doc_e)->get_top_pos() - ViewWindow::GetViewWindowInstance()->offset_y,
+			ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
+			ViewWindow::GetViewWindowInstance()->offset_x,
+			(*row_doc_e)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		FlushRect(pDC, &rect, back_color);
+		if (!only_background)
+		{
+			(*row_doc_e)->Draw(pDC, font_tree, color_tree, row_doc_e.get_paragraph()->get_phy_paragraph(),
+				row_doc_e.get_paragraph()->get_area_begin() - row_doc_e.get_paragraph()->get_offset_inner());
+		}
+	}
+}
+void ComposeDoc::Draw(CDC* pDC, Section* section)
+{
+	flush_valid_pages(pDC);
+	if (section->active())
+		draw_section(pDC, section);
+	for (auto page_ : pages)
+	{
+		if (page_->get_top_pos() + LxPaper::pixel_height <= ViewWindow::GetViewWindowInstance()->offset_y)
+			continue;
+		if (page_->get_top_pos() >= ViewWindow::GetViewWindowInstance()->get_bottom_pos())
+			break;
 		page_->Draw(pDC, font_tree, color_tree);
 	}
 }
@@ -337,7 +434,7 @@ void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 	//由于删除段可能会产生空页，需要在这之后立即删除空页.
 	page_iter may_null_page_start;
 	size_t _cnt = 0;
-	for (; ;)
+	for (;;)
 	{
 		auto to_deleted = group_first;
 		++group_first;
@@ -509,7 +606,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				int to_remove_index = phy_pgh_index;
 				to_remove_index += bAdded ? 1 : 0;
 				int removed_cnt = prev_page->pgh_size() - to_remove_index;
-				
+
 				for (int i = 0; i < removed_cnt; i++)
 				{
 					paragraph_iter reverse_it = --prev_page->end();
@@ -1105,7 +1202,7 @@ void ComposePage::FlushOwnArea(CDC* pDC)
 		ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::pixel_width -
 		ViewWindow::GetViewWindowInstance()->offset_x,
 		this->get_top_pos() + LxPaper::pixel_height - ViewWindow::GetViewWindowInstance()->offset_y);
-	FlushRect(pDC, &rect, LxPaper::paper_back_color);
+	FlushRect(pDC, &rect, LxPaper::paper_back_color_s);
 	//绘制四个角的定位标识
 	pDC->SetDCPenColor(RGB(255, 0, 0));
 	pDC->MoveTo(rect.left + LxPaper::left_margin / 2, rect.top + LxPaper::top_margin);
@@ -1174,7 +1271,7 @@ void ComposeRow::FlushOwnArea(CDC* pDC)
 		ViewWindow::GetViewWindowInstance()->border_width_left + LxPaper::pixel_width -
 		ViewWindow::GetViewWindowInstance()->offset_x - LxPaper::right_margin,
 		this->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
-	FlushRect(pDC, &rect, LxPaper::paper_back_color);
+	FlushRect(pDC, &rect, LxPaper::paper_back_color_s);
 }
 
 void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Paragraph* pagraph, size_t base_index, bool bParaFlag)

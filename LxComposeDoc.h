@@ -30,6 +30,7 @@ class LxRowInDocIter;
 class LxParagraphInDocIter;
 
 class LxCursor;
+struct Section;
 
 class ComposeBase
 {
@@ -68,6 +69,8 @@ public:
 	void set_external_leading(int leading) { ri_external_leading = leading; }
 	void set_words_space(int words_space_) { words_space = words_space_; }
 	int get_words_space() { return words_space; }
+	int get_area_length() { return LxPaper::get_edit_pixel_width() - last_line_space; }
+	int get_area_right() { return get_area_length() + LxPaper::left_margin; }
 public:
 	void modify_pos(int offset_y) { top_offset_session += offset_y; }
 	void FlushOwnArea(CDC* pDC);
@@ -213,7 +216,9 @@ public:
 	void relayout(LxParagraphInDocIter pagraph_iter);
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
-	void Draw(CDC* pDC);
+	void flush_valid_pages(CDC* pDC);
+	void draw_section(CDC* pDC, Section* section, bool only_background = true, COLORREF back_color = LxPaper::section_back_color_s);
+	void Draw(CDC* pDC, Section* section);
 	void locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner);
 	void locate(ComposePage*& page, ComposeParagraph*& cpgh, int index, int direction);
 	void locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y);
@@ -340,6 +345,10 @@ public:
 	ComposeRow* operator*()
 	{
 		return *row;
+	}
+	ComposeParagraph* get_paragraph()
+	{
+		return *paragraph;
 	}
 	bool operator==(const LxRowInDocIter& other) const
 	{

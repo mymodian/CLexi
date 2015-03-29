@@ -29,6 +29,10 @@ public:
 	void usr_wrap(CDC* pDC);
 	void usr_backspace(CDC* pDC);
 	void usr_move_cursor(CDC* pDC, unsigned int direction);
+	void usr_font_change(CDC* pDC, LOGFONT log_font);
+	void usr_color_change(CDC* pDC, COLORREF src_color);
+public:
+	bool section_active() { return section.active(); }
 public:
 	void backspace();
 	void insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color);
@@ -50,6 +54,8 @@ public:
 	void modify_layout(CDC* pDC, int count);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
+	void draw_section(CDC* pDC, Section* _section);
+	void clear_section(CDC* pDC, Section* _section);
 	int modify_cursor_offset();
 	size_t get_current_cur_index();
 	void locate(CDC* pDC, int doc_x, int doc_y);

@@ -34,6 +34,7 @@
 #include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
 
 #pragma warning(disable:4018)
+#pragma warning(disable:4244)
 
 
 

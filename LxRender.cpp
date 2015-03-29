@@ -9,9 +9,19 @@ LxContexRender::LxContexRender(ComposeDoc* compose_doc, GD_proxy_base* gd_proxy)
 	gd_proxy_(gd_proxy) {}
 LxContexRender::~LxContexRender() {}
 
-void LxContexRender::DrawDocument(CDC* pDC)
+void LxContexRender::DrawSection(CDC* pDC, Section* section)
 {
-	compose_doc_->Draw(pDC);
+	compose_doc_->draw_section(pDC, section, false);
+}
+
+void LxContexRender::ClearSection(CDC* pDC, Section* section)
+{
+	compose_doc_->draw_section(pDC, section, false,LxPaper::paper_back_color_s);
+}
+
+void LxContexRender::DrawDocument(CDC* pDC, Section* section)
+{
+	compose_doc_->Draw(pDC, section);
 }
 
 void LxContexRender::create_caret(int height, int width)
@@ -97,9 +107,19 @@ void LxBorderRender::DrawBorder(CDC* pDC)
 	FlushRect(pDC, &rect_r, ViewWindow::GetViewWindowInstance()->get_view_back_color());
 }
 
-void LxBorderRender::DrawDocument(CDC* pDC)
+void LxBorderRender::DrawSection(CDC* pDC, Section* section)
 {
-	base_render_->DrawDocument(pDC);
+	base_render_->DrawSection(pDC, section);
+}
+
+void LxBorderRender::ClearSection(CDC* pDC, Section* section)
+{
+	base_render_->ClearSection(pDC, section);
+}
+
+void LxBorderRender::DrawDocument(CDC* pDC, Section* section)
+{
+	base_render_->DrawDocument(pDC, section);
 	DrawBorder(pDC);
 }
 
@@ -138,9 +158,19 @@ void LxScrollRender::set_scroll_pos(int hscroll_pos, int vscroll_pos)
 	get_gd_proxy()->set_scroll_pos(hscroll_pos, vscroll_pos);
 }
 
-void LxScrollRender::DrawDocument(CDC* pDC)
+void LxScrollRender::DrawSection(CDC* pDC, Section* section)
 {
-	base_render_->DrawDocument(pDC);
+	base_render_->DrawSection(pDC, section);
+}
+
+void LxScrollRender::ClearSection(CDC* pDC, Section* section)
+{
+	base_render_->ClearSection(pDC, section);
+}
+
+void LxScrollRender::DrawDocument(CDC* pDC, Section* section)
+{
+	base_render_->DrawDocument(pDC, section);
 }
 
 void LxScrollRender::create_caret(int height, int width)

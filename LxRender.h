@@ -20,7 +20,9 @@ public:
 	virtual void create_caret(int height, int width) = 0;
 	virtual void show_caret(LxCursor* cursor) = 0;
 	virtual void hide_caret() = 0;
-	virtual void DrawDocument(CDC* pDC) = 0;
+	virtual void DrawSection(CDC* pDC, Section* section) = 0;
+	virtual void ClearSection(CDC* pDC, Section* section) = 0;
+	virtual void DrawDocument(CDC* pDC, Section* section) = 0;
 	virtual ComposeDoc* get_compose_doc() = 0;
 	virtual GD_proxy_base* get_gd_proxy() = 0;
 };
@@ -36,7 +38,9 @@ public:
 	virtual void create_caret(int height, int width) override;
 	virtual void show_caret(LxCursor* cursor) override;
 	virtual void hide_caret() override;
-	virtual void DrawDocument(CDC* pDC) override;
+	virtual void DrawSection(CDC* pDC, Section* section) override;
+	virtual void ClearSection(CDC* pDC, Section* section) override;
+	virtual void DrawDocument(CDC* pDC, Section* section) override;
 	virtual ComposeDoc* get_compose_doc() override;
 	virtual GD_proxy_base* get_gd_proxy() override;
 private:
@@ -55,7 +59,9 @@ public:
 	virtual void create_caret(int height, int width) override;
 	virtual void show_caret(LxCursor* cursor) override;
 	virtual void hide_caret() override;
-	virtual void DrawDocument(CDC* pDC) override;
+	virtual void DrawSection(CDC* pDC, Section* section) override;
+	virtual void ClearSection(CDC* pDC, Section* section) override;
+	virtual void DrawDocument(CDC* pDC, Section* section) override;
 	virtual ComposeDoc* get_compose_doc() override;
 	virtual GD_proxy_base* get_gd_proxy() override;
 private:
@@ -76,7 +82,9 @@ public:
 	virtual void create_caret(int height, int width) override;
 	virtual void show_caret(LxCursor* cursor) override;
 	virtual void hide_caret() override;
-	virtual void DrawDocument(CDC* pDC) override;
+	virtual void DrawSection(CDC* pDC, Section* section) override;
+	virtual void ClearSection(CDC* pDC, Section* section) override;
+	virtual void DrawDocument(CDC* pDC, Section* section) override;
 	virtual ComposeDoc* get_compose_doc() override;
 	virtual GD_proxy_base* get_gd_proxy() override;
 public:

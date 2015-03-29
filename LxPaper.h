@@ -23,13 +23,32 @@ struct LxPaper
 	static int bottom_margin;
 
 	static int margin_mode;
-	static COLORREF paper_back_color;
+	static COLORREF paper_back_color_s;
+	static COLORREF section_back_color_s;
 
-	static bool set_back_color(COLORREF back_color)
+	static int get_edit_pixel_width()
 	{
-		if( paper_back_color == back_color )
+		return pixel_width - left_margin - right_margin;
+	}
+
+	static int get_edit_pixel_height()
+	{
+		return pixel_height - top_margin - bottom_margin;
+	}
+
+	static bool set_paper_back_color(COLORREF paper_back_color)
+	{
+		if (paper_back_color == paper_back_color_s)
 			return false;
-		paper_back_color = back_color;
+		paper_back_color_s = paper_back_color;
+		return true;
+	}
+
+	static bool set_section_back_color(COLORREF section_back_color)
+	{
+		if (section_back_color == section_back_color_s)
+			return false;
+		section_back_color_s = section_back_color;
 		return true;
 	}
 

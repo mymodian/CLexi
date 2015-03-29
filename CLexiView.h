@@ -51,6 +51,7 @@ public:
 	void wrap();
 	void backspace();
 	void redraw();
+	void notify_recovery();
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
@@ -104,6 +105,7 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnSetFont();
 	afx_msg void OnSetColor();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本
