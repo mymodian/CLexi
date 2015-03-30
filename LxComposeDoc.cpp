@@ -63,7 +63,7 @@ int ComposeDoc::current_phypgh_index(LxCursor& cursor)
 	for (auto pghit = phy_document->begin(); pghit != phy_document->end(); ++pghit, ++index)
 		if (*pghit == phy_pgh)
 			return index;
-	assert(index < phy_document->size());
+	ASSERT(index < phy_document->size());
 	return -1;
 }
 
@@ -110,7 +110,7 @@ bool ComposeDoc::self_check()
 
 void ComposeDoc::locate(ComposePage*& page, ComposeParagraph*& cpgh, int index, int direction)
 {
-	assert(direction == 0 || direction == 1);
+	ASSERT(direction == 0 || direction == 1);
 	LxParagraphInDocIter pgh_doc_it = this->pargraph_begin();
 	int _index = -1;
 	for (; pgh_doc_it != this->pargraph_end(); ++pgh_doc_it)
@@ -137,7 +137,7 @@ void ComposeDoc::locate(ComposePage*& page, ComposeParagraph*& cpgh, int index, 
 			}
 		}
 	}
-	assert(pgh_doc_it != this->pargraph_end());
+	ASSERT(pgh_doc_it != this->pargraph_end());
 }
 
 void ComposeDoc::locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& row_it, size_t phy_pgh_index, size_t offset_inner)
@@ -166,11 +166,11 @@ void ComposeDoc::locate(page_iter& page_it, paragraph_iter& pgh_it, row_iter& ro
 						return;
 					}
 				}
-				assert(_row != (*pgh_doc_it)->end());
+				ASSERT(_row != (*pgh_doc_it)->end());
 			}
 		}
 	}
-	assert(pgh_doc_it != this->pargraph_end());
+	ASSERT(pgh_doc_it != this->pargraph_end());
 }
 
 void ComposeDoc::locate(LxCursor& cursor, CDC* pDC, int doc_x, int doc_y)
@@ -464,7 +464,7 @@ void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 
 LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
 {
-	assert(direction == 0 || direction == 1);
+	ASSERT(direction == 0 || direction == 1);
 	//需要哪些变量参考compose_complete和modify
 	size_t index_global;
 	size_t index_inner = 0;
@@ -474,7 +474,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 	for (; page_cursor != this->end(); ++page_cursor)
 		if (*page_cursor == page)
 			break;
-	assert(page_cursor != this->end());
+	ASSERT(page_cursor != this->end());
 	if (cpgh == nullptr)		//只有compose_complete第一个段才可能出现
 	{
 		index_global = 0;
@@ -1140,7 +1140,7 @@ void ComposePage::add_paragraph(ComposeParagraph* paragraph, int index)
 }
 ComposeParagraph* ComposePage::get_last_pgh()
 {
-	assert(!paragraphs.empty());
+	ASSERT(!paragraphs.empty());
 	return *paragraphs.rbegin();
 }
 ComposePage::inner_row_iter ComposePage::rowiter_begin()

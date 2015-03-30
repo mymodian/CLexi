@@ -46,7 +46,7 @@ void LxInsertCmd::Excute(CDC* pDC)
 	//每次插入排版前记录下一些调试需要知道的先前信息
 	//排版后安排ComposeDoc和cursor的自检程序来辅助调试(页产生空段和页偏移不连续的现象)
 	//document自检 only for test and debugger
-	assert(doc_view_ctrl_->self_check());
+	ASSERT(doc_view_ctrl_->self_check());
 	///////////////////////////////////////////
 }
 void LxInsertCmd::Undo()
@@ -65,7 +65,7 @@ void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->add_phy_paragraph(pDC, pgh, index_, direction_);
 
 	doc_view_ctrl_->draw_complete(pDC);
-	assert(doc_view_ctrl_->self_check());
+	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
 void LxInsertPhyParagraphCmd::Undo()
@@ -88,7 +88,7 @@ void LxSingleRemoveCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->modify_layout(pDC, -1);
 	doc_view_ctrl_->draw_complete(pDC);
 	//document自检 only for test and debugger
-	assert(doc_view_ctrl_->self_check());
+	ASSERT(doc_view_ctrl_->self_check());
 	///////////////////////////////////////////
 	doc_view_ctrl_->calc_font_color();
 }
@@ -125,7 +125,7 @@ void LxMergeCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->compose_merged_paragraph(pDC, index_para2_ - 1, para1_size_);
 	doc_view_ctrl_->draw_complete(pDC);
 
-	assert(doc_view_ctrl_->self_check());
+	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
 void LxMergeCmd::Undo()
@@ -147,7 +147,7 @@ void LxSplitCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->compose_splited_paragraph(pDC, phy_paragraph_index_, offset_inner_, new_phy_pgh);
 	doc_view_ctrl_->draw_complete(pDC);
 
-	assert(doc_view_ctrl_->self_check());
+	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
 void LxSplitCmd::Undo()

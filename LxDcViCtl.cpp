@@ -242,7 +242,7 @@ void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t 
 //partial
 void LxDcViCtl::modify_layout(CDC* pDC, int count)
 {
-	assert(count != 0);
+	ASSERT(count != 0);
 	size_t cur_gbl_index_old = cursor.get_index_global() + count;
 	Paragraph* phy_pgh = cursor.get_phy_paragraph();
 
@@ -426,7 +426,7 @@ Paragraph* LxDcViCtl::split_phy_paragraph(size_t phy_paragraph_index, size_t off
 }
 size_t LxDcViCtl::merge_phy_paragraph(size_t index_para2)
 {
-	assert(index_para2 > 0);
+	ASSERT(index_para2 > 0);
 	contex_pgh_iter phy_pgh_iter2 = document.begin();
 	advance(phy_pgh_iter2, index_para2);
 	contex_pgh_iter phy_pgh_iter1 = phy_pgh_iter2;
@@ -541,16 +541,23 @@ void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
 }
 void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
 {
-	assert(section.active());
+	ASSERT(section.active());
 	size_t src_font = SrcFontFactory::GetFontFactInstance()->insert_src_font(log_font);
-	font_tree.modify(section.cursor_begin.get_index_global(), section.cursor_end.get_index_global(), src_font);
+	LxCursor* _begin = &(section.cursor_begin);
+	LxCursor* _end = &(section.cursor_end);
+	if (section.cursor_end < section.cursor_begin)
+	{
+		_begin = &(section.cursor_end);
+		_end = &(section.cursor_begin);
+	}
+	font_tree.modify(_begin->get_index_global(), _end->get_index_global(), src_font);
 	gd_proxy.set_font_index(src_font);
-
+	//记录section的信息
 	size_t index_begin_g = section.cursor_begin.get_index_global();
 	size_t index_end_g = section.cursor_end.get_index_global();
 	Paragraph* phy_pgh_begin = section.cursor_begin.get_phy_paragraph();
 	Paragraph* phy_pgh_end = section.cursor_end.get_phy_paragraph();
-
+	//重新计算需要的排版
 	LxParagraphInDocIter pghInDoc(&compose_doc, section.cursor_begin.page, section.cursor_begin.paragraph);
 	compose_doc.modify(pghInDoc, section.cursor_begin.row, pDC);
 	//重新计算cursor的左边位置
@@ -562,8 +569,15 @@ void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
 }
 void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 {
-	assert(section.active());
-	color_tree.modify(section.cursor_begin.get_index_global(), section.cursor_end.get_index_global(), src_color);
+	ASSERT(section.active());
+	LxCursor* _begin = &(section.cursor_begin);
+	LxCursor* _end = &(section.cursor_end);
+	if (section.cursor_end < section.cursor_begin)
+	{
+		_begin = &(section.cursor_end);
+		_end = &(section.cursor_begin);
+	}
+	color_tree.modify(_begin->get_index_global(), _end->get_index_global(), src_color);
 	draw_complete(pDC);
 	//此处drawcomplete可以改为部分绘制
 }

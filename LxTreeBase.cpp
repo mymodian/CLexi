@@ -426,7 +426,7 @@ void TreeBase::get_src_index(size_t position, size_t& src_index, size_t& last_cn
 // 如果position比某个节点的序号刚好大一，那么结果转移到其右兄弟(如果存在，否则是自身)
 node_leaf* TreeBase::find(size_t position, node_branch* root, size_t& offset)
 {
-	assert(root != NULL);
+	ASSERT(root != NULL);
 	if (root->childs.empty()) return NULL;
 
 	auto it = root->childs.begin();
@@ -631,7 +631,7 @@ void TreeBase::shared_with_new_brother(node_branch* left_brother, node_branch* r
 
 void TreeBase::split(node_branch* parent)
 {
-	//assert(parent->childs.size() > MAX_CHILD_INDEX);
+	//ASSERT(parent->childs.size() > MAX_CHILD_INDEX);
 	//如果父节点为根，直接分裂，结束
 	if (parent == root_)
 	{
@@ -983,7 +983,7 @@ void TreeBase::showleafchilds(node_branch* parent, int whitspace, vector<int>& I
 
 bool TreeBase::empty()
 {
-	assert(root_ != NULL);
+	ASSERT(root_ != NULL);
 	return root_->childs.empty();
 }
 void TreeBase::clear()
