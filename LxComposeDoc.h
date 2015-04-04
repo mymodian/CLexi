@@ -201,6 +201,7 @@ public:
 public:
 	void clear();
 	void remove_group_paragraph(LxParagraphInDocIter group_first);
+	LxParagraphInDocIter pure_remove_group_paragraph(LxParagraphInDocIter group_first);
 	//对某一个物理段进行排版
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int index, ComposePage* &page, size_t& index_global, int& y_offset, CDC* pDC);
 	LxParagraphInDocIter compose_phy_pagph(Paragraph* pagph, int page_index, int pagh_index, CDC* pDC);
@@ -214,6 +215,8 @@ public:
 	void modify_index(LxParagraphInDocIter pagraph_iter, int count);
 	//relayout作用为将剩下的区域集体上下移动，段中每行的排版无需改动
 	void relayout(LxParagraphInDocIter pagraph_iter);
+	//将指定区间重排版，在更改区间的字体后会使用
+	void relayout_section(CDC* pDC, size_t index_begin_gbl, size_t section_begin_pgh, size_t index_end_gbl, size_t section_end_pgh);
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
 	void flush_valid_pages(CDC* pDC);
@@ -234,7 +237,7 @@ public:
 	LxRowInDocIter row_begin();
 	LxRowInDocIter row_end();
 	bool first_phy_paragraph(LxCursor& cursor);
-	int current_phypgh_index(LxCursor& cursor);
+	size_t current_phypgh_index(LxCursor& cursor);
 	int total_width();
 	int total_height();
 // only for test and debugger
@@ -485,6 +488,11 @@ public:
 		this->doc = other.doc;
 		this->page = other.page;
 		this->paragraph = other.paragraph;
+	}
+	void assign(page_iter page_it, paragraph_iter pagraph_it)
+	{
+		this->page = page_it;
+		this->paragraph = pagraph_it;
 	}
 	~LxParagraphInDocIter() = default;
 	inline page_iter get_page() { return page; }

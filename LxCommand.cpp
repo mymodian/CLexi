@@ -155,6 +155,28 @@ void LxSplitCmd::Undo()
 
 }
 
+LxModifyFontCmd::LxModifyFontCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_font_(src_font),
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+{
+}
+LxModifyFontCmd::~LxModifyFontCmd()
+{
+
+}
+void LxModifyFontCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->modify_section_font(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, src_font_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	ASSERT(doc_view_ctrl_->self_check());
+	//doc_view_ctrl_->calc_font_color();
+}
+void LxModifyFontCmd::Undo()
+{
+
+}
+
 LxCommand::~LxCommand()
 {
 	for (LxCommandBase* it : command)

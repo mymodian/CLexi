@@ -29,6 +29,13 @@ void Document::insert_paragraph(Paragraph* paragraph,int index)
 	paragraph_list.insert(it, paragraph);
 }
 
+Paragraph* Document::get_pgh(int index)
+{
+	auto it = paragraph_list.begin();
+	advance(it, index);
+	return *it;
+}
+
 void Document::insert_paragraph(Paragraph* paragraph, contex_pgh_iter pos)
 {
 	paragraph_list.insert(pos, paragraph);

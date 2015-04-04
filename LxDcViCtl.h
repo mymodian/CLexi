@@ -66,6 +66,11 @@ public:
 	void modify_mouse_hscroll(CDC* pDC, int hdistanse);
 	void modify_mouse_vscroll(CDC* pDC, int vdistanse);
 	void calc_font_color();
+
+//排版相关-------在 section != NULL 下的操作
+public:
+	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font);
+
 //member for test and debugger.
 public:
 	ComposeDoc* get_com_doc() { return &compose_doc; }

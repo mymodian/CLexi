@@ -89,6 +89,23 @@ void LxDcViCtl::modify_mouse_vscroll(CDC* pDC, int vdistanse)
 		draw_complete(pDC);
 }
 
+void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font)
+{
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t index_e = section_end_index > section_begin_index ? section_end_index : section_begin_index;
+	font_tree.modify(index_b, index_e, src_font);
+	gd_proxy.set_font_index(src_font);
+
+	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
+	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
+
+	compose_doc.relayout_section(pDC, index_b, pgh_b, index_e, pgh_e);
+	//重新计算cursor的左边位置
+	compose_doc.calc_cursor(section.cursor_begin, section_begin_index, document.get_pgh(section_begin_pgh), pDC);
+	compose_doc.calc_cursor(section.cursor_end, section_end_index, document.get_pgh(section_end_pgh), pDC);
+	cursor = section.cursor_end;
+}
+
 void LxDcViCtl::calc_font_color()
 {
 	if (cursor.head_of_paragraph())
@@ -539,33 +556,23 @@ void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
 {
 
 }
+
 void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
 {
 	ASSERT(section.active());
 	size_t src_font = SrcFontFactory::GetFontFactInstance()->insert_src_font(log_font);
-	LxCursor* _begin = &(section.cursor_begin);
-	LxCursor* _end = &(section.cursor_end);
-	if (section.cursor_end < section.cursor_begin)
-	{
-		_begin = &(section.cursor_end);
-		_end = &(section.cursor_begin);
-	}
-	font_tree.modify(_begin->get_index_global(), _end->get_index_global(), src_font);
-	gd_proxy.set_font_index(src_font);
-	//记录section的信息
+	////记录section的信息
 	size_t index_begin_g = section.cursor_begin.get_index_global();
 	size_t index_end_g = section.cursor_end.get_index_global();
-	Paragraph* phy_pgh_begin = section.cursor_begin.get_phy_paragraph();
-	Paragraph* phy_pgh_end = section.cursor_end.get_phy_paragraph();
-	//重新计算需要的排版
-	LxParagraphInDocIter pghInDoc(&compose_doc, section.cursor_begin.page, section.cursor_begin.paragraph);
-	compose_doc.modify(pghInDoc, section.cursor_begin.row, pDC);
-	//重新计算cursor的左边位置
-	compose_doc.calc_cursor(section.cursor_begin, index_begin_g, phy_pgh_begin, pDC);
-	compose_doc.calc_cursor(section.cursor_end, index_end_g, phy_pgh_end, pDC);
-	cursor = section.cursor_end;
+	
+	LxCommand* modify_section_font_cmd = new LxCommand();
+	modify_section_font_cmd->add_child_cmd(
+		new LxModifyFontCmd(index_begin_g, compose_doc.current_phypgh_index(section.cursor_begin), 
+		index_end_g, compose_doc.current_phypgh_index(section.cursor_end), src_font));
+	modify_section_font_cmd->set_dvctl(this);
+	modify_section_font_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(modify_section_font_cmd);
 
-	draw_complete(pDC);
 }
 void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 {

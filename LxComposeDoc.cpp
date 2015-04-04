@@ -56,15 +56,15 @@ int ComposeDoc::total_height()
 {
 	return (LxPaper::pixel_height + ViewWindow::GetViewWindowInstance()->border_height)*(pages.size() + 1) - LxPaper::pixel_height;
 }
-int ComposeDoc::current_phypgh_index(LxCursor& cursor)
+size_t ComposeDoc::current_phypgh_index(LxCursor& cursor)
 {
 	Paragraph* phy_pgh = (*cursor.paragraph)->get_phy_paragraph();
-	int index = 0;
+	size_t index = 0;
 	for (auto pghit = phy_document->begin(); pghit != phy_document->end(); ++pghit, ++index)
 		if (*pghit == phy_pgh)
 			return index;
 	ASSERT(index < phy_document->size());
-	return -1;
+	return index;
 }
 
 bool ComposeDoc::self_check()
@@ -429,6 +429,56 @@ void ComposeDoc::clear()
 	pages.clear();
 }
 
+void ComposeDoc::relayout_section(CDC* pDC, size_t index_begin_gbl, size_t section_begin_pgh, size_t index_end_gbl, size_t section_end_pgh)
+{
+	LxCursor cursor_begin;
+	calc_cursor(cursor_begin, index_begin_gbl, phy_document->get_pgh(section_begin_pgh), pDC);
+
+	LxParagraphInDocIter pgh_in_doc_b(this, cursor_begin.page, cursor_begin.paragraph);
+	pgh_in_doc_b = modify(pgh_in_doc_b, cursor_begin.row, pDC);
+
+	//删除除第一个段以外的在section中的段
+	if (section_end_pgh > section_begin_pgh)
+	{
+		page_iter _page = pgh_in_doc_b.get_page();
+		paragraph_iter _pgh = pgh_in_doc_b.get_paragraph();
+		++_pgh;
+		if (_pgh == (*_page)->end())
+		{
+			while ((*(++_page))->pgh_size() == 0);
+			_pgh = (*_page)->begin();
+		}
+
+		LxParagraphInDocIter pgh_it(this, _page, _pgh);
+		//while ((*(++pgh_it))->get_offset_inner() != 0);
+		for (int i = 0; i < section_end_pgh - section_begin_pgh; i++)
+		{
+			pgh_it = pure_remove_group_paragraph(pgh_it);
+		}
+	}
+
+	for (int i = 0; i < section_end_pgh - section_begin_pgh; i++)
+	{
+		pgh_in_doc_b = compose_phy_pagph(phy_document->get_pgh(section_begin_pgh + i + 1),
+			*(pgh_in_doc_b.get_page()), *(pgh_in_doc_b.get_paragraph()), 1, pDC);
+	}
+
+	relayout(pgh_in_doc_b);
+}
+
+LxParagraphInDocIter ComposeDoc::pure_remove_group_paragraph(LxParagraphInDocIter group_first)
+{
+	for (;;)
+	{
+		auto to_deleted = group_first;
+		++group_first;
+		(*(to_deleted.get_page()))->remove_paragraph(to_deleted.get_paragraph());
+		if (group_first == this->pargraph_end() || (*group_first)->get_offset_inner() == 0)
+			break;
+	}
+	return group_first;
+}
+
 void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 {
 	//由于删除段可能会产生空页，需要在这之后立即删除空页.
@@ -765,7 +815,10 @@ void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
 		pgraph_cusr = (*page_cusr)->begin();
 	}
 }
-
+/**
+	modify可能会产生空页，因此需要modify产生空页时删除空页
+	但modify经常使用，因此可以在调用modify之后放弃使用LxParagraphInDoc来避免此问题
+	*/
 LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_iter pos, CDC* pDC)
 {
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
@@ -807,6 +860,25 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 		(*(temp_it.get_page()))->remove_paragraph(temp_it.get_paragraph());
 		delete paragraph_to_delete;
 	}
+
+	/*if ((*pagraph_iter)->get_offset_inner() + (*pagraph_iter)->size() != (*pagraph_iter)->get_phy_paragraph()->size())
+	{
+		LxParagraphInDocIter pgph_it = pagraph_iter;
+		while (1)
+		{
+			++pgph_it;
+			if ((*pgph_it)->get_offset_inner() + (*pgph_it)->size() == (*pgph_it)->get_phy_paragraph()->size())
+				break;
+		}
+		while (pgph_it != pagraph_iter)
+		{
+			LxParagraphInDocIter temp_it = pgph_it;
+			--pgph_it;
+			ComposeParagraph* paragraph_to_delete = *temp_it;
+			(*(temp_it.get_page()))->remove_paragraph(temp_it.get_paragraph());
+			delete paragraph_to_delete;
+		}
+	}*/
 
 	//		3.重排当前物理段
 	ComposeParagraph* composed_paragraph = *pgraph_cusr;

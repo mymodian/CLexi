@@ -159,6 +159,24 @@ private:
 	size_t offset_inner_;
 };
 
+class LxModifyFontCmd : public LxCommandBase
+{
+public:
+	LxModifyFontCmd() = delete;
+	LxModifyFontCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font);
+	virtual ~LxModifyFontCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+private:
+	size_t section_begin_index_;
+	size_t section_begin_pgh_;
+	size_t section_end_index_;
+	size_t section_end_pgh_;
+	size_t src_font_;
+};
+
 class LxCommand : public LxCommandBase
 {
 public:
