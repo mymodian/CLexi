@@ -177,6 +177,27 @@ void LxModifyFontCmd::Undo()
 
 }
 
+LxModifyColorCmd::LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_color_(src_color)
+{
+}
+LxModifyColorCmd::~LxModifyColorCmd()
+{
+
+}
+void LxModifyColorCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->modify_section_color(section_begin_index_, section_end_index_, src_color_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	ASSERT(doc_view_ctrl_->self_check());
+	//doc_view_ctrl_->calc_font_color();
+}
+void LxModifyColorCmd::Undo()
+{
+
+}
+
 LxCommand::~LxCommand()
 {
 	for (LxCommandBase* it : command)

@@ -106,6 +106,11 @@ void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t
 	cursor = section.cursor_end;
 }
 
+void LxDcViCtl::modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
+{
+	color_tree.modify(section_begin_index, section_end_index, src_color);
+}
+
 void LxDcViCtl::calc_font_color()
 {
 	if (cursor.head_of_paragraph())
@@ -584,8 +589,13 @@ void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 		_begin = &(section.cursor_end);
 		_end = &(section.cursor_begin);
 	}
-	color_tree.modify(_begin->get_index_global(), _end->get_index_global(), src_color);
-	draw_complete(pDC);
+
+	LxCommand* modify_section_color_cmd = new LxCommand();
+	modify_section_color_cmd->add_child_cmd(
+		new LxModifyColorCmd(_begin->get_index_global(), _end->get_index_global(), src_color));
+	modify_section_color_cmd->set_dvctl(this);
+	modify_section_color_cmd->Excute(pDC);
+	lx_command_mgr.insert_cmd(modify_section_color_cmd);
 	//此处drawcomplete可以改为部分绘制
 }
 void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORREF src_color)

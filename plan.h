@@ -8,8 +8,8 @@ next to do:
 	3.添加滚动条														 done
 	4.未选择区域下的字体和颜色设置						 done
 	5.选择区域的显示(物理变化已实现)					 done
-	6.选择区域下的颜色设置									 done lack_command
-	7.选择区域下的字体设置									 next to do
+	6.选择区域下的颜色设置									 done next to lack_command
+	7.选择区域下的字体设置									 done
 	8.选择区域下的删除、插入、回车						 next to do 
 */
 

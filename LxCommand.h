@@ -177,6 +177,22 @@ private:
 	size_t src_font_;
 };
 
+class LxModifyColorCmd : public LxCommandBase
+{
+public:
+	LxModifyColorCmd() = delete;
+	LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
+	virtual ~LxModifyColorCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+private:
+	size_t section_begin_index_;
+	size_t section_end_index_;
+	COLORREF src_color_;
+};
+
 class LxCommand : public LxCommandBase
 {
 public:
