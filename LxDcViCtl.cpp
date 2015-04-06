@@ -89,6 +89,59 @@ void LxDcViCtl::modify_mouse_vscroll(CDC* pDC, int vdistanse)
 		draw_complete(pDC);
 }
 
+void LxDcViCtl::remove_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
+{
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t index_e = section_end_index > section_begin_index ? section_end_index : section_begin_index;
+	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
+	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
+
+	remove_phy_section(index_b, pgh_b, index_e, pgh_e);
+
+	font_tree.remove(index_b, index_e);
+	color_tree.remove(index_b, index_e);
+	if (font_tree.empty() && color_tree.empty())
+	{
+		font_tree.insert(0, 0, default_font_index);
+		color_tree.insert(0, 0, default_color_index);
+	}
+
+	compose_doc.remove_section(pDC, index_b, pgh_b, index_e, pgh_e);
+
+	compose_doc.calc_cursor(cursor, index_b, document.get_pgh(pgh_b), pDC);
+	section.cursor_begin = cursor;
+	section.cursor_end = cursor;
+}
+
+void LxDcViCtl::replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
+	size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color)
+{
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t index_e = section_end_index > section_begin_index ? section_end_index : section_begin_index;
+	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
+	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
+
+	remove_phy_section(index_b, pgh_b, index_e, pgh_e);
+
+	font_tree.remove(index_b, index_e);
+	color_tree.remove(index_b, index_e);
+	if (font_tree.empty() && color_tree.empty())
+	{
+		font_tree.insert(0, 0, default_font_index);
+		color_tree.insert(0, 0, default_color_index);
+	}
+
+	insert(index_b, pgh_b, cs, len);
+	font_tree.insert(index_b, len, src_font);
+	color_tree.insert(index_b, len, src_color);
+
+	compose_doc.remove_section(pDC, index_b, pgh_b, index_e - len, pgh_e);
+
+	compose_doc.calc_cursor(cursor, index_b + len, document.get_pgh(pgh_b), pDC);
+	section.cursor_begin = cursor;
+	section.cursor_end = cursor;
+}
+
 void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font)
 {
 	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
@@ -238,6 +291,14 @@ void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_
 
 	font_tree.insert(cursor.get_index_global(), count, src_font);
 	color_tree.insert(cursor.get_index_global(), count, src_color);
+}
+
+void LxDcViCtl::insert(size_t pos_global, size_t pos_pgh_index, TCHAR* src, size_t  count)
+{
+	auto phy_pgh_iter_b = document.begin();
+	advance(phy_pgh_iter_b, pos_pgh_index);
+	size_t inner_index_b = document.get_offset_inner(pos_global, pos_pgh_index);
+	(*phy_pgh_iter_b)->Insert(inner_index_b, src, count);
 }
 //void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_index)
 //{
@@ -432,6 +493,27 @@ Paragraph* LxDcViCtl::insert_null_phy_paragraph(int index)
 	document.insert_paragraph(new_phy_pragh, index);
 	return new_phy_pragh;
 }
+void LxDcViCtl::remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
+{
+	auto phy_pgh_iter_b = document.begin();
+	advance(phy_pgh_iter_b, section_begin_pgh);
+	size_t inner_index_b = document.get_offset_inner(section_begin_index, section_begin_pgh);
+	if (section_begin_pgh == section_end_pgh)
+	{
+		(*phy_pgh_iter_b)->Delete(inner_index_b, inner_index_b + section_end_index - section_begin_index - 1);
+		return;
+	}
+	auto phy_pgh_iter_e = document.begin();
+	advance(phy_pgh_iter_e, section_end_pgh);
+	size_t inner_index_e = document.get_offset_inner(section_end_index, section_end_pgh);
+	if (inner_index_b < (*phy_pgh_iter_b)->size())
+		(*phy_pgh_iter_b)->Delete(inner_index_b, (*phy_pgh_iter_b)->size() - 1);
+	if (inner_index_e < (*phy_pgh_iter_e)->size())
+		(*phy_pgh_iter_b)->Insert(inner_index_b, (*phy_pgh_iter_e)->get_context_ptr() + inner_index_e, 
+		(*phy_pgh_iter_e)->size() - inner_index_e);
+
+	document.remove_paragraphs(section_begin_pgh + 1, section_end_pgh);
+}
 Paragraph* LxDcViCtl::split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner)
 {
 	contex_pgh_iter phy_pgh_iter = document.begin();
@@ -610,7 +692,13 @@ void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORR
 	}
 	else                                       //选择区域有效
 	{
-
+		LxCommand* section_replace_cmd = new LxCommand();
+		section_replace_cmd->add_child_cmd(
+			new LxSectionReplaceCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin),
+			section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end), cs, len, src_font, src_color));
+		section_replace_cmd->set_dvctl(this);
+		section_replace_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(section_replace_cmd);
 	}
 }
 void LxDcViCtl::usr_wrap(CDC* pDC)
@@ -686,7 +774,13 @@ void LxDcViCtl::usr_backspace(CDC* pDC)
 	}
 	else                                       //选择区域有效
 	{
-
+		LxCommand* section_remove_cmd = new LxCommand();
+		section_remove_cmd->add_child_cmd(
+			new LxSectionRemoveCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin),
+			section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end)));
+		section_remove_cmd->set_dvctl(this);
+		section_remove_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(section_remove_cmd);
 	}
 }
 void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)

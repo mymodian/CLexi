@@ -16,6 +16,7 @@ public:
 	virtual ~Document();
 	contex_pgh_iter begin() { return paragraph_list.begin(); }
 	contex_pgh_iter end() { return paragraph_list.end(); }
+	size_t get_offset_inner(size_t index_global, size_t pgh_index);
 	Paragraph* get_pgh(int index);
 	size_t size() { return paragraph_list.size(); }
 public:
@@ -25,6 +26,8 @@ public:
 	void insert_paragraph(Paragraph* paragraph, contex_pgh_iter pos);
 	void remove_paragraph(int index);
 	void remove_paragraph(contex_pgh_iter pgh_it);
+	//to delete paragraphs in [index_b,index_e];
+	void remove_paragraphs(size_t index_b, size_t index_e);
 public:
 	void insert(size_t pos, TCHAR* cs, size_t len);		//insert中不包括换行符
 private:

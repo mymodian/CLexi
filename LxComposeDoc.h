@@ -217,6 +217,8 @@ public:
 	void relayout(LxParagraphInDocIter pagraph_iter);
 	//将指定区间重排版，在更改区间的字体后会使用
 	void relayout_section(CDC* pDC, size_t index_begin_gbl, size_t section_begin_pgh, size_t index_end_gbl, size_t section_end_pgh);
+	//将指定区间删除
+	void remove_section(CDC* pDC, size_t index_begin_gbl, size_t section_begin_pgh, size_t index_end_gbl, size_t section_end_pgh);
 	paragraph_iter do_logic_combine(ComposePage* page, paragraph_iter paragraph_it);
 public:
 	void flush_valid_pages(CDC* pDC);

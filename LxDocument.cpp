@@ -29,6 +29,18 @@ void Document::insert_paragraph(Paragraph* paragraph,int index)
 	paragraph_list.insert(it, paragraph);
 }
 
+size_t Document::get_offset_inner(size_t index_global, size_t pgh_index)
+{
+	ASSERT(pgh_index < size());
+	auto it = begin();
+	size_t _offset = 0;
+	for (int i = 0; i < pgh_index; ++i, ++it)
+	{
+		_offset += (*it)->size();
+	}
+	return index_global - _offset;
+}
+
 Paragraph* Document::get_pgh(int index)
 {
 	auto it = paragraph_list.begin();
@@ -51,6 +63,17 @@ void Document::remove_paragraph(int index)
 void Document::remove_paragraph(contex_pgh_iter pgh_it)
 {
 	paragraph_list.erase(pgh_it);
+}
+
+void Document::remove_paragraphs(size_t index_b, size_t index_e)
+{
+	auto it = begin();
+	advance(it, index_b);
+	for (int i = 0; i < index_e - index_b + 1; ++i)
+	{
+		delete *it;
+		it = paragraph_list.erase(it);
+	}
 }
 
 void Document::insert(size_t pos, TCHAR* cs, size_t len)

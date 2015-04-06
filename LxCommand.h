@@ -159,6 +159,46 @@ private:
 	size_t offset_inner_;
 };
 
+class LxSectionRemoveCmd : public LxCommandBase
+{
+public:
+	LxSectionRemoveCmd() = delete;
+	LxSectionRemoveCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
+	virtual ~LxSectionRemoveCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+private:
+	size_t section_begin_index_;
+	size_t section_begin_pgh_;
+	size_t section_end_index_;
+	size_t section_end_pgh_;
+};
+
+class LxSectionReplaceCmd : public LxCommandBase
+{
+public:
+	LxSectionReplaceCmd() = delete;
+	LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, 
+		TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
+	virtual ~LxSectionReplaceCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+private:
+	size_t section_begin_index_;
+	size_t section_begin_pgh_;
+	size_t section_end_index_;
+	size_t section_end_pgh_;
+
+	TCHAR* cs_;
+	size_t len_;
+	size_t src_font_;
+	COLORREF src_color_;
+};
+
 class LxModifyFontCmd : public LxCommandBase
 {
 public:

@@ -352,6 +352,8 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 				ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
 				ViewWindow::GetViewWindowInstance()->offset_x,
 				(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+			/*if (rect.Width() == 0)
+				rect.right += rect.Height() / 2;*/
 			FlushRect(pDC, &rect, back_color);
 			if (!only_background)
 			{
@@ -367,6 +369,8 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_doc_b)->get_area_right() -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		/*if (rect.Width() == 0)
+			rect.right += rect.Height() / 2;*/
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
@@ -384,6 +388,8 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_b)->get_area_right() -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		/*if (rect.Width() == 0)
+			rect.right += rect.Height() / 2;*/
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
@@ -399,6 +405,8 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_e)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
+		/*if (rect.Width() == 0)
+			rect.right += rect.Height() / 2;*/
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
@@ -461,6 +469,38 @@ void ComposeDoc::relayout_section(CDC* pDC, size_t index_begin_gbl, size_t secti
 	{
 		pgh_in_doc_b = compose_phy_pagph(phy_document->get_pgh(section_begin_pgh + i + 1),
 			*(pgh_in_doc_b.get_page()), *(pgh_in_doc_b.get_paragraph()), 1, pDC);
+	}
+
+	relayout(pgh_in_doc_b);
+}
+
+void ComposeDoc::remove_section(CDC* pDC, size_t index_begin_gbl, size_t section_begin_pgh, size_t index_end_gbl, size_t section_end_pgh)
+{
+	LxCursor cursor_begin;
+	calc_cursor(cursor_begin, index_begin_gbl, phy_document->get_pgh(section_begin_pgh), pDC);
+
+	LxParagraphInDocIter pgh_in_doc_b(this, cursor_begin.page, cursor_begin.paragraph);
+	modify_index(pgh_in_doc_b, 0 - (index_end_gbl - index_begin_gbl));
+	pgh_in_doc_b = modify(pgh_in_doc_b, cursor_begin.row, pDC);
+
+	//删除除第一个段以外的在section中的段
+	if (section_end_pgh > section_begin_pgh)
+	{
+		page_iter _page = pgh_in_doc_b.get_page();
+		paragraph_iter _pgh = pgh_in_doc_b.get_paragraph();
+		++_pgh;
+		if (_pgh == (*_page)->end())
+		{
+			while ((*(++_page))->pgh_size() == 0);
+			_pgh = (*_page)->begin();
+		}
+
+		LxParagraphInDocIter pgh_it(this, _page, _pgh);
+		//while ((*(++pgh_it))->get_offset_inner() != 0);
+		for (int i = 0; i < section_end_pgh - section_begin_pgh; i++)
+		{
+			pgh_it = pure_remove_group_paragraph(pgh_it);
+		}
 	}
 
 	relayout(pgh_in_doc_b);

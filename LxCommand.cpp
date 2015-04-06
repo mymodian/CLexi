@@ -155,6 +155,53 @@ void LxSplitCmd::Undo()
 
 }
 
+LxSectionRemoveCmd::LxSectionRemoveCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+{
+}
+LxSectionRemoveCmd::~LxSectionRemoveCmd()
+{
+
+}
+void LxSectionRemoveCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->remove_section(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
+}
+void LxSectionRemoveCmd::Undo()
+{
+
+}
+
+LxSectionReplaceCmd::LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh,
+	TCHAR* cs, size_t len, size_t src_font, COLORREF src_color)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh),
+	cs_(cs), len_(len), src_font_(src_font), src_color_(src_color)
+{
+}
+LxSectionReplaceCmd::~LxSectionReplaceCmd()
+{
+
+}
+void LxSectionReplaceCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->replace_section(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, 
+		cs_, len_, src_font_, src_color_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
+}
+void LxSectionReplaceCmd::Undo()
+{
+
+}
+
 LxModifyFontCmd::LxModifyFontCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_font_(src_font),
 	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)

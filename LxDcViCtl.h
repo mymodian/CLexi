@@ -36,6 +36,7 @@ public:
 public:
 	void backspace();
 	void insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color);
+	void insert(size_t pos_global, size_t pos_pgh_index, TCHAR* src, size_t  count);
 	//void insert(TCHAR* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);
 	void remove(size_t position_begin, size_t position_end);
@@ -46,6 +47,7 @@ public:
 	Paragraph* insert_null_phy_paragraph(int index);
 	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
 	size_t merge_phy_paragraph(size_t index_para2);
+	void remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
 //排版相关
 public:
 	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
@@ -70,7 +72,12 @@ public:
 //排版相关-------在 section != NULL 下的操作
 public:
 	void modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
-	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font);
+	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+		size_t section_end_index, size_t section_end_pgh, size_t src_font);
+	void remove_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+		size_t section_end_index, size_t section_end_pgh);
+	void replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
+		size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
 	
 //member for test and debugger.
 public:
