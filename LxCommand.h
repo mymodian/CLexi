@@ -176,6 +176,23 @@ private:
 	size_t section_end_pgh_;
 };
 
+class LxSectionWrapCmd : public LxCommandBase
+{
+public:
+	LxSectionWrapCmd() = delete;
+	LxSectionWrapCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
+	virtual ~LxSectionWrapCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo() override;
+private:
+	size_t section_begin_index_;
+	size_t section_begin_pgh_;
+	size_t section_end_index_;
+	size_t section_end_pgh_;
+};
+
 class LxSectionReplaceCmd : public LxCommandBase
 {
 public:

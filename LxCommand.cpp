@@ -177,6 +177,28 @@ void LxSectionRemoveCmd::Undo()
 
 }
 
+LxSectionWrapCmd::LxSectionWrapCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+{
+}
+LxSectionWrapCmd::~LxSectionWrapCmd()
+{
+
+}
+void LxSectionWrapCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->section_wrap(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
+}
+void LxSectionWrapCmd::Undo()
+{
+
+}
+
 LxSectionReplaceCmd::LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh,
 	TCHAR* cs, size_t len, size_t src_font, COLORREF src_color)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),

@@ -78,6 +78,8 @@ public:
 		size_t section_end_index, size_t section_end_pgh);
 	void replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
 		size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
+	void section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+		size_t section_end_index, size_t section_end_pgh);
 	
 //member for test and debugger.
 public:
