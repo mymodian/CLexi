@@ -100,6 +100,7 @@ public:
 	void remove_row(row_iter row_it) { rows.erase(row_it); }
 	void set_phy_paragraph(Paragraph* paragraph) { this->paragraph = paragraph; }
 	Paragraph* get_phy_paragraph() { return paragraph; }
+	bool last_pgh_in_phy_pgh() { return offset_inner + size() == paragraph->size(); }
 	void set_parent_page(ComposePage* parent) { parent_page = parent; }
 	ComposePage* get_parent_page() { return parent_page; }
 	void set_area(size_t index_begin, size_t index_end)
@@ -350,6 +351,10 @@ public:
 	ComposeRow* operator*()
 	{
 		return *row;
+	}
+	bool last_row_in_phy_pgh()
+	{
+		return (*paragraph)->last_pgh_in_phy_pgh() && row == --(*paragraph)->end();
 	}
 	ComposeParagraph* get_paragraph()
 	{

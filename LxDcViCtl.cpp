@@ -116,20 +116,22 @@ void LxDcViCtl::remove_section(CDC* pDC, size_t section_begin_index, size_t sect
 void LxDcViCtl::section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 	size_t section_end_index, size_t section_end_pgh)
 {
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
 	remove_section(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
 	if (cursor.tail_of_paragraph() || cursor.head_of_paragraph())
 	{
 		int direction = 0;
 		if (cursor.tail_of_paragraph())
 			direction = 1;
-		Paragraph* pgh = insert_null_phy_paragraph(section_begin_pgh + direction);
-		add_phy_paragraph(pDC, pgh, section_begin_pgh, direction);
+		Paragraph* pgh = insert_null_phy_paragraph(pgh_b + direction);
+		add_phy_paragraph(pDC, pgh, pgh_b, direction);
 	}
 	else
 	{
-		size_t _offset_inner = document.get_offset_inner(section_begin_index, section_begin_pgh);
-		Paragraph* new_phy_pgh = split_phy_paragraph(section_begin_pgh, _offset_inner);
-		compose_splited_paragraph(pDC, section_begin_pgh, _offset_inner, new_phy_pgh);
+		size_t _offset_inner = document.get_offset_inner(index_b, pgh_b);
+		Paragraph* new_phy_pgh = split_phy_paragraph(pgh_b, _offset_inner);
+		compose_splited_paragraph(pDC, pgh_b, _offset_inner, new_phy_pgh);
 	}
 }
 

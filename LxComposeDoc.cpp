@@ -352,30 +352,32 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 				ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
 				ViewWindow::GetViewWindowInstance()->offset_x,
 				(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
-			/*if (rect.Width() == 0)
+			/*if (rect.right == (*row_doc_b)->get_area_right() && row_doc_b.last_row_in_phy_pgh())
 				rect.right += rect.Height() / 2;*/
 			FlushRect(pDC, &rect, back_color);
 			if (!only_background)
 			{
-				(*row_doc_b)->Draw(pDC, font_tree, color_tree, row_doc_b.get_paragraph()->get_phy_paragraph(), 
-					row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner());
+				(*row_doc_b)->Draw(pDC, font_tree, color_tree, row_doc_b.get_paragraph()->get_phy_paragraph(),
+					row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner(),
+					row_doc_b.last_row_in_phy_pgh());
 			}
 			return;
 		}
 		++row_b;
 		CRect rect(_begin->point_x + ViewWindow::GetViewWindowInstance()->border_width_left -
-			ViewWindow::GetViewWindowInstance()->offset_x, 
+			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_b)->get_top_pos() - ViewWindow::GetViewWindowInstance()->offset_y,
 			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_doc_b)->get_area_right() -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
-		/*if (rect.Width() == 0)
-			rect.right += rect.Height() / 2;*/
+		if (row_doc_b.last_row_in_phy_pgh())
+			rect.right += rect.Height() / 2;
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
 			(*row_doc_b)->Draw(pDC, font_tree, color_tree, row_doc_b.get_paragraph()->get_phy_paragraph(),
-				row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner());
+				row_doc_b.get_paragraph()->get_area_begin() - row_doc_b.get_paragraph()->get_offset_inner(),
+				row_doc_b.last_row_in_phy_pgh());
 		}
 	}
 	for (; row_b != row_doc_e; ++row_b)
@@ -388,13 +390,14 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->border_width_left + (*row_b)->get_area_right() -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
-		/*if (rect.Width() == 0)
-			rect.right += rect.Height() / 2;*/
+		if (row_b.last_row_in_phy_pgh())
+			rect.right += rect.Height() / 2;
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
 			(*row_b)->Draw(pDC, font_tree, color_tree, row_b.get_paragraph()->get_phy_paragraph(),
-				row_b.get_paragraph()->get_area_begin() - row_b.get_paragraph()->get_offset_inner());
+				row_b.get_paragraph()->get_area_begin() - row_b.get_paragraph()->get_offset_inner(),
+				row_b.last_row_in_phy_pgh());
 		}
 	}
 	if ((*row_doc_e)->get_top_pos() < ViewWindow::GetViewWindowInstance()->get_bottom_pos())
@@ -405,13 +408,14 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->border_width_left + _end->point_x -
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_e)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
-		/*if (rect.Width() == 0)
+		/*if (rect.right == (*row_doc_b)->get_area_right() && row_doc_b.last_row_in_phy_pgh())
 			rect.right += rect.Height() / 2;*/
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
 			(*row_doc_e)->Draw(pDC, font_tree, color_tree, row_doc_e.get_paragraph()->get_phy_paragraph(),
-				row_doc_e.get_paragraph()->get_area_begin() - row_doc_e.get_paragraph()->get_offset_inner());
+				row_doc_e.get_paragraph()->get_area_begin() - row_doc_e.get_paragraph()->get_offset_inner(),
+				row_doc_e.last_row_in_phy_pgh());
 		}
 	}
 }
@@ -903,21 +907,21 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 
 	/*if ((*pagraph_iter)->get_offset_inner() + (*pagraph_iter)->size() != (*pagraph_iter)->get_phy_paragraph()->size())
 	{
-		LxParagraphInDocIter pgph_it = pagraph_iter;
-		while (1)
-		{
-			++pgph_it;
-			if ((*pgph_it)->get_offset_inner() + (*pgph_it)->size() == (*pgph_it)->get_phy_paragraph()->size())
-				break;
-		}
-		while (pgph_it != pagraph_iter)
-		{
-			LxParagraphInDocIter temp_it = pgph_it;
-			--pgph_it;
-			ComposeParagraph* paragraph_to_delete = *temp_it;
-			(*(temp_it.get_page()))->remove_paragraph(temp_it.get_paragraph());
-			delete paragraph_to_delete;
-		}
+	LxParagraphInDocIter pgph_it = pagraph_iter;
+	while (1)
+	{
+	++pgph_it;
+	if ((*pgph_it)->get_offset_inner() + (*pgph_it)->size() == (*pgph_it)->get_phy_paragraph()->size())
+	break;
+	}
+	while (pgph_it != pagraph_iter)
+	{
+	LxParagraphInDocIter temp_it = pgph_it;
+	--pgph_it;
+	ComposeParagraph* paragraph_to_delete = *temp_it;
+	(*(temp_it.get_page()))->remove_paragraph(temp_it.get_paragraph());
+	delete paragraph_to_delete;
+	}
 	}*/
 
 	//		3.重排当前物理段
