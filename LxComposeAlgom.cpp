@@ -3,6 +3,8 @@
 #include "LxSrcFontFactory.h"
 #include "LxPaper.h"
 
+ComposeAlgoFactory* ComposeAlgoFactory::lpComposeAlgoFactoryInstance = nullptr;
+
 LxSimpleComposeAlgo::LxSimpleComposeAlgo()
 {
 

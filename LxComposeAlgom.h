@@ -6,6 +6,7 @@
 #include "LxTreeBase.h"
 #include "LxComposeDoc.h"
 #include "LxCursor.h"
+#include "LxCommon.h"
 
 //因为根据命令的情况可能会部分排版或全部排版，因此需要部分排版和全部排版
 //  <--？？？     考虑到排版算法的独立性，那么一个通用的排版算法需要怎样的接口？      ？？？ -->
@@ -43,6 +44,37 @@ public:
 	virtual ComposeParagraph* compose(int offset_y, size_t pagra_index_begin, Paragraph* pagraph, TreeBase* font_tree, CDC* pDC) override;
 	virtual void compose(LxCursor cursor) override;
 	virtual void compose(ComposeRow* row_to_compose, Paragraph* pagraph, size_t& index_begin, size_t& index_inner, TreeBase* font_tree, CDC* pDC) override;
+};
+
+class ComposeAlgoFactory
+{
+public:
+	~ComposeAlgoFactory()
+	{
+		for (auto algo : algoms)
+			delete algo;
+	}
+	LxComposeAlgom* get_compose_algom(ComposeAlgoType type)
+	{
+		return algoms[type];
+	}
+public:
+	static ComposeAlgoFactory* GetComposeAlgoFactInstance()
+	{
+		if (lpComposeAlgoFactoryInstance == nullptr)
+			lpComposeAlgoFactoryInstance = new ComposeAlgoFactory();
+		return lpComposeAlgoFactoryInstance;
+	}
+private:
+	static ComposeAlgoFactory* lpComposeAlgoFactoryInstance;
+	LxComposeAlgom* algoms[1];
+private:
+	ComposeAlgoFactory()
+	{
+		algoms[0] = new LxSimpleComposeAlgo();
+	}
+	ComposeAlgoFactory(const ComposeAlgoFactory&) = delete;
+	ComposeAlgoFactory& operator=(const ComposeAlgoFactory&) = delete;
 };
 
 #endif

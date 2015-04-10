@@ -2,8 +2,12 @@
 #include "LxDcViCtl.h"
 #include "LxSrcFontFactory.h"
 
-LxDcViCtl::LxDcViCtl() {}
-LxDcViCtl::~LxDcViCtl() {}
+LxDcViCtl::LxDcViCtl() : render(nullptr) {}
+LxDcViCtl::~LxDcViCtl()
+{
+	if (render)
+		delete render;
+}
 
 void LxDcViCtl::init(CDC* pDC)
 {
@@ -26,7 +30,7 @@ void LxDcViCtl::init(CDC* pDC)
 
 	Paragraph* paragraph = new Paragraph();
 	//设置默认的排版算法，对象应从排版算法管理结构中获取
-	paragraph->SetComposeAlgom(new LxSimpleComposeAlgo());
+	paragraph->SetComposeAlgom(ComposeAlgoType::COMPOSE_ALGO_SIMPLE);
 	document.add_paragraph(paragraph);
 	compose_doc.AttachColorInfo(&color_tree);
 	compose_doc.AttachFontInfo(&font_tree);
@@ -511,7 +515,7 @@ void LxDcViCtl::draw_complete(CDC* pDC)
 Paragraph* LxDcViCtl::insert_null_phy_paragraph(int index)
 {
 	Paragraph* new_phy_pragh = new Paragraph();
-	new_phy_pragh->SetComposeAlgom(new LxSimpleComposeAlgo());
+	new_phy_pragh->SetComposeAlgom(ComposeAlgoType::COMPOSE_ALGO_SIMPLE);
 	document.insert_paragraph(new_phy_pragh, index);
 	return new_phy_pragh;
 }
@@ -541,7 +545,7 @@ Paragraph* LxDcViCtl::split_phy_paragraph(size_t phy_paragraph_index, size_t off
 	contex_pgh_iter phy_pgh_iter = document.begin();
 	advance(phy_pgh_iter, phy_paragraph_index);
 	Paragraph* new_phy_pgh = new Paragraph();
-	new_phy_pgh->SetComposeAlgom(new LxSimpleComposeAlgo());
+	new_phy_pgh->SetComposeAlgom(ComposeAlgoType::COMPOSE_ALGO_SIMPLE);
 	new_phy_pgh->Insert(0, (*phy_pgh_iter)->get_context_ptr() + offset_inner, (*phy_pgh_iter)->size() - offset_inner);
 
 	(*phy_pgh_iter)->Delete(offset_inner, (*phy_pgh_iter)->size() - 1);

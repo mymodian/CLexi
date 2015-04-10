@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "LxDocument.h"
+#include "LxComposeAlgom.h"
 #include <iostream>
 using namespace std;
 
 Document::Document() {}
 Document::~Document()
 {
-	for(auto it=paragraph_list.begin();it != paragraph_list.end();it++)
-		delete *it;
+	for (auto pgh : paragraph_list)
+		delete pgh;
 	paragraph_list.clear();
 }
 
@@ -87,4 +88,9 @@ void Document::insert(size_t pos, TCHAR* cs, size_t len)
 			return;
 		}
 	}
+}
+
+LxComposeAlgom* Paragraph::GetComposeAlgom()
+{
+	return ComposeAlgoFactory::GetComposeAlgoFactInstance()->get_compose_algom(compose_algom_type_);
 }

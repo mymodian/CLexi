@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "LxPaper.h"
 #include "LxViewWindow.h"
 #include "LxComposeDoc.h"
@@ -274,7 +274,7 @@ void ComposeDoc::calc_cursor(LxCursor& cursor, size_t cur_gbl_index, Paragraph* 
 								cursor.paragraph = paragraph;
 								cursor.row = row;
 								cursor.index_inner = cur_gbl_index - (*row)->get_area_begin();
-								//cursorÔÚrowµÄµÚindex_inner¸ö×Ö·ûºó
+								//cursoråœ¨rowçš„ç¬¬index_innerä¸ªå­—ç¬¦åŽ
 								int x = LxPaper::left_margin;
 								int y = (*row)->get_top_pos();
 								size_t index = (*row)->get_area_begin();
@@ -371,7 +371,7 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_doc_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
 		if (row_doc_b.last_row_in_phy_pgh())
-			rect.right += rect.Height() / 2;
+			rect.right += rect.Height();
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
@@ -391,7 +391,7 @@ void ComposeDoc::draw_section(CDC* pDC, Section* section, bool only_background, 
 			ViewWindow::GetViewWindowInstance()->offset_x,
 			(*row_b)->get_bottom_pos() - ViewWindow::GetViewWindowInstance()->offset_y);
 		if (row_b.last_row_in_phy_pgh())
-			rect.right += rect.Height() / 2;
+			rect.right += rect.Height();
 		FlushRect(pDC, &rect, back_color);
 		if (!only_background)
 		{
@@ -449,7 +449,7 @@ void ComposeDoc::relayout_section(CDC* pDC, size_t index_begin_gbl, size_t secti
 	LxParagraphInDocIter pgh_in_doc_b(this, cursor_begin.page, cursor_begin.paragraph);
 	pgh_in_doc_b = modify(pgh_in_doc_b, cursor_begin.row, pDC);
 
-	//É¾³ý³ýµÚÒ»¸ö¶ÎÒÔÍâµÄÔÚsectionÖÐµÄ¶Î
+	//åˆ é™¤é™¤ç¬¬ä¸€ä¸ªæ®µä»¥å¤–çš„åœ¨sectionä¸­çš„æ®µ
 	if (section_end_pgh > section_begin_pgh)
 	{
 		page_iter _page = pgh_in_doc_b.get_page();
@@ -487,7 +487,7 @@ void ComposeDoc::remove_section(CDC* pDC, size_t index_begin_gbl, size_t section
 	modify_index(pgh_in_doc_b, 0 - (index_end_gbl - index_begin_gbl));
 	pgh_in_doc_b = modify(pgh_in_doc_b, cursor_begin.row, pDC);
 
-	//É¾³ý³ýµÚÒ»¸ö¶ÎÒÔÍâµÄÔÚsectionÖÐµÄ¶Î
+	//åˆ é™¤é™¤ç¬¬ä¸€ä¸ªæ®µä»¥å¤–çš„åœ¨sectionä¸­çš„æ®µ
 	if (section_end_pgh > section_begin_pgh)
 	{
 		page_iter _page = pgh_in_doc_b.get_page();
@@ -525,7 +525,7 @@ LxParagraphInDocIter ComposeDoc::pure_remove_group_paragraph(LxParagraphInDocIte
 
 void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 {
-	//ÓÉÓÚÉ¾³ý¶Î¿ÉÄÜ»á²úÉú¿ÕÒ³£¬ÐèÒªÔÚÕâÖ®ºóÁ¢¼´É¾³ý¿ÕÒ³.
+	//ç”±äºŽåˆ é™¤æ®µå¯èƒ½ä¼šäº§ç”Ÿç©ºé¡µï¼Œéœ€è¦åœ¨è¿™ä¹‹åŽç«‹å³åˆ é™¤ç©ºé¡µ.
 	page_iter may_null_page_start;
 	size_t _cnt = 0;
 	for (;;)
@@ -559,7 +559,7 @@ void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage* page, ComposeParagraph* cpgh, int direction, CDC* pDC)
 {
 	ASSERT(direction == 0 || direction == 1);
-	//ÐèÒªÄÄÐ©±äÁ¿²Î¿¼compose_completeºÍmodify
+	//éœ€è¦å“ªäº›å˜é‡å‚è€ƒcompose_completeå’Œmodify
 	size_t index_global;
 	size_t index_inner = 0;
 	int y_offset;
@@ -569,7 +569,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 		if (*page_cursor == page)
 			break;
 	ASSERT(page_cursor != this->end());
-	if (cpgh == nullptr)		//Ö»ÓÐcompose_completeµÚÒ»¸ö¶Î²Å¿ÉÄÜ³öÏÖ
+	if (cpgh == nullptr)		//åªæœ‰compose_completeç¬¬ä¸€ä¸ªæ®µæ‰å¯èƒ½å‡ºçŽ°
 	{
 		index_global = 0;
 		y_offset = ViewWindow::GetViewWindowInstance()->border_height + LxPaper::top_margin;
@@ -619,7 +619,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 
 		paragraph->add_row(row);
 
-		//°üº¬Ò»¸ö¿ÕÐÐµÄ¿Õ¶Î³¬¹ýµ±Ç°Ò³µÄÈÝÄÉ·¶Î§
+		//åŒ…å«ä¸€ä¸ªç©ºè¡Œçš„ç©ºæ®µè¶…è¿‡å½“å‰é¡µçš„å®¹çº³èŒƒå›´
 		if (y_offset + row->get_height() > page->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
 		{
 			page->set_area(page->get_area_begin(), index_global - 1);
@@ -636,7 +636,7 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				--page_cursor;
 			}
 			page = *page_cursor;
-			//½« prev_page ÔÚ cpgh Ö®ºóµÄ¶Î¶¼ÒÆÈë page;
+			//å°† prev_page åœ¨ cpgh ä¹‹åŽçš„æ®µéƒ½ç§»å…¥ page;
 			int removed_cnt = prev_page->pgh_size() - phy_pgh_index;
 
 			for (int i = 0; i < removed_cnt; i++)
@@ -664,11 +664,11 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 			pagph->GetComposeAlgom()->compose(row_to_compose, pagph, index_global, index_inner, font_tree, pDC);
 			if (y_offset + row_to_compose->get_height() > page->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
 			{
-				//µ±Ç°Ò³ÎÞ·¨ÈÝÄÉÐÂÐÐ
-				//1.ÐÞ¸Äµ±Ç°Ò³µÄÊôÐÔ
+				//å½“å‰é¡µæ— æ³•å®¹çº³æ–°è¡Œ
+				//1.ä¿®æ”¹å½“å‰é¡µçš„å±žæ€§
 				page->set_area(page->get_area_begin(), index_global - row_to_compose->size() - 1);
 
-				//µ±Ç°¶ÎÒÑÓÐÄÚÈÝ£¬±£´æ
+				//å½“å‰æ®µå·²æœ‰å†…å®¹ï¼Œä¿å­˜
 				bool bAdded = false;
 				if (paragraph->row_size() != 0)
 				{
@@ -695,8 +695,8 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				page = *page_cursor;
 				page->set_area(index_global - row_to_compose->size(), page->get_area_end());
 
-				//1.ÓÐ¶Î²åÈë--->phy_pgh_indexÖ®ºóµÄ¶ÎÒÆ³ö
-				//2.ÎÞ¶Î²åÈë--->phy_pgh_index¼°Ö®ºóµÄ¶ÎÒÆ³ö
+				//1.æœ‰æ®µæ’å…¥--->phy_pgh_indexä¹‹åŽçš„æ®µç§»å‡º
+				//2.æ— æ®µæ’å…¥--->phy_pgh_indexåŠä¹‹åŽçš„æ®µç§»å‡º
 				int to_remove_index = phy_pgh_index;
 				to_remove_index += bAdded ? 1 : 0;
 				int removed_cnt = prev_page->pgh_size() - to_remove_index;
@@ -796,11 +796,11 @@ void ComposeDoc::compose_complete(CDC* pDC)
 				(*phy_pagph)->GetComposeAlgom()->compose(row_to_compose, *phy_pagph, index_global, index_inner, font_tree, pDC);
 				if (y_offset + row_to_compose->get_height() > page->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
 				{
-					//µ±Ç°Ò³ÎÞ·¨ÈÝÄÉÐÂÐÐ
-					//1.ÐÞ¸Äµ±Ç°Ò³µÄÊôÐÔ
+					//å½“å‰é¡µæ— æ³•å®¹çº³æ–°è¡Œ
+					//1.ä¿®æ”¹å½“å‰é¡µçš„å±žæ€§
 					page->set_area(page->get_area_begin(), index_global - row_to_compose->size() - 1);
 
-					//µ±Ç°¶ÎÒÑÓÐÄÚÈÝ£¬±£´æ
+					//å½“å‰æ®µå·²æœ‰å†…å®¹ï¼Œä¿å­˜
 					if (paragraph->row_size() != 0)
 					{
 						paragraph->set_area(paragraph->get_area_begin(), index_global - row_to_compose->size() - 1);
@@ -860,22 +860,22 @@ void ComposeDoc::modify_index(LxParagraphInDocIter pagraph_iter, int count)
 	}
 }
 /**
-	modify¿ÉÄÜ»á²úÉú¿ÕÒ³£¬Òò´ËÐèÒªmodify²úÉú¿ÕÒ³Ê±É¾³ý¿ÕÒ³
-	µ«modify¾­³£Ê¹ÓÃ£¬Òò´Ë¿ÉÒÔÔÚµ÷ÓÃmodifyÖ®ºó·ÅÆúÊ¹ÓÃLxParagraphInDocÀ´±ÜÃâ´ËÎÊÌâ
+	modifyå¯èƒ½ä¼šäº§ç”Ÿç©ºé¡µï¼Œå› æ­¤éœ€è¦modifyäº§ç”Ÿç©ºé¡µæ—¶åˆ é™¤ç©ºé¡µ
+	ä½†modifyç»å¸¸ä½¿ç”¨ï¼Œå› æ­¤å¯ä»¥åœ¨è°ƒç”¨modifyä¹‹åŽæ”¾å¼ƒä½¿ç”¨LxParagraphInDocæ¥é¿å…æ­¤é—®é¢˜
 	*/
 LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_iter pos, CDC* pDC)
 {
 	paragraph_iter pgraph_cusr = pagraph_iter.get_paragraph();
 	page_iter page_cusr = pagraph_iter.get_page();
-	//ÏÈÉ¾³ýµ±Ç°ÎïÀí¶Î¶ÔÓ¦µÄËùÓÐÂß¼­¶Î
+	//å…ˆåˆ é™¤å½“å‰ç‰©ç†æ®µå¯¹åº”çš„æ‰€æœ‰é€»è¾‘æ®µ
 	/*
-	Ã¿ÐÐÌí¼ÓÒ»¸ö×Ö¼ä¾à
-	Ã¿´Îcommand²Ù×÷ÐèÒªÖØÐÂ¼ÆËãCursor
-	¸ÃÐÐºÍ¶ÎÖ®ºóµÄÐÐÉ¾³ý
+	æ¯è¡Œæ·»åŠ ä¸€ä¸ªå­—é—´è·
+	æ¯æ¬¡commandæ“ä½œéœ€è¦é‡æ–°è®¡ç®—Cursor
+	è¯¥è¡Œå’Œæ®µä¹‹åŽçš„è¡Œåˆ é™¤
 	*/
-	//×¢Òâµü´úÆ÷Ê§Ð§µÄÇé¿ö
+	//æ³¨æ„è¿­ä»£å™¨å¤±æ•ˆçš„æƒ…å†µ
 
-	//		1.É¾³ýµ±Ç°Âß¼­¶ÎposºÍposÖ®ºóµÄÂß¼­ÐÐ,ÏÈ¼Ç×¡rowµÄÒ»Ð©ÊôÐÔ£¨offset_y, index£©
+	//		1.åˆ é™¤å½“å‰é€»è¾‘æ®µposå’Œposä¹‹åŽçš„é€»è¾‘è¡Œ,å…ˆè®°ä½rowçš„ä¸€äº›å±žæ€§ï¼ˆoffset_y, indexï¼‰
 	int row_max_height_ = (*pos)->get_height();
 	int row_baseline_offset_inner_ = (*pos)->get_base_line();
 	int row_ri_external_leading_ = (*pos)->get_external_leading();
@@ -890,16 +890,16 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 		(*pgraph_cusr)->remove_row(temp_it);
 	}
 
-	//		2.É¾³ýµ±Ç°ÎïÀí¶Î¶ÔÓ¦µÄËùÓÐÂß¼­¶Î
+	//		2.åˆ é™¤å½“å‰ç‰©ç†æ®µå¯¹åº”çš„æ‰€æœ‰é€»è¾‘æ®µ
 	for (LxParagraphInDocIter pgph_it = ++pagraph_iter/*pagraph_iter*/; pgph_it != pargraph_end();)
 	{
 		/*pgph_it++;
 		if (pgph_it == pargraph_end()) break;*/
 		LxParagraphInDocIter temp_it = pgph_it;
 		++pgph_it;
-		//Èç¹û temp_it ËùÖ¸Âß¼­¶ÎÎª²¿·Ö¶ÎÔòÉ¾³ý£¬·ñÔòÍË³ö
+		//å¦‚æžœ temp_it æ‰€æŒ‡é€»è¾‘æ®µä¸ºéƒ¨åˆ†æ®µåˆ™åˆ é™¤ï¼Œå¦åˆ™é€€å‡º
 		if ((*temp_it)->get_offset_inner() == 0) break;
-		//É¾³ý¸ÃÂß¼­¶Î
+		//åˆ é™¤è¯¥é€»è¾‘æ®µ
 		ComposeParagraph* paragraph_to_delete = *temp_it;
 		(*(temp_it.get_page()))->remove_paragraph(temp_it.get_paragraph());
 		delete paragraph_to_delete;
@@ -924,7 +924,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 	}
 	}*/
 
-	//		3.ÖØÅÅµ±Ç°ÎïÀí¶Î
+	//		3.é‡æŽ’å½“å‰ç‰©ç†æ®µ
 	ComposeParagraph* composed_paragraph = *pgraph_cusr;
 	int y_offset = top_offset_current;
 	size_t index_global = index_begin;
@@ -969,8 +969,8 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 		compose_algom->compose(row_to_compose, paragraph, index_global, index_inner, font_tree, pDC);
 		if (y_offset + row_to_compose->get_height() > (*page_cusr)->get_top_pos() + LxPaper::pixel_height - LxPaper::bottom_margin)
 		{
-			//ÐÂ¼ÓÈëÐÐºó»áµ¼ÖÂ³¬Ô½µ±Ç°µÄÒ³·¶Î§
-			//1.1Èç¹ûµ±Ç°Ò³Îª×îºóÒ»Ò³£¬ÐÂ½¨Ò»¸öÒ³
+			//æ–°åŠ å…¥è¡ŒåŽä¼šå¯¼è‡´è¶…è¶Šå½“å‰çš„é¡µèŒƒå›´
+			//1.1å¦‚æžœå½“å‰é¡µä¸ºæœ€åŽä¸€é¡µï¼Œæ–°å»ºä¸€ä¸ªé¡µ
 			page_iter next_page = page_cusr;
 			++next_page;
 			if (next_page == end())
@@ -980,7 +980,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 				new_page->set_top_pos((*page_cusr)->get_top_pos() + LxPaper::pixel_height +
 					ViewWindow::GetViewWindowInstance()->border_height);
 			}
-			//1.2½«Ö®ºóµÄÂß¼­¶Î¶¼ÒÆÈëÏÂÒ»Ò³(++page_cusr)
+			//1.2å°†ä¹‹åŽçš„é€»è¾‘æ®µéƒ½ç§»å…¥ä¸‹ä¸€é¡µ(++page_cusr)
 			page_iter prev_page = page_cusr;
 			++page_cusr;
 
@@ -992,7 +992,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 				(*page_cusr)->add_paragraph(*deleted, 0);
 				(*prev_page)->remove_paragraph(deleted);
 			}
-			//1.3Èç¹ûµ±Ç°ÎªÎïÀí¶Î¶ÔÓ¦µÄµÚÒ»¸öÐÐ£¬ÔòÉ¾³ý¸ÃÂß¼­¶Î
+			//1.3å¦‚æžœå½“å‰ä¸ºç‰©ç†æ®µå¯¹åº”çš„ç¬¬ä¸€ä¸ªè¡Œï¼Œåˆ™åˆ é™¤è¯¥é€»è¾‘æ®µ
 			if (composed_paragraph->row_size() == 0)
 			{
 				delete *pgraph_cusr;
@@ -1003,22 +1003,22 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 				composed_paragraph->set_area(composed_paragraph->get_area_begin(), index_global - row_to_compose->size() - 1);
 				composed_paragraph->set_pos(composed_paragraph->get_top_pos(), (*(--composed_paragraph->end()))->get_bottom_pos());
 			}
-			//1.4ÏÈ¸üÐÂµ±Ç°Ò³ºÍÂß¼­¶ÎµÄÊôÐÔ
+			//1.4å…ˆæ›´æ–°å½“å‰é¡µå’Œé€»è¾‘æ®µçš„å±žæ€§
 			(*prev_page)->set_area((*prev_page)->get_area_begin(), index_global - row_to_compose->size() - 1);
 
-			//1.5¿ªÊ¼¿çÒ³£¬ÏÈÐÂ½¨Ò»¸öÂß¼­¶Î²¢ÉèÖÃ²¿·ÖÊôÐÔ
+			//1.5å¼€å§‹è·¨é¡µï¼Œå…ˆæ–°å»ºä¸€ä¸ªé€»è¾‘æ®µå¹¶è®¾ç½®éƒ¨åˆ†å±žæ€§
 			composed_paragraph = new ComposeParagraph();
 			composed_paragraph->set_offset_inner(index_inner - row_to_compose->size());
 			composed_paragraph->set_area(index_global - row_to_compose->size(), 0);
 			composed_paragraph->set_phy_paragraph(paragraph);
 
-			//1.6½«ÐÂ½¨µÄÂß¼­¶Î¼ÓÈëÐÂÒ³
+			//1.6å°†æ–°å»ºçš„é€»è¾‘æ®µåŠ å…¥æ–°é¡µ
 			(*page_cusr)->add_paragraph(composed_paragraph, 0);
 			composed_paragraph->set_parent_page(*page_cusr);
 			pgraph_cusr = (*page_cusr)->begin();
-			//1.7ÐÞ¸ÄÏÂÒ»Ò³ÏàÓ¦ÊôÐÔ
+			//1.7ä¿®æ”¹ä¸‹ä¸€é¡µç›¸åº”å±žæ€§
 			(*page_cusr)->set_area(composed_paragraph->get_area_begin(), (*page_cusr)->get_area_end());
-			//1.8½«ÐÂÐÐ¼ÓÈëµ½ÐÂ¶ÎÖÐ
+			//1.8å°†æ–°è¡ŒåŠ å…¥åˆ°æ–°æ®µä¸­
 			y_offset = (*page_cusr)->get_top_pos() + LxPaper::top_margin;
 			composed_paragraph->set_pos(y_offset, composed_paragraph->get_bottom_pos());
 			row_to_compose->set_top_pos(y_offset);
@@ -1032,7 +1032,7 @@ LxParagraphInDocIter ComposeDoc::modify(LxParagraphInDocIter pagraph_iter, row_i
 			y_offset += row_to_compose->get_height() + row_to_compose->get_external_leading();
 		}
 	}
-	//×îºó¸üÐÂ¶ÎµÄÄ©Î²ÊôÐÔ
+	//æœ€åŽæ›´æ–°æ®µçš„æœ«å°¾å±žæ€§
 	composed_paragraph->set_area(composed_paragraph->get_area_begin(), index_global - 1);
 	composed_paragraph->set_pos(composed_paragraph->get_top_pos(), (*(--composed_paragraph->end()))->get_bottom_pos());
 	(*page_cusr)->set_area((*page_cusr)->get_area_begin(), (*(--(*page_cusr)->end()))->get_area_end());
@@ -1065,7 +1065,7 @@ paragraph_iter ComposeDoc::do_logic_combine(ComposePage* page, paragraph_iter pa
 	return prev_pragraph;
 }
 
-//pagraph_iterÎªÖ¸ÏòmodifyËùÉú³ÉµÄ×îºóÒ»¸ö¶Î
+//pagraph_iterä¸ºæŒ‡å‘modifyæ‰€ç”Ÿæˆçš„æœ€åŽä¸€ä¸ªæ®µ
 void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 {
 	page_iter page_cusr = pagraph_iter.get_page();
@@ -1078,16 +1078,16 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 	{
 		for (; pgraph_cusr != (*page_cusr)->end();)
 		{
-			if ((*pgraph_cusr)->get_top_pos() == y_offset)		//Èç¹û¶ÎµÄÔ­Ê¼Î»ÖÃ²»±ä£¬Ôòµ÷Õû½áÊø
+			if ((*pgraph_cusr)->get_top_pos() == y_offset)		//å¦‚æžœæ®µçš„åŽŸå§‹ä½ç½®ä¸å˜ï¼Œåˆ™è°ƒæ•´ç»“æŸ
 				return;
-			//1.µ±Ç°Ò³»¹ÄÜÈÝÏÂÕû¸ö¶Î
+			//1.å½“å‰é¡µè¿˜èƒ½å®¹ä¸‹æ•´ä¸ªæ®µ
 			if ((*pgraph_cusr)->get_height() <= (*container_page)->get_top_pos() + LxPaper::pixel_height -
 				LxPaper::bottom_margin - y_offset)
 			{
-				//Æ½ÒÆ¸Ã¶Î
+				//å¹³ç§»è¯¥æ®µ
 				int offset_ = y_offset - (*pgraph_cusr)->get_top_pos();
 				(*pgraph_cusr)->set_pos(y_offset, y_offset + (*pgraph_cusr)->get_height());
-				//Æ½ÒÆ¸Ã¶ÎµÄÃ¿Ò»ÐÐ
+				//å¹³ç§»è¯¥æ®µçš„æ¯ä¸€è¡Œ
 				for (row_iter row_it = (*pgraph_cusr)->begin(); row_it != (*pgraph_cusr)->end(); ++row_it)
 				{
 					(*row_it)->set_top_pos((*row_it)->get_top_pos() + offset_);
@@ -1105,13 +1105,13 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 				}
 				else
 					++pgraph_cusr;
-				//¼ì²éÊÇ·ñÐèÒª½«¸Ã¶ÎÓëÉÏÒ»¸ö¶ÎÈÚºÏ
+				//æ£€æŸ¥æ˜¯å¦éœ€è¦å°†è¯¥æ®µä¸Žä¸Šä¸€ä¸ªæ®µèžåˆ
 				if ((*to_check_combine)->get_offset_inner() != 0 && to_check_combine != (*container_page)->begin())
 					do_logic_combine(*container_page, to_check_combine);
 			}
 			else
 			{
-				//1.3Èç¹ûµ±Ç°Ò³Îª×îºóÒ»Ò³£¬ÐÂ½¨Ò»¸öÒ³
+				//1.3å¦‚æžœå½“å‰é¡µä¸ºæœ€åŽä¸€é¡µï¼Œæ–°å»ºä¸€ä¸ªé¡µ
 				page_iter next_page = container_page;
 				++next_page;
 				if (next_page == end())
@@ -1122,17 +1122,17 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 						ViewWindow::GetViewWindowInstance()->border_height);
 					--next_page;
 				}
-				//2.µ±Ç°Ò³ÎÞ·¨ÈÝÄÉ¸Ã¶ÎµÄÈÎÒâÐÐ
+				//2.å½“å‰é¡µæ— æ³•å®¹çº³è¯¥æ®µçš„ä»»æ„è¡Œ
 				if ((*(*pgraph_cusr)->begin())->get_height() > (*container_page)->get_top_pos() + LxPaper::pixel_height -
 					LxPaper::bottom_margin - y_offset)
 				{
-					//Íê³Éµ±Ç°Ò³µÄÊôÐÔÐÞ¸Ä
+					//å®Œæˆå½“å‰é¡µçš„å±žæ€§ä¿®æ”¹
 					(*container_page)->set_area((*container_page)->get_area_begin(), (*pgraph_cusr)->get_area_begin() - 1);
-					//ÐÞ¸ÄÏÂÒ»Ò³²¿·ÖÊôÐÔ
+					//ä¿®æ”¹ä¸‹ä¸€é¡µéƒ¨åˆ†å±žæ€§
 					(*next_page)->set_area((*pgraph_cusr)->get_area_begin(), (*next_page)->get_area_end());
-					//ÐÞ¸Äµ±Ç° y_offset
+					//ä¿®æ”¹å½“å‰ y_offset
 					y_offset = (*next_page)->get_top_pos() + LxPaper::top_margin;
-					//Èç¹û¸Ã¶ÎÔÚÅÅ°æÒ³ÄÚ£¬Ôò½«¸Ã¶ÎºÍÖ®ºóÍ¬Ò³µÄ¶Î´Óµ±Ç°Ò³ÒÆµ½ÏÂÒ»Ò³²¢ÐÞ¸ÄÏàÓ¦µÄÊôÐÔ
+					//å¦‚æžœè¯¥æ®µåœ¨æŽ’ç‰ˆé¡µå†…ï¼Œåˆ™å°†è¯¥æ®µå’Œä¹‹åŽåŒé¡µçš„æ®µä»Žå½“å‰é¡µç§»åˆ°ä¸‹ä¸€é¡µå¹¶ä¿®æ”¹ç›¸åº”çš„å±žæ€§
 					if (page_cusr == container_page)
 					{
 						for (paragraph_iter reverse_it = --((*page_cusr)->end());;)
@@ -1156,10 +1156,10 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 					else
 						container_page = next_page;
 				}
-				//3.µ±Ç°Ò³ÄÜÈÝÏÂ²¿·Ö¶Î
+				//3.å½“å‰é¡µèƒ½å®¹ä¸‹éƒ¨åˆ†æ®µ
 				else
 				{
-					//½«µ±Ç°¶ÎÖ®ºóµÄËùÓÐ¶Î¶¼ÒÆÈëÏÂÒ»Ò³
+					//å°†å½“å‰æ®µä¹‹åŽçš„æ‰€æœ‰æ®µéƒ½ç§»å…¥ä¸‹ä¸€é¡µ
 					if (page_cusr == container_page)
 					{
 						for (paragraph_iter reverse_it = --((*page_cusr)->end()); reverse_it != pgraph_cusr;)
@@ -1171,7 +1171,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 							(*page_cusr)->remove_paragraph(deleted);
 						}
 					}
-					//¼ÆËãµ±Ç°¶ÎµÄÄÄÐ©ÐÐ±»ÒÆ³ý
+					//è®¡ç®—å½“å‰æ®µçš„å“ªäº›è¡Œè¢«ç§»é™¤
 					int height_allowed_ = (*container_page)->get_top_pos() + LxPaper::pixel_height -
 						LxPaper::bottom_margin - y_offset;
 					int height_ = 0;
@@ -1186,7 +1186,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 						height_ += (*row_it_)->get_external_leading();
 					}
 
-					//ÐÂ½¨Ò»¸ö¶Î²¢½«Ê£ÓàµÄÐÐ¼ÓÈëÆäÖÐ
+					//æ–°å»ºä¸€ä¸ªæ®µå¹¶å°†å‰©ä½™çš„è¡ŒåŠ å…¥å…¶ä¸­
 					ComposeParagraph* new_paragraph = new ComposeParagraph();
 					new_paragraph->set_area((*row_it_)->get_area_begin(), (*pgraph_cusr)->get_area_end());
 					new_paragraph->set_offset_inner((*row_it_)->get_area_begin() - (*pgraph_cusr)->get_area_begin() + (*pgraph_cusr)->get_offset_inner());
@@ -1197,7 +1197,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 					new_paragraph->set_phy_paragraph((*pgraph_cusr)->get_phy_paragraph());
 					new_paragraph->set_pos((*row_it_)->get_top_pos(), (*pgraph_cusr)->get_bottom_pos());
 
-					//µ÷Õûµ±Ç°Ò³ºÍ¶ÎµÄÊôÐÔ
+					//è°ƒæ•´å½“å‰é¡µå’Œæ®µçš„å±žæ€§
 					//(*container_page)->set_area( (*container_page)->get_area_begin(), (*row_it_)->get_area_begin() - 1 );
 					(*pgraph_cusr)->set_area((*pgraph_cusr)->get_area_begin(), (*row_it_)->get_area_begin() - 1);
 					row_it_--;
@@ -1211,13 +1211,13 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 						new_paragraph->add_row(*to_move);
 						(*pgraph_cusr)->remove_row(to_move);
 					}
-					//Èç¹û¶Î²»ÊôÓÚcontainer_page£¬ÔòÒÆÈë
-					//½«ÐÂ¶Î¼ÓÈëÏÂÒ»Ò³
+					//å¦‚æžœæ®µä¸å±žäºŽcontainer_pageï¼Œåˆ™ç§»å…¥
+					//å°†æ–°æ®µåŠ å…¥ä¸‹ä¸€é¡µ
 					if (page_cusr == container_page)
 						(*next_page)->add_paragraph(new_paragraph, 0);
 					else
 						(*page_cusr)->add_paragraph(new_paragraph, 1);
-					//ÔÚÏÂÒ»´Î¶ÎµÄÑ­»·ÖÐ»á×Ô¶¯Æ½ÒÆ¶Î
+					//åœ¨ä¸‹ä¸€æ¬¡æ®µçš„å¾ªçŽ¯ä¸­ä¼šè‡ªåŠ¨å¹³ç§»æ®µ
 				}
 			}
 		}
@@ -1226,7 +1226,7 @@ void ComposeDoc::relayout(LxParagraphInDocIter pagraph_iter)
 			break;
 		pgraph_cusr = (*page_cusr)->begin();
 	}
-	//´¦ÀíÍêËùÓÐÒ³ºó£¬É¾³ýcontainer_pageÖ®ºóµÄËùÓÐÒ³
+	//å¤„ç†å®Œæ‰€æœ‰é¡µåŽï¼Œåˆ é™¤container_pageä¹‹åŽçš„æ‰€æœ‰é¡µ
 	(*container_page)->set_area((*container_page)->get_area_begin(), (*(--(*container_page)->end()))->get_area_end());
 	container_page++;
 	for (; container_page != end();)
@@ -1265,7 +1265,7 @@ ComposePage::inner_row_iter ComposePage::rowiter_begin()
 	auto ite = (*paragraphs.begin())->end();
 	for (; itb != ite; itb++)
 	{
-		if ((*itb)->get_top_pos() > this->top_pos_global)	//ÕÒ³ö¸ÃÒ³µÄµÚÒ»¸öÐÐ¡£Èç¹ûÊ×¸ö¶ÎÊÇ¿çÒ³µÄ¶Î
+		if ((*itb)->get_top_pos() > this->top_pos_global)	//æ‰¾å‡ºè¯¥é¡µçš„ç¬¬ä¸€ä¸ªè¡Œã€‚å¦‚æžœé¦–ä¸ªæ®µæ˜¯è·¨é¡µçš„æ®µ
 			break;
 	}
 	ComposePage::inner_row_iter it(this, paragraphs.begin(), itb);
@@ -1279,7 +1279,7 @@ ComposePage::inner_row_iter ComposePage::rowiter_end()
 		auto ite = paragraphs.back()->end();
 		for (; itb != ite; itb++)
 		{
-			if ((*itb)->get_top_pos() > this->top_pos_global + LxPaper::pixel_height)	//ÕÒ³ö¸ÃÒ³µÄ×îºóÒ»¸öÐÐ¡£Èç¹û×îºóÒ»¸ö¶ÎÊÇ¿çÒ³µÄ¶Î
+			if ((*itb)->get_top_pos() > this->top_pos_global + LxPaper::pixel_height)	//æ‰¾å‡ºè¯¥é¡µçš„æœ€åŽä¸€ä¸ªè¡Œã€‚å¦‚æžœæœ€åŽä¸€ä¸ªæ®µæ˜¯è·¨é¡µçš„æ®µ
 				break;
 		}
 		itb--;
@@ -1319,7 +1319,7 @@ void ComposePage::FlushOwnArea(CDC* pDC)
 		ViewWindow::GetViewWindowInstance()->offset_x,
 		this->get_top_pos() + LxPaper::pixel_height - ViewWindow::GetViewWindowInstance()->offset_y);
 	FlushRect(pDC, &rect, LxPaper::paper_back_color_s);
-	//»æÖÆËÄ¸ö½ÇµÄ¶¨Î»±êÊ¶
+	//ç»˜åˆ¶å››ä¸ªè§’çš„å®šä½æ ‡è¯†
 	pDC->SetDCPenColor(RGB(255, 0, 0));
 	pDC->MoveTo(rect.left + LxPaper::left_margin / 2, rect.top + LxPaper::top_margin);
 	pDC->LineTo(rect.left + LxPaper::left_margin, rect.top + LxPaper::top_margin);
@@ -1409,7 +1409,11 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 			pDC->SelectObject(font);
 			pDC->GetTextMetrics(&trx);
 			pDC->SetTextColor(RGB(150, 150, 150));
-			pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"¡ý", 1);
+			//pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"â†©", 1);
+			CSize size = pDC->GetTextExtent(L"â†©", 1);
+			size.cx += size.cx / 3;
+			CRect rect(x, top_offset_session + trx.tmDescent - base_top, x + size.cx, get_bottom_pos());
+			pDC->DrawText(L"â†©", &rect, DT_CENTER);
 		}
 		return;
 	}
@@ -1437,7 +1441,11 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 	if (bParaFlag)
 	{
 		pDC->SetTextColor(RGB(150, 150, 150));
-		pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"¡ý", 1);
+		//pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"â†©", 1);
+		CSize size = pDC->GetTextExtent(L"â†©", 1);
+		size.cx += size.cx / 3;
+		CRect rect(x, top_offset_session + trx.tmDescent - base_top, x + size.cx, get_bottom_pos());
+		pDC->DrawText(L"â†©", &rect, DT_CENTER);
 	}
 }
 //do not need again

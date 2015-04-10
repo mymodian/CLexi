@@ -50,7 +50,10 @@ GD_proxy_base* LxContexRender::get_gd_proxy()
 //border render,draw border and the base render which is decorated.
 LxBorderRender::LxBorderRender(LxRender* base_render)
 	: base_render_(base_render) {}
-LxBorderRender::~LxBorderRender() {}
+LxBorderRender::~LxBorderRender()
+{
+	delete base_render_;
+}
 
 void LxBorderRender::DrawPageSpace(CDC* pDC, int bottom_pos, int pages_space)
 {
@@ -147,7 +150,10 @@ GD_proxy_base* LxBorderRender::get_gd_proxy()
 //scroll render,draw scrollbar and the base render which is decorated.
 LxScrollRender::LxScrollRender(LxRender* base_render)
 	: base_render_(base_render) {}
-LxScrollRender::~LxScrollRender() {}
+LxScrollRender::~LxScrollRender()
+{
+	delete base_render_;
+}
 
 void LxScrollRender::set_scroll_size_total(int width_total, int height_total)
 {

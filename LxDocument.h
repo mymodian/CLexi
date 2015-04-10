@@ -1,5 +1,6 @@
 #include <list>
 #include <iostream>
+#include "LxCommon.h"
 #include "LxContextBuf.h"
 
 #ifndef __LEXI_DOCUMENT_H
@@ -37,13 +38,13 @@ private:
 class Paragraph
 {
 public:
-	Paragraph() : compose_algom(nullptr) {}
+	Paragraph() : compose_algom_type_(ComposeAlgoType::COMPOSE_ALGO_SIMPLE) {}
 	virtual ~Paragraph() {}
-	void SetComposeAlgom(LxComposeAlgom* compose_algom)
+	void SetComposeAlgom(ComposeAlgoType compose_algom_type)
 	{
-		this->compose_algom = compose_algom;
+		this->compose_algom_type_ = compose_algom_type;
 	}
-	LxComposeAlgom* GetComposeAlgom() { return compose_algom; }
+	LxComposeAlgom* GetComposeAlgom();
 public:
 	inline void store_stream(FILE* file)
 	{
@@ -74,7 +75,7 @@ private:
 	//how to store the paragraph context string
 	//RandomAccessStrBuf context;
 	GeneralStrBuf context;
-	LxComposeAlgom* compose_algom;
+	ComposeAlgoType compose_algom_type_;
 };
 
 #endif

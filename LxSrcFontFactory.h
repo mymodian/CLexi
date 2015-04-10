@@ -43,6 +43,12 @@ public:
 	{
 		return *(font_list.begin() + src_index - 1);
 	}
+	~SrcFontFactory()
+	{
+		for (auto font : font_list)
+			delete font;
+		font_list.clear();
+	}
 public:
 	static SrcFontFactory* GetFontFactInstance()
 	{
