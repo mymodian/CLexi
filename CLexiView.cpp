@@ -243,7 +243,7 @@ BOOL CCLexiView::PreTranslateMessage(MSG* pMsg)
 BOOL CCLexiView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	
+
 	return CScrollView::OnSetCursor(pWnd, nHitTest, message);
 }
 
@@ -321,10 +321,10 @@ void CCLexiView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		if (IMECharLeft == 0)
 		{
 			HIMC himc = ImmGetContext(this->m_hWnd);
-			TCHAR* result_str = new TCHAR[IMECharSize/2];
+			TCHAR* result_str = new TCHAR[IMECharSize / 2];
 			ImmGetCompositionString(himc, GCS_RESULTSTR, (BYTE*)result_str, IMECharSize);
 			ImmReleaseContext(this->m_hWnd, himc);
-			this->insert(result_str, IMECharSize/2);
+			this->insert(result_str, IMECharSize / 2);
 			delete[] result_str;
 		}
 	}
@@ -381,7 +381,7 @@ void CCLexiView::OnSize(UINT nType, int cx, int cy)
 	CRect rect;
 	GetClientRect(&rect);
 	doc_view_controler.modify_view_size(rect.Width(), rect.Height());
-	
+
 	if (!bInitialized)
 		return;
 	CDC* pDC = NULL;
@@ -411,7 +411,7 @@ void CCLexiView::ExecuteNormalTask(Task<CDC>* task, CDC* pdc)
 
 	dcMem.DeleteDC();
 	bmp.DeleteObject();
-	if(!pdc)
+	if (!pdc)
 		ReleaseDC(pDC);
 }
 

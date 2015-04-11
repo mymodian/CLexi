@@ -17,7 +17,7 @@ LxLocateCmd::LxLocateCmd(int point_x, int point_y)
 
 void LxLocateCmd::Excute(CDC* pDC)
 {
-	int doc_inner_point_x = point_x_ - ViewWindow::GetViewWindowInstance()->border_width_left + 
+	int doc_inner_point_x = point_x_ - ViewWindow::GetViewWindowInstance()->border_width_left +
 		ViewWindow::GetViewWindowInstance()->offset_x;
 	int doc_inner_point_y = point_y_ + ViewWindow::GetViewWindowInstance()->offset_y;
 
@@ -212,7 +212,7 @@ LxSectionReplaceCmd::~LxSectionReplaceCmd()
 }
 void LxSectionReplaceCmd::Excute(CDC* pDC)
 {
-	doc_view_ctrl_->replace_section(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, 
+	doc_view_ctrl_->replace_section(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_,
 		cs_, len_, src_font_, src_color_);
 	doc_view_ctrl_->draw_complete(pDC);
 
@@ -314,8 +314,18 @@ LxCommandMgr::LxCommandMgr()
 }
 LxCommandMgr::~LxCommandMgr()
 {
-	for (LxCommand* it : command_list)
+	for (auto it : command_list)
 		delete it;
+}
+void LxCommandMgr::reset()
+{
+	for (auto it : command_list)
+		delete it;
+	command_list.clear();
+	LxCommand* empty_cmd = new LxCommand();
+	empty_cmd->add_child_cmd(new LxEmptyCmd());
+	command_list.push_back(empty_cmd);
+	curr_ = command_list.begin();
 }
 void LxCommandMgr::insert_cmd(LxCommand* lx_cmd)
 {

@@ -42,13 +42,13 @@ public:
 	void remove(size_t position_begin, size_t position_end);
 	void modify_font(size_t position_begin, size_t position_end, size_t font_src_index);
 	void modify_color(size_t position_begin, size_t position_end, size_t color_src_index);
-//操作物理文档
+	//操作物理文档
 public:
 	Paragraph* insert_null_phy_paragraph(int index);
 	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
 	size_t merge_phy_paragraph(size_t index_para2);
 	void remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
-//排版相关
+	//排版相关
 public:
 	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
 	void compose_splited_paragraph(CDC* pDC, size_t phy_paragraph_index, size_t offset_inner, Paragraph* seprated_phy_pgh);
@@ -69,7 +69,7 @@ public:
 	void modify_mouse_vscroll(CDC* pDC, int vdistanse);
 	void calc_font_color();
 
-//排版相关-------在 section != NULL 下的操作
+	//排版相关-------在 section != NULL 下的操作
 public:
 	void modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
 	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
@@ -80,8 +80,8 @@ public:
 		size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
 	void section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 		size_t section_end_index, size_t section_end_pgh);
-	
-//member for test and debugger.
+
+	//member for test and debugger.
 public:
 	ComposeDoc* get_com_doc() { return &compose_doc; }
 	void get_cursor(LxCursor& _cursor)

@@ -96,7 +96,7 @@ public:
 public:
 	bool empty() { return rows.empty(); }
 	void add_row(ComposeRow* row);
-	void add_row(ComposeRow* row,int index);
+	void add_row(ComposeRow* row, int index);
 	void remove_row(row_iter row_it) { rows.erase(row_it); }
 	void set_phy_paragraph(Paragraph* paragraph) { this->paragraph = paragraph; }
 	Paragraph* get_phy_paragraph() { return paragraph; }
@@ -153,7 +153,7 @@ public:
 	~ComposePage();
 	bool empty() { return paragraphs.empty(); }
 	void add_paragraph(ComposeParagraph* paragraph);
-	void add_paragraph(ComposeParagraph* paragraph,int index);
+	void add_paragraph(ComposeParagraph* paragraph, int index);
 	void remove_paragraph(paragraph_iter it) { paragraphs.erase(it); }
 	void set_area(size_t index_begin, size_t index_end)
 	{
@@ -243,7 +243,7 @@ public:
 	size_t current_phypgh_index(LxCursor& cursor);
 	int total_width();
 	int total_height();
-// only for test and debugger
+	// only for test and debugger
 public:
 	bool self_check();
 private:

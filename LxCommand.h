@@ -1,7 +1,7 @@
 /**
 	当前存在的问题：所有操作如果要实现undo和redo，必定不能在execute和undo的实现中直接使用cursor。
 	然而当前的诸多操作都是直接使用cursor。尽早将接口改过来，将cursor和操作的实现解耦
-*/
+	*/
 
 #include "stdafx.h"
 #include "LxComposeDoc.h"
@@ -197,7 +197,7 @@ class LxSectionReplaceCmd : public LxCommandBase
 {
 public:
 	LxSectionReplaceCmd() = delete;
-	LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, 
+	LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh,
 		TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
 	virtual ~LxSectionReplaceCmd();
 public:
@@ -270,6 +270,7 @@ public:
 	LxCommandMgr();
 	~LxCommandMgr();
 
+	void reset();
 	void insert_cmd(LxCommand* lx_cmd);
 	LxCommand* get_redo_cmd();
 	LxCommand* get_undo_cmd();

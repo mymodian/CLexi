@@ -467,7 +467,7 @@ int LxDcViCtl::modify_cursor_offset()
 	}
 	else if (cursor.point_x > ViewWindow::GetViewWindowInstance()->offset_x + ViewWindow::GetViewWindowInstance()->width)
 	{
-		int new_offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width + 
+		int new_offset_x = cursor.point_x - ViewWindow::GetViewWindowInstance()->width +
 			ViewWindow::GetViewWindowInstance()->width / 6;
 		int offset_x_max = compose_doc.total_width() - ViewWindow::GetViewWindowInstance()->width;
 		ViewWindow::GetViewWindowInstance()->offset_x = new_offset_x > offset_x_max ? offset_x_max : new_offset_x;
@@ -535,7 +535,7 @@ void LxDcViCtl::remove_phy_section(size_t section_begin_index, size_t section_be
 	if (inner_index_b < (*phy_pgh_iter_b)->size())
 		(*phy_pgh_iter_b)->Delete(inner_index_b, (*phy_pgh_iter_b)->size() - 1);
 	if (inner_index_e < (*phy_pgh_iter_e)->size())
-		(*phy_pgh_iter_b)->Insert(inner_index_b, (*phy_pgh_iter_e)->get_context_ptr() + inner_index_e, 
+		(*phy_pgh_iter_b)->Insert(inner_index_b, (*phy_pgh_iter_e)->get_context_ptr() + inner_index_e,
 		(*phy_pgh_iter_e)->size() - inner_index_e);
 
 	document.remove_paragraphs(section_begin_pgh + 1, section_end_pgh);
@@ -653,6 +653,7 @@ void LxDcViCtl::usr_mouse_move(CDC* pDC, int x, int y)
 }
 void LxDcViCtl::usr_mouse_lbutton_up(CDC* pDC, int x, int y)
 {
+	if (!section.trace) return;
 	LxCommand* locate_cmd = new LxCommand();
 	locate_cmd->add_child_cmd(new LxLocateCmd(x, y));
 	locate_cmd->set_dvctl(this);
@@ -663,24 +664,25 @@ void LxDcViCtl::usr_mouse_lbutton_up(CDC* pDC, int x, int y)
 }
 void LxDcViCtl::usr_mouse_rbutton_down(CDC* pDC, int x, int y)
 {
-
+	section.trace = false;
 }
 void LxDcViCtl::usr_mouse_rbutton_up(CDC* pDC, int x, int y)
 {
-
+	section.trace = false;
 }
 
 void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
 {
+	section.trace = false;
 	ASSERT(section.active());
 	size_t src_font = SrcFontFactory::GetFontFactInstance()->insert_src_font(log_font);
 	////记录section的信息
 	size_t index_begin_g = section.cursor_begin.get_index_global();
 	size_t index_end_g = section.cursor_end.get_index_global();
-	
+
 	LxCommand* modify_section_font_cmd = new LxCommand();
 	modify_section_font_cmd->add_child_cmd(
-		new LxModifyFontCmd(index_begin_g, compose_doc.current_phypgh_index(section.cursor_begin), 
+		new LxModifyFontCmd(index_begin_g, compose_doc.current_phypgh_index(section.cursor_begin),
 		index_end_g, compose_doc.current_phypgh_index(section.cursor_end), src_font));
 	modify_section_font_cmd->set_dvctl(this);
 	modify_section_font_cmd->Excute(pDC);
@@ -689,6 +691,7 @@ void LxDcViCtl::usr_font_change(CDC* pDC, LOGFONT log_font)
 }
 void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 {
+	section.trace = false;
 	ASSERT(section.active());
 	LxCursor* _begin = &(section.cursor_begin);
 	LxCursor* _end = &(section.cursor_end);
@@ -708,6 +711,7 @@ void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 }
 void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORREF src_color)
 {
+	section.trace = false;
 	if (!section.active())				//选择区域无效
 	{
 		LxCommand* insert_cmd = new LxCommand();
@@ -729,6 +733,7 @@ void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORR
 }
 void LxDcViCtl::usr_wrap(CDC* pDC)
 {
+	section.trace = false;
 	if (!section.active())				//选择区域无效
 	{
 		if (cursor.tail_of_paragraph() || cursor.head_of_paragraph())
@@ -767,6 +772,7 @@ void LxDcViCtl::usr_wrap(CDC* pDC)
 }
 void LxDcViCtl::usr_backspace(CDC* pDC)
 {
+	section.trace = false;
 	if (!section.active())				//选择区域无效
 	{
 		if (cursor.head_of_paragraph())		//物理段首
@@ -817,6 +823,7 @@ void LxDcViCtl::usr_backspace(CDC* pDC)
 }
 void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
 {
+	section.trace = false;
 	LxCommand* move_cmd = new LxCommand();
 	move_cmd->add_child_cmd(new LxMoveCmd(direction));
 	move_cmd->set_dvctl(this);
