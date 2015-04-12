@@ -911,6 +911,15 @@ void TreeBase::build_from_stream(FILE* file)
 	}
 }
 
+void TreeBase::get_src_list_still_using(std::set<size_t>& font_list_still_using)
+{
+	node_leaf* head = src_head_;
+	while (head != NULL)
+	{
+		font_list_still_using.insert(head->src_index);
+		head = head->right;
+	}
+}
 void TreeBase::print_leafs()
 {
 	node_leaf* head = src_head_;

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <set>
 using namespace std;
 
 struct node_branch
@@ -48,6 +49,7 @@ public:
 	void print_hole_tree();
 	void store_stream(FILE* file);
 	void build_from_stream(FILE* file);
+	void get_src_list_still_using(std::set<size_t>& font_list_still_using);
 protected:
 	void partial_clear(node_branch* parent);
 	void show(node_branch* parent, int whitspace, vector<int>& IsEnd);

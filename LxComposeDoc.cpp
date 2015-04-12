@@ -63,7 +63,7 @@ size_t ComposeDoc::current_phypgh_index(LxCursor& cursor)
 	for (auto pghit = phy_document->begin(); pghit != phy_document->end(); ++pghit, ++index)
 		if (*pghit == phy_pgh)
 			return index;
-	ASSERT(index < phy_document->size());
+	ASSERT(index < phy_document->pgh_size());
 	return index;
 }
 

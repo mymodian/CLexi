@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnApplicationLook)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
 	ON_WM_SYSCOMMAND()
+//	ON_COMMAND(ID_FILE_SAVE_AS, &CMainFrame::OnFileSaveAs)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -192,3 +193,10 @@ void CMainFrame::OnSysCommand(UINT nID, LPARAM lParam)
 		((CCLexiView*)(GetActiveView()))->notify_recovery();
 	}
 }
+
+
+//void CMainFrame::OnFileSaveAs()
+//{
+//	// TODO:  在此添加命令处理程序代码
+//	AfxMessageBox(L"save as");
+//}

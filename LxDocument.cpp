@@ -12,10 +12,37 @@ Document::~Document()
 	paragraph_list.clear();
 }
 
+void Document::clear()
+{
+	for (auto pgh : paragraph_list)
+		delete pgh;
+	paragraph_list.clear();
+}
+
 void Document::store_stream(FILE* file)
 {
-	for(auto it=paragraph_list.begin();it != paragraph_list.end();it++)
-		(*it)->store_stream(file);
+	store_stream_int(file, paragraph_list.size());
+	for (auto pgh : paragraph_list)
+		pgh->store_stream(file);
+}
+
+void Document::build_from_stream(FILE* file)
+{
+	int pgh_cnt = read_stream_int(file);
+	for (int i = 0; i < pgh_cnt; i++)
+	{
+		Paragraph* pgh = new Paragraph();
+		add_paragraph(pgh);
+		pgh->build_from_stream(file);
+	}
+}
+
+size_t Document::size()
+{
+	size_t size_total = 0;
+	for (auto pgh : paragraph_list)
+		size_total += pgh->size();
+	return size_total;
 }
 
 void Document::add_paragraph(Paragraph* paragraph)
@@ -32,7 +59,7 @@ void Document::insert_paragraph(Paragraph* paragraph,int index)
 
 size_t Document::get_offset_inner(size_t index_global, size_t pgh_index)
 {
-	ASSERT(pgh_index < size());
+	ASSERT(pgh_index < pgh_size());
 	auto it = begin();
 	size_t _offset = 0;
 	for (int i = 0; i < pgh_index; ++i, ++it)

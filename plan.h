@@ -1,16 +1,19 @@
 /**
-Attention!! 注意许多操作不仅仅会改变排版文档，还会改变 font_trrr 和 color_tree.
+Attention!! 注意许多操作不仅仅会改变排版文档，还会改变 font_tree 和 color_tree.
 next to do:
-	1.无选择区域的情况下的删除操作						done
+	1.无选择区域的情况下的删除操作						 done
 		1.1删除某一个物理段                                     done
 		1.2将某个物理段与她之前的物理段合并       done
-	2.完成保存和打开功能                                        have the solution
+	2.完成保存和打开功能                                        done
 	3.添加滚动条														 done
 	4.未选择区域下的字体和颜色设置						 done
 	5.选择区域的显示(物理变化已实现)					 done
-	6.选择区域下的颜色设置									 done next to lack_command
+	6.选择区域下的颜色设置									 done
 	7.选择区域下的字体设置									 done
-	8.选择区域下的删除、插入、回车						 next to do 
+	8.选择区域下的删除、插入、回车						 done
+	9.重构所有可能需要重构的命令的实现				 now to do
+	9.ctrl+z,ctrl+y undo和redo							 next to do
+	10.ctrl+c,ctrl+x,ctrl+v 复制、剪切、粘贴		 next to do
 */
 
 

@@ -5,6 +5,8 @@
 #define __LEXI_CONTEXT_BUF_H
 #define TRIVAL_STR_BUF_CAPACITY		50
 
+#include "LxCommon.h"
+
 class ContextBuf
 {
 public:
@@ -40,8 +42,17 @@ public:
 public:
 	inline void store_stream(FILE* file)
 	{
-		if( ! str_buf.empty() )
-			fwrite(&str_buf[0], sizeof(TCHAR), str_buf.size(), file);
+		store_stream_int(file, str_buf.size());
+		if (!str_buf.empty())
+			fwrite(&str_buf[0], 1, sizeof(TCHAR)*str_buf.size(), file);
+	}
+	inline void build_from_stream(FILE* file)
+	{
+		int str_size = read_stream_int(file);
+		if (str_size == 0)
+			return;
+		str_buf.resize(str_size);
+		fread(&str_buf[0], 1, sizeof(TCHAR)*str_size, file);
 	}
 public:
 	const TCHAR* get_context_ptr() const { return &str_buf[0]; }

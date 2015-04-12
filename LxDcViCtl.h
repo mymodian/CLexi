@@ -18,6 +18,10 @@ public:
 	LxDcViCtl();
 	~LxDcViCtl();
 	void init(CDC* pDC);
+	void init(CDC* pDC, FILE* file);
+	void clear();
+	void store_stream(FILE* file);
+	void build_from_stream(FILE* file);
 	//ÓÃ»§²Ù×÷
 public:
 	void usr_mouse_lbutton_down(CDC* pDC, int x, int y);

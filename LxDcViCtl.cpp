@@ -9,6 +9,66 @@ LxDcViCtl::~LxDcViCtl()
 		delete render;
 }
 
+void LxDcViCtl::clear()
+{
+	document.clear();
+	compose_doc.clear();
+	font_tree.clear();
+	color_tree.clear();
+	lx_command_mgr.reset();
+	SrcFontFactory::GetFontFactInstance()->clear();
+	if (render)
+		delete render;
+	render = nullptr;
+}
+
+void LxDcViCtl::store_stream(FILE* file)
+{
+	document.store_stream(file);
+	std::set<size_t> font_list_still_using;
+	font_tree.get_src_list_still_using(font_list_still_using);
+	SrcFontFactory::GetFontFactInstance()->store_stream(file, font_list_still_using);
+	font_tree.store_stream(file);
+	color_tree.store_stream(file);
+}
+
+void LxDcViCtl::build_from_stream(FILE* file)
+{
+	document.build_from_stream(file);
+	SrcFontFactory::GetFontFactInstance()->build_from_stream(file);
+	font_tree.build_from_stream(file);
+	color_tree.build_from_stream(file);
+}
+
+void LxDcViCtl::init(CDC* pDC, FILE* file)
+{
+	clear();
+	build_from_stream(file);
+	CFont* font = new CFont;
+	font->CreateFont(-18, 0, 0, 0, 100, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_SWISS, L"Consolas");
+	LOGFONT logfont;
+	font->GetLogFont(&logfont);
+	default_font_index = SrcFontFactory::GetFontFactInstance()->insert_src_font(logfont);
+	default_color_index = RGB(0, 50, 150);
+	delete font;
+
+	compose_doc.AttachColorInfo(&color_tree);
+	compose_doc.AttachFontInfo(&font_tree);
+	compose_doc.AttachPhyDoc(&document);
+
+	compose_doc.compose_complete(pDC);
+
+	compose_doc.calc_cursor(cursor, 0, *document.begin(), pDC);
+	section.cursor_begin = cursor;
+	section.cursor_end = cursor;
+	section.trace = false;
+
+	gd_proxy.init();
+	calc_font_color();
+	render = new LxScrollRender(new LxBorderRender(new LxContexRender(&compose_doc, &gd_proxy)));
+}
+
 void LxDcViCtl::init(CDC* pDC)
 {
 	CFont* font = new CFont;

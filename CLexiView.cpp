@@ -46,6 +46,9 @@ BEGIN_MESSAGE_MAP(CCLexiView, CScrollView)
 	ON_COMMAND(ID_SET_FONT, &CCLexiView::OnSetFont)
 	ON_COMMAND(ID_SET_COLOR, &CCLexiView::OnSetColor)
 	ON_WM_SYSCOMMAND()
+	ON_COMMAND(ID_FILE_SAVE_AS, &CCLexiView::OnFileSaveAs)
+	ON_COMMAND(ID_FILE_SAVE, &CCLexiView::OnFileSave)
+	ON_COMMAND(ID_FILE_OPEN, &CCLexiView::OnFileOpen)
 END_MESSAGE_MAP()
 
 // CCLexiView 构造/析构
@@ -565,4 +568,57 @@ void CCLexiView::OnSysCommand(UINT nID, LPARAM lParam)
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
 
 	CScrollView::OnSysCommand(nID, lParam);
+}
+
+
+void CCLexiView::OnFileSaveAs()
+{
+	CString filter = L"文本文件(*.txt)|*.txt||";
+	CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY, filter);
+	if (dlg.DoModal() == IDOK)
+	{
+		CString str = dlg.GetPathName();
+		USES_CONVERSION;
+		FILE* file;
+		fopen_s(&file, W2A(str), "wb+");
+		doc_view_controler.store_stream(file);
+		fclose(file);
+	}
+}
+
+
+void CCLexiView::OnFileSave()
+{
+	CString filter = L"文本文件(*.txt)|*.txt||";
+	CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY, filter);
+	if (dlg.DoModal() == IDOK)
+	{
+		CString str = dlg.GetPathName();
+		USES_CONVERSION;
+		FILE* file;
+		fopen_s(&file, W2A(str), "wb+");
+		doc_view_controler.store_stream(file);
+		fclose(file);
+	}
+}
+
+
+void CCLexiView::OnFileOpen()
+{
+	CString filter = L"文本文件(*.txt)|*.txt||";
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, filter);
+	if (dlg.DoModal() == IDOK)
+	{
+		CString str = dlg.GetPathName();
+		USES_CONVERSION;
+		FILE* file;
+		fopen_s(&file, W2A(str), "rb");
+		CDC* pDC = GetDC();
+		doc_view_controler.init(pDC, file);
+		ViewWindow::GetViewWindowInstance()->offset_x = 0;
+		ViewWindow::GetViewWindowInstance()->offset_y = 0;
+		doc_view_controler.draw_complete(pDC);
+		ReleaseDC(pDC);
+		fclose(file);
+	}
 }

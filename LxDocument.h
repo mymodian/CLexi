@@ -15,13 +15,16 @@ class Document
 public:
 	Document();
 	virtual ~Document();
+	void clear();
 	contex_pgh_iter begin() { return paragraph_list.begin(); }
 	contex_pgh_iter end() { return paragraph_list.end(); }
 	size_t get_offset_inner(size_t index_global, size_t pgh_index);
 	Paragraph* get_pgh(int index);
-	size_t size() { return paragraph_list.size(); }
+	size_t pgh_size() { return paragraph_list.size(); }
+	size_t size();
 public:
 	void store_stream(FILE* file);
+	void build_from_stream(FILE* file);
 	void add_paragraph(Paragraph* paragraph);
 	void insert_paragraph(Paragraph* paragraph,int index);
 	void insert_paragraph(Paragraph* paragraph, contex_pgh_iter pos);
@@ -40,7 +43,7 @@ class Paragraph
 public:
 	Paragraph() : compose_algom_type_(ComposeAlgoType::COMPOSE_ALGO_SIMPLE) {}
 	virtual ~Paragraph() {}
-	void SetComposeAlgom(ComposeAlgoType compose_algom_type)
+	inline void SetComposeAlgom(ComposeAlgoType compose_algom_type)
 	{
 		this->compose_algom_type_ = compose_algom_type;
 	}
@@ -48,7 +51,13 @@ public:
 public:
 	inline void store_stream(FILE* file)
 	{
+		store_stream_int(file, compose_algom_type_);
 		context.store_stream(file);
+	}
+	inline void build_from_stream(FILE* file)
+	{
+		this->SetComposeAlgom((ComposeAlgoType)read_stream_int(file));
+		context.build_from_stream(file);
 	}
 public:
 	const TCHAR* get_context_ptr() const { return context.get_context_ptr(); }

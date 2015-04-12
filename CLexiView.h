@@ -106,6 +106,9 @@ public:
 	afx_msg void OnSetFont();
 	afx_msg void OnSetColor();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnFileSaveAs();
+	afx_msg void OnFileSave();
+	afx_msg void OnFileOpen();
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

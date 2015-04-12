@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include "stdafx.h"
 using namespace std;
 
@@ -49,6 +50,9 @@ public:
 			delete font;
 		font_list.clear();
 	}
+	void store_stream(FILE* file, std::set<size_t>& font_list_still_using);
+	void build_from_stream(FILE* file);
+	void clear();
 public:
 	static SrcFontFactory* GetFontFactInstance()
 	{
@@ -56,6 +60,8 @@ public:
 			lpViewWindowInstance = new SrcFontFactory();
 		return lpViewWindowInstance;
 	}
+	static void store_stream_logfont(FILE* file, LOGFONT& logfont);
+	static void build_stream_logfont(FILE* file, LOGFONT& logfont);
 private:
 	static SrcFontFactory* lpViewWindowInstance;
 	map<LOGFONT, size_t, FontLessCmp> font_map;
