@@ -53,6 +53,12 @@ void LxDcViCtl::init(CDC* pDC, FILE* file)
 	default_color_index = RGB(0, 50, 150);
 	delete font;
 
+	if (font_tree.empty() && color_tree.empty())
+	{
+		font_tree.insert(0, 0, default_font_index);
+		color_tree.insert(0, 0, default_color_index);
+	}
+
 	compose_doc.AttachColorInfo(&color_tree);
 	compose_doc.AttachFontInfo(&font_tree);
 	compose_doc.AttachPhyDoc(&document);
