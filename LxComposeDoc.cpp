@@ -1412,7 +1412,7 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 			//pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"↩", 1);
 			CSize size = pDC->GetTextExtent(L"↩", 1);
 			size.cx += size.cx / 3;
-			CRect rect(x, top_offset_session + trx.tmDescent - base_top, x + size.cx, get_bottom_pos());
+			CRect rect(x, top_offset_session + baseline_offset_inner - trx.tmAscent - base_top, x + size.cx, get_bottom_pos());
 			pDC->DrawText(L"↩", &rect, DT_CENTER);
 		}
 		return;
@@ -1444,7 +1444,7 @@ void ComposeRow::Draw(CDC* pDC, TreeBase* font_tree, TreeBase* color_tree, Parag
 		//pDC->TextOut(x, top_offset_session + trx.tmDescent - base_top, L"↩", 1);
 		CSize size = pDC->GetTextExtent(L"↩", 1);
 		size.cx += size.cx / 3;
-		CRect rect(x, top_offset_session + trx.tmDescent - base_top, x + size.cx, get_bottom_pos());
+		CRect rect(x, top_offset_session + baseline_offset_inner - trx.tmAscent - base_top, x + size.cx, get_bottom_pos());
 		pDC->DrawText(L"↩", &rect, DT_CENTER);
 	}
 }
