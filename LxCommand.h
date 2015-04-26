@@ -68,17 +68,18 @@ class LxInsertCmd : public LxCommandBase
 public:
 	LxInsertCmd() = delete;
 	virtual ~LxInsertCmd() = default;
-	LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
-	LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color);
+	LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
 private:
 	TCHAR* cs_;
 	size_t len_;
-	size_t ins_pos_;
 	size_t src_font_;
 	COLORREF src_color_;
+	size_t phy_pgh_index_;
+	size_t pos_global_;
+	size_t pos_inner_;
 };
 
 class LxInsertPhyParagraphCmd : public LxCommandBase

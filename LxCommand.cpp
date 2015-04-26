@@ -25,12 +25,8 @@ void LxLocateCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->calc_font_color();
 }
 
-LxInsertCmd::LxInsertCmd(size_t ins_pos, size_t src_font, COLORREF src_color)
-	: ins_pos_(ins_pos), src_font_(src_font), src_color_(src_color)
-{
-}
-LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color)
-	: cs_(cs), len_(len), src_font_(src_font), src_color_(src_color) {}
+LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
+	: cs_(cs), len_(len), src_font_(src_font), src_color_(src_color), phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner) {}
 void LxInsertCmd::Excute(CDC* pDC)
 {
 	//获取插入前的状态信息 only for test and debugger
@@ -38,7 +34,7 @@ void LxInsertCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->get_cursor(cursor);
 	std::cout << cursor.index_inner <<endl;*/
 	///////////////////////////////////////////
-	doc_view_ctrl_->insert(cs_, len_, src_font_, src_color_);
+	doc_view_ctrl_->insert(cs_, len_, src_font_, src_color_, phy_pgh_index_, pos_global_, pos_inner_);
 	doc_view_ctrl_->modify_layout(pDC, len_);
 	doc_view_ctrl_->draw_complete(pDC);
 	doc_view_ctrl_->calc_font_color();

@@ -39,7 +39,7 @@ public:
 	bool section_active() { return section.active(); }
 public:
 	void backspace();
-	void insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color);
+	void insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner);
 	void insert(size_t pos_global, size_t pos_pgh_index, TCHAR* src, size_t  count);
 	//void insert(TCHAR* src, size_t  count, size_t font_src_index);
 	void remove(size_t position);

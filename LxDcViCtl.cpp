@@ -375,14 +375,14 @@ bool LxDcViCtl::single_remove()
 	return true;
 }
 
-void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color)
+void LxDcViCtl::insert(TCHAR* src, size_t  count, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
 {
 	//在cursor处执行插入操作
-	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
-	pgh->Insert(cursor.get_index_inner_paragraph(), src, count);
+	Paragraph* pgh = document.get_pgh(phy_pgh_index);
+	pgh->Insert(pos_inner, src, count);
 
-	font_tree.insert(cursor.get_index_global(), count, src_font);
-	color_tree.insert(cursor.get_index_global(), count, src_color);
+	font_tree.insert(pos_global, count, src_font);
+	color_tree.insert(pos_global, count, src_color);
 }
 
 void LxDcViCtl::insert(size_t pos_global, size_t pos_pgh_index, TCHAR* src, size_t  count)
@@ -781,7 +781,8 @@ void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORR
 	if (!section.active())				//选择区域无效
 	{
 		LxCommand* insert_cmd = new LxCommand();
-		insert_cmd->add_child_cmd(new LxInsertCmd(cs, len, src_font, src_color));
+		insert_cmd->add_child_cmd(new LxInsertCmd(cs, len, src_font, src_color, compose_doc.current_phypgh_index(cursor), 
+			cursor.get_index_global(), cursor.get_index_inner_paragraph()));
 		insert_cmd->set_dvctl(this);
 		insert_cmd->Excute(pDC);
 		lx_command_mgr.insert_cmd(insert_cmd);
