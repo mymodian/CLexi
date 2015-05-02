@@ -35,7 +35,7 @@ void LxInsertCmd::Excute(CDC* pDC)
 	std::cout << cursor.index_inner <<endl;*/
 	///////////////////////////////////////////
 	doc_view_ctrl_->insert(cs_, len_, src_font_, src_color_, phy_pgh_index_, pos_global_, pos_inner_);
-	doc_view_ctrl_->modify_layout(pDC, len_);
+	doc_view_ctrl_->modify_layout(pDC, len_, pos_global_, phy_pgh_index_);
 	doc_view_ctrl_->draw_complete(pDC);
 	doc_view_ctrl_->calc_font_color();
 	// !-- caution this
@@ -69,6 +69,9 @@ void LxInsertPhyParagraphCmd::Undo()
 
 }
 
+LxSingleRemoveCmd::LxSingleRemoveCmd(size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
+	: phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner)
+{}
 LxSingleRemoveCmd::~LxSingleRemoveCmd() {}
 void LxSingleRemoveCmd::Undo()
 {
@@ -76,12 +79,12 @@ void LxSingleRemoveCmd::Undo()
 }
 void LxSingleRemoveCmd::Excute(CDC* pDC)
 {
-	if (!doc_view_ctrl_->single_remove())
+	if (!doc_view_ctrl_->single_remove(phy_pgh_index_, pos_global_, pos_inner_))
 	{
 		doc_view_ctrl_->draw_complete(pDC);
 		return;
 	}
-	doc_view_ctrl_->modify_layout(pDC, -1);
+	doc_view_ctrl_->modify_layout(pDC, -1, pos_global_, phy_pgh_index_);
 	doc_view_ctrl_->draw_complete(pDC);
 	//document×Ô¼ì only for test and debugger
 	ASSERT(doc_view_ctrl_->self_check());
@@ -312,6 +315,7 @@ LxCommandMgr::~LxCommandMgr()
 {
 	for (auto it : command_list)
 		delete it;
+	command_list.clear();
 }
 void LxCommandMgr::reset()
 {
@@ -328,12 +332,6 @@ void LxCommandMgr::insert_cmd(LxCommand* lx_cmd)
 	if (!lx_cmd->CanUndo())
 	{
 		delete lx_cmd;
-		return;
-	}
-	if (curr_ == command_list.begin())
-	{
-		command_list.push_back(lx_cmd);
-		++curr_;
 		return;
 	}
 	auto it = curr_;

@@ -57,7 +57,7 @@ public:
 	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
 	void compose_splited_paragraph(CDC* pDC, size_t phy_paragraph_index, size_t offset_inner, Paragraph* seprated_phy_pgh);
 	void compose_merged_paragraph(CDC* pDC, size_t index_para1, size_t offset_para1);
-	void modify_layout(CDC* pDC, int count);
+	void modify_layout(CDC* pDC, int count, size_t cur_gbl_index, size_t pgh_index);
 	void compose_complete(CDC* pDC);
 	void draw_complete(CDC* pDC);
 	void draw_section(CDC* pDC, Section* _section);
@@ -66,7 +66,7 @@ public:
 	size_t get_current_cur_index();
 	void locate(CDC* pDC, int doc_x, int doc_y);
 	void locate(CDC* pDC, Paragraph* pgh, int global_index);
-	bool single_remove();
+	bool single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_);
 	void move_cursor(CDC* pDC, unsigned direction);
 	void modify_view_size(int width, int height);
 	void modify_mouse_hscroll(CDC* pDC, int hdistanse);

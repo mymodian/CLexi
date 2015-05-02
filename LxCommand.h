@@ -99,11 +99,15 @@ private:
 class LxSingleRemoveCmd : public LxCommandBase
 {
 public:
-	LxSingleRemoveCmd() = default;
+	LxSingleRemoveCmd(size_t phy_pgh_index, size_t pos_global, size_t pos_inner);
 	virtual ~LxSingleRemoveCmd();
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
 	virtual void Undo() override;
+private:
+	size_t phy_pgh_index_;
+	size_t pos_global_;
+	size_t pos_inner_;
 };
 
 class LxDeleteCmd : public LxCommandBase

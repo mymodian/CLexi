@@ -358,15 +358,15 @@ void LxDcViCtl::backspace()
 
 }
 
-bool LxDcViCtl::single_remove()
+bool LxDcViCtl::single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_)
 {
-	Paragraph* pgh = (*(cursor.paragraph))->get_phy_paragraph();
-	if (pgh->size() == 0 || cursor.get_index_inner_paragraph() == 0)
+	Paragraph* pgh = document.get_pgh(phy_pgh_index_);
+	if (pgh->size() == 0 || pos_inner_ == 0)
 		return false;
-	pgh->Delete(cursor.get_index_inner_paragraph() - 1);
+	pgh->Delete(pos_inner_ - 1);
 
-	font_tree.remove(cursor.get_index_global() - 1, cursor.get_index_global());
-	color_tree.remove(cursor.get_index_global() - 1, cursor.get_index_global());
+	font_tree.remove(pos_global_ - 1, pos_global_);
+	color_tree.remove(pos_global_ - 1, pos_global_);
 	if (font_tree.empty() && color_tree.empty())
 	{
 		font_tree.insert(0, 0, default_font_index);
@@ -415,13 +415,17 @@ void LxDcViCtl::modify_color(size_t position_begin, size_t position_end, size_t 
 }
 
 //partial
-void LxDcViCtl::modify_layout(CDC* pDC, int count)
+void LxDcViCtl::modify_layout(CDC* pDC, int count, size_t cur_gbl_index, size_t pgh_index)
 {
 	ASSERT(count != 0);
-	size_t cur_gbl_index_old = cursor.get_index_global() + count;
-	Paragraph* phy_pgh = cursor.get_phy_paragraph();
+	size_t cur_gbl_index_old = cur_gbl_index + count;
+	Paragraph* phy_pgh = document.get_pgh(pgh_index);
 
-	//删除时计算新的cursor
+	//插入时计算cursor
+	if (count > 0)
+		compose_doc.calc_cursor(cursor, cur_gbl_index, phy_pgh, pDC);
+
+	//删除时计算cursor
 	if (count < 0)
 		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 
@@ -431,11 +435,8 @@ void LxDcViCtl::modify_layout(CDC* pDC, int count)
 	compose_doc.relayout(pgh_doc_it);
 
 	//插入时计算新的cursor
-	if (count > 0)
-		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 	//删除时由于先计算的cursor的row会被清除，所以需要再次计算cursor
-	if (count < 0)
-		compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
+	compose_doc.calc_cursor(cursor, cur_gbl_index_old, phy_pgh, pDC);
 
 	modify_cursor_offset();
 }
@@ -871,7 +872,8 @@ void LxDcViCtl::usr_backspace(CDC* pDC)
 		else
 		{
 			LxCommand* backspace_cmd = new LxCommand();
-			backspace_cmd->add_child_cmd(new LxSingleRemoveCmd());
+			backspace_cmd->add_child_cmd(new LxSingleRemoveCmd(compose_doc.current_phypgh_index(cursor),
+				cursor.get_index_global(), cursor.get_index_inner_paragraph()));
 			backspace_cmd->set_dvctl(this);
 			backspace_cmd->Excute(pDC);
 			lx_command_mgr.insert_cmd(backspace_cmd);

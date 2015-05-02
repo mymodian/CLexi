@@ -11,8 +11,8 @@ next to do:
 	6.选择区域下的颜色设置									 done
 	7.选择区域下的字体设置									 done
 	8.选择区域下的删除、插入、回车						 done
-	9.重构所有可能需要重构的命令的实现				 now to do
-	10.ctrl+z,ctrl+y undo和redo							 next to do
+	9.重构所有可能需要重构的命令的实现				 done
+	10.ctrl+z,ctrl+y undo和redo							 now to do, but how?
 	11.ctrl+c,ctrl+x,ctrl+v 复制、剪切、粘贴		 next to do
 */
 
