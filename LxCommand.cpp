@@ -45,7 +45,7 @@ void LxInsertCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	///////////////////////////////////////////
 }
-void LxInsertCmd::Undo()
+void LxInsertCmd::Undo(CDC* pDC)
 {
 
 }
@@ -64,7 +64,7 @@ void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxInsertPhyParagraphCmd::Undo()
+void LxInsertPhyParagraphCmd::Undo(CDC* pDC)
 {
 
 }
@@ -73,7 +73,7 @@ LxSingleRemoveCmd::LxSingleRemoveCmd(size_t phy_pgh_index, size_t pos_global, si
 	: phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner)
 {}
 LxSingleRemoveCmd::~LxSingleRemoveCmd() {}
-void LxSingleRemoveCmd::Undo()
+void LxSingleRemoveCmd::Undo(CDC* pDC)
 {
 
 }
@@ -100,7 +100,7 @@ void LxDeleteCmd::Excute(CDC* pDC)
 {
 
 }
-void LxDeleteCmd::Undo()
+void LxDeleteCmd::Undo(CDC* pDC)
 {
 
 }
@@ -127,9 +127,11 @@ void LxMergeCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxMergeCmd::Undo()
+void LxMergeCmd::Undo(CDC* pDC)
 {
-
+	LxSplitCmd split_command(index_para2_ - 1, para1_size_);
+	split_command.set_dvctl(doc_view_ctrl_);
+	split_command.Excute(pDC);
 }
 
 LxSplitCmd::LxSplitCmd(size_t phy_paragraph_index, size_t offset_inner)
@@ -149,14 +151,17 @@ void LxSplitCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxSplitCmd::Undo()
+void LxSplitCmd::Undo(CDC* pDC)
 {
-
+	LxMergeCmd merge_command(phy_paragraph_index_ + 1);
+	merge_command.set_dvctl(doc_view_ctrl_);
+	merge_command.Excute(pDC);
 }
 
 LxSectionRemoveCmd::LxSectionRemoveCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
-	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh), 
+	structured_section_context_(nullptr)
 {
 }
 LxSectionRemoveCmd::~LxSectionRemoveCmd()
@@ -165,15 +170,29 @@ LxSectionRemoveCmd::~LxSectionRemoveCmd()
 }
 void LxSectionRemoveCmd::Excute(CDC* pDC)
 {
-	doc_view_ctrl_->remove_section(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	if (!structured_section_context_)
+	{
+		structured_section_context_ = new StructuredSectionContext();
+	}
+	doc_view_ctrl_->remove_section(pDC, section_begin_index_, section_begin_pgh_, 
+		section_end_index_, section_end_pgh_, structured_section_context_);
 	doc_view_ctrl_->draw_complete(pDC);
 
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxSectionRemoveCmd::Undo()
+void LxSectionRemoveCmd::Undo(CDC* pDC)
 {
+	size_t _section_begin_pgh = section_begin_pgh_ < section_end_pgh_ ? section_begin_pgh_ : section_end_pgh_;
+	size_t _section_begin_index = section_begin_index_ < section_end_index_ ? section_begin_index_ : section_end_index_;
+	doc_view_ctrl_->insert_structured_context(pDC, structured_section_context_, _section_begin_index, _section_begin_pgh);
+	doc_view_ctrl_->reset_selection(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	doc_view_ctrl_->draw_complete(pDC);
 
+	delete structured_section_context_;
+	structured_section_context_ = nullptr;
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxSectionWrapCmd::LxSectionWrapCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
@@ -193,7 +212,7 @@ void LxSectionWrapCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxSectionWrapCmd::Undo()
+void LxSectionWrapCmd::Undo(CDC* pDC)
 {
 
 }
@@ -218,7 +237,7 @@ void LxSectionReplaceCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	doc_view_ctrl_->calc_font_color();
 }
-void LxSectionReplaceCmd::Undo()
+void LxSectionReplaceCmd::Undo(CDC* pDC)
 {
 
 }
@@ -240,30 +259,38 @@ void LxModifyFontCmd::Excute(CDC* pDC)
 	ASSERT(doc_view_ctrl_->self_check());
 	//doc_view_ctrl_->calc_font_color();
 }
-void LxModifyFontCmd::Undo()
+void LxModifyFontCmd::Undo(CDC* pDC)
 {
 
 }
 
 LxModifyColorCmd::LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
-	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_color_(src_color)
+	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_color_(src_color), color_contex_(nullptr)
 {
 }
 LxModifyColorCmd::~LxModifyColorCmd()
 {
-
+	if (color_contex_)
+		delete color_contex_;
 }
 void LxModifyColorCmd::Excute(CDC* pDC)
 {
+	if (!color_contex_)
+	{
+		color_contex_ = new StructuredSrcContext();
+		doc_view_ctrl_->record_section_color_info(color_contex_, section_begin_index_, section_end_index_);
+	}
 	doc_view_ctrl_->modify_section_color(section_begin_index_, section_end_index_, src_color_);
 	doc_view_ctrl_->draw_complete(pDC);
 
 	ASSERT(doc_view_ctrl_->self_check());
 	//doc_view_ctrl_->calc_font_color();
 }
-void LxModifyColorCmd::Undo()
+void LxModifyColorCmd::Undo(CDC* pDC)
 {
-
+	doc_view_ctrl_->modify_structured_color_context(color_contex_);
+	doc_view_ctrl_->draw_complete(pDC);
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxCommand::~LxCommand()
@@ -286,7 +313,7 @@ bool LxCommand::CanUndo()
 		if (!it->CanUndo()) return false;
 	return true;
 }
-void LxCommand::Undo()
+void LxCommand::Undo(CDC* pDC)
 {
 	if (CanUndo())
 	{
@@ -294,7 +321,7 @@ void LxCommand::Undo()
 		auto rite = command.rend();
 		for (; rit != rite; ++rit)
 		{
-			(*(rit))->Undo();
+			(*(rit))->Undo(pDC);
 		}
 	}
 }

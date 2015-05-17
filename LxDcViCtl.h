@@ -8,6 +8,7 @@
 #include "LxComposeAlgom.h"
 #include "LxRender.h"
 #include "LxCommand.h"
+#include "LxStructuredContext.h"
 
 #ifndef __LX_DOCUMENT_VIEW_CONTROL_H
 #define __LX_DOCUMENT_VIEW_CONTROL_H
@@ -24,6 +25,8 @@ public:
 	void build_from_stream(FILE* file);
 	//用户操作
 public:
+	void usr_undo(CDC* pDC);
+	void usr_redo(CDC* pDC);
 	void usr_mouse_lbutton_down(CDC* pDC, int x, int y);
 	void usr_mouse_move(CDC* pDC, int x, int y);
 	void usr_mouse_lbutton_up(CDC* pDC, int x, int y);
@@ -51,7 +54,8 @@ public:
 	Paragraph* insert_null_phy_paragraph(int index);
 	Paragraph* split_phy_paragraph(size_t phy_paragraph_index, size_t offset_inner);
 	size_t merge_phy_paragraph(size_t index_para2);
-	void remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
+	void remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, 
+		size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 	//排版相关
 public:
 	void add_phy_paragraph(CDC* pDC, Paragraph* pgh, int index, int direction);
@@ -79,10 +83,24 @@ public:
 	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 		size_t section_end_index, size_t section_end_pgh, size_t src_font);
 	void remove_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
-		size_t section_end_index, size_t section_end_pgh);
+		size_t section_end_index, size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 	void replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
 		size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
 	void section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+		size_t section_end_index, size_t section_end_pgh);
+
+	//信息记录
+public:
+	void record_section_src_info(TreeBase* src_tree, StructuredSrcContext* src_contex, size_t section_begin, size_t section_end);
+	void record_section_color_info(StructuredSrcContext* color_contex, size_t section_begin, size_t section_end);
+	void record_section_font_info(StructuredSrcContext* font_contex, size_t section_begin, size_t section_end);
+
+	//信息恢复
+public:
+	void modify_structured_color_context(StructuredSrcContext* color_contex);
+	void insert_structured_context(CDC* pDC, StructuredSectionContext* structured_section_context, 
+		size_t section_begin_index, size_t section_begin_pgh);
+	void reset_selection(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, 
 		size_t section_end_index, size_t section_end_pgh);
 
 	//member for test and debugger.

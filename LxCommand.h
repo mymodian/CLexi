@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "LxComposeDoc.h"
+#include "LxStructuredContext.h"
 #include <list>
 using namespace std;
 
@@ -20,7 +21,7 @@ public:
 	virtual ~LxCommandBase() = default;
 	virtual void Excute(CDC* pDC) = 0;
 	virtual bool CanUndo() = 0;
-	virtual void Undo() {}
+	virtual void Undo(CDC* pDC) {}
 	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl)
 	{
 		doc_view_ctrl_ = doc_view_ctrl;
@@ -71,7 +72,7 @@ public:
 	LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	TCHAR* cs_;
 	size_t len_;
@@ -90,7 +91,7 @@ public:
 	LxInsertPhyParagraphCmd(int index, int direction);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	int index_;				//该段在哪个段(index)上下插入
 	int direction_;		//在index_段之前(0)还是之后(1)插入
@@ -103,7 +104,7 @@ public:
 	virtual ~LxSingleRemoveCmd();
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t phy_pgh_index_;
 	size_t pos_global_;
@@ -117,7 +118,7 @@ public:
 	virtual ~LxDeleteCmd();
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t pos_begin;
 	size_t pos_end;
@@ -143,7 +144,7 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t index_para2_;
 	size_t para1_size_;
@@ -158,7 +159,7 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t phy_paragraph_index_;
 	size_t offset_inner_;
@@ -173,12 +174,13 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
 	size_t section_begin_pgh_;
 	size_t section_end_index_;
 	size_t section_end_pgh_;
+	StructuredSectionContext* structured_section_context_;
 };
 
 class LxSectionWrapCmd : public LxCommandBase
@@ -190,7 +192,7 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
 	size_t section_begin_pgh_;
@@ -208,7 +210,7 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
 	size_t section_begin_pgh_;
@@ -230,7 +232,7 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
 	size_t section_begin_pgh_;
@@ -248,11 +250,12 @@ public:
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
 	size_t section_end_index_;
 	COLORREF src_color_;
+	StructuredSrcContext* color_contex_;
 };
 
 class LxCommand : public LxCommandBase
@@ -263,7 +266,7 @@ public:
 	void add_child_cmd(LxCommandBase* child_cmd);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override;
-	virtual void Undo() override;
+	virtual void Undo(CDC* pDC) override;
 	virtual void set_dvctl(LxDcViCtl* doc_view_ctrl) override;
 private:
 	list<LxCommandBase*> command;

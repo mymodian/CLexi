@@ -12,7 +12,12 @@ next to do:
 	7.选择区域下的字体设置									 done
 	8.选择区域下的删除、插入、回车						 done
 	9.重构所有可能需要重构的命令的实现				 done
-	10.ctrl+z,ctrl+y undo和redo							 now to do, but how?
+	10.ctrl+z,ctrl+y undo和redo							 now to do, but how? some operations are so complex like section_remove or ctr+c ctrl+v
+																				 to do this, i need to add some other command like 
+																				 insert_structured_context(ctrl+v) and section_remove(ctrl+c)
+																				 section_wrap and section_replace is composited command
+																				 //!!!!    so I need only a new command which is insert_structured_context
+																				 //!!!!    and adjust some command
 	11.ctrl+c,ctrl+x,ctrl+v 复制、剪切、粘贴		 next to do
 */
 

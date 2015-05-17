@@ -109,6 +109,9 @@ public:
 	afx_msg void OnFileSaveAs();
 	afx_msg void OnFileSave();
 	afx_msg void OnFileOpen();
+	afx_msg LRESULT OnHotKey(WPARAM wParam, LPARAM lParam);
+//	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 #ifndef _DEBUG  // CLexiView.cpp 中的调试版本

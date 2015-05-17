@@ -49,6 +49,8 @@ BEGIN_MESSAGE_MAP(CCLexiView, CScrollView)
 	ON_COMMAND(ID_FILE_SAVE_AS, &CCLexiView::OnFileSaveAs)
 	ON_COMMAND(ID_FILE_SAVE, &CCLexiView::OnFileSave)
 	ON_COMMAND(ID_FILE_OPEN, &CCLexiView::OnFileOpen)
+	ON_MESSAGE(WM_HOTKEY, &CCLexiView::OnHotKey)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // CCLexiView 构造/析构
@@ -621,4 +623,38 @@ void CCLexiView::OnFileOpen()
 		ReleaseDC(pDC);
 		fclose(file);
 	}
+}
+
+int CCLexiView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CScrollView::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  在此添加您专用的创建代码
+	RegisterHotKey(GetSafeHwnd(), 1001, MOD_CONTROL, 'z');
+	RegisterHotKey(GetSafeHwnd(), 1002, MOD_CONTROL, 'Z');
+	RegisterHotKey(GetSafeHwnd(), 1003, MOD_CONTROL, 'y');
+	RegisterHotKey(GetSafeHwnd(), 1004, MOD_CONTROL, 'Y');
+
+	return 0;
+}
+
+LRESULT CCLexiView::OnHotKey(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == 1001 || wParam == 1002)
+	{
+		CDC* pDC = NULL;
+		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_undo);
+		ExecuteNormalTask(task, pDC);
+		delete task;
+	}
+	else if (wParam == 1003 || wParam == 1004)
+	{
+		CDC* pDC = NULL;
+		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_redo);
+		ExecuteNormalTask(task, pDC);
+		delete task;
+	}
+
+	return 0;
 }

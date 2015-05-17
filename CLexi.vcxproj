@@ -113,6 +113,7 @@
     <ClInclude Include="LxDcViCtl.h" />
     <ClInclude Include="LxRender.h" />
     <ClInclude Include="LxSrcFontFactory.h" />
+    <ClInclude Include="LxStructuredContext.h" />
     <ClInclude Include="LxViewWindow.h" />
     <ClInclude Include="LxComposeDoc.h" />
     <ClInclude Include="LxCursor.h" />
@@ -143,6 +144,7 @@
     <ClCompile Include="LxPaper.cpp" />
     <ClCompile Include="LxRender.cpp" />
     <ClCompile Include="LxSrcFontFactory.cpp" />
+    <ClCompile Include="LxStructuredContext.cpp" />
     <ClCompile Include="LxViewWindow.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="stdafx.cpp">

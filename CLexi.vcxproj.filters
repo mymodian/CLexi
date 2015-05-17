@@ -99,6 +99,9 @@
     <ClInclude Include="plan.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LxStructuredContext.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLexi.cpp">
@@ -160,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="ChromiumTask.cpp">
       <Filter>generic</Filter>
+    </ClCompile>
+    <ClCompile Include="LxStructuredContext.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
