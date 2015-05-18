@@ -162,10 +162,8 @@ void LxDcViCtl::modify_mouse_vscroll(CDC* pDC, int vdistanse)
 void LxDcViCtl::reset_selection(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, 
 	size_t section_end_index, size_t section_end_pgh)
 {
-	Paragraph* phy_pgh_b = document.get_pgh(section_begin_pgh);
-	compose_doc.calc_cursor(section.cursor_begin, section_begin_index, phy_pgh_b, pDC);
-	Paragraph* phy_pgh_e = document.get_pgh(section_end_pgh);
-	compose_doc.calc_cursor(section.cursor_end, section_end_index, phy_pgh_e, pDC);
+	compose_doc.calc_cursor(section.cursor_begin, section_begin_index, document.get_pgh(section_begin_pgh), pDC);
+	compose_doc.calc_cursor(section.cursor_end, section_end_index, document.get_pgh(section_end_pgh), pDC);
 	cursor = section.cursor_end;
 }
 
@@ -326,9 +324,27 @@ void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t
 
 	compose_doc.relayout_section(pDC, index_b, pgh_b, index_e, pgh_e);
 	//重新计算cursor的左边位置
-	compose_doc.calc_cursor(section.cursor_begin, section_begin_index, document.get_pgh(section_begin_pgh), pDC);
-	compose_doc.calc_cursor(section.cursor_end, section_end_index, document.get_pgh(section_end_pgh), pDC);
-	cursor = section.cursor_end;
+	reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
+}
+
+void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+	size_t section_end_index, size_t section_end_pgh, StructuredSrcContext* font_context)
+{
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t index_e = section_end_index > section_begin_index ? section_end_index : section_begin_index;
+	int _index_gbl = index_b;
+	for (auto it_src : font_context->srcinfo_list)
+	{
+		font_tree.modify(_index_gbl, _index_gbl + it_src.first, it_src.second);
+		_index_gbl += it_src.first;
+	}
+
+	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
+	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
+
+	compose_doc.relayout_section(pDC, index_b, pgh_b, index_e, pgh_e);
+	//重新计算cursor的左边位置
+	reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
 }
 
 void LxDcViCtl::modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
@@ -338,13 +354,20 @@ void LxDcViCtl::modify_section_color(size_t section_begin_index, size_t section_
 
 void LxDcViCtl::record_section_src_info(TreeBase* src_tree, StructuredSrcContext* src_contex, size_t section_begin, size_t section_end)
 {
-	size_t src_index, last_cnt;
-	src_contex->pos_begin_global = section_begin;
-	for (; section_begin < section_end;)
+	size_t index_b = section_begin;
+	size_t index_e = section_end;
+	if (section_begin > section_end)
 	{
-		src_tree->get_src_index(section_begin, src_index, last_cnt);
-		int cnt = min(last_cnt, section_end - section_begin);
-		section_begin += cnt;
+		index_b = section_end;
+		index_e = section_begin;
+	}
+	size_t src_index, last_cnt;
+	src_contex->pos_begin_global = index_b;
+	for (; index_b < index_e;)
+	{
+		src_tree->get_src_index(index_b, src_index, last_cnt);
+		int cnt = min(last_cnt, index_e - index_b);
+		index_b += cnt;
 		src_contex->srcinfo_list.push_back(std::pair<int, int>(cnt, src_index));
 	}
 }

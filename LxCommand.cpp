@@ -244,15 +244,21 @@ void LxSectionReplaceCmd::Undo(CDC* pDC)
 
 LxModifyFontCmd::LxModifyFontCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, size_t src_font)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_font_(src_font),
-	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh), font_contex_(nullptr)
 {
 }
 LxModifyFontCmd::~LxModifyFontCmd()
 {
-
+	if (font_contex_)
+		delete font_contex_;
 }
 void LxModifyFontCmd::Excute(CDC* pDC)
 {
+	if (!font_contex_)
+	{
+		font_contex_ = new StructuredSrcContext();
+		doc_view_ctrl_->record_section_font_info(font_contex_, section_begin_index_, section_end_index_);
+	}
 	doc_view_ctrl_->modify_section_font(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, src_font_);
 	doc_view_ctrl_->draw_complete(pDC);
 
@@ -261,7 +267,9 @@ void LxModifyFontCmd::Excute(CDC* pDC)
 }
 void LxModifyFontCmd::Undo(CDC* pDC)
 {
-
+	doc_view_ctrl_->modify_section_font(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, font_contex_);
+	doc_view_ctrl_->draw_complete(pDC);
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxModifyColorCmd::LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color)

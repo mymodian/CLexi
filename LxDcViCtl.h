@@ -82,6 +82,8 @@ public:
 	void modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
 	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 		size_t section_end_index, size_t section_end_pgh, size_t src_font);
+	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
+		size_t section_end_index, size_t section_end_pgh, StructuredSrcContext* font_context);
 	void remove_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 		size_t section_end_index, size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 	void replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,

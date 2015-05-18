@@ -239,6 +239,7 @@ private:
 	size_t section_end_index_;
 	size_t section_end_pgh_;
 	size_t src_font_;
+	StructuredSrcContext* font_contex_;
 };
 
 class LxModifyColorCmd : public LxCommandBase
