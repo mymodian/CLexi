@@ -66,7 +66,9 @@ void LxInsertPhyParagraphCmd::Excute(CDC* pDC)
 }
 void LxInsertPhyParagraphCmd::Undo(CDC* pDC)
 {
-
+	LxMergeCmd merge_cmd(index_ + 1);
+	merge_cmd.set_dvctl(doc_view_ctrl_);
+	merge_cmd.Excute(pDC);
 }
 
 LxSingleRemoveCmd::LxSingleRemoveCmd(size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
