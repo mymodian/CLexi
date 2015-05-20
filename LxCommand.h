@@ -68,7 +68,7 @@ class LxInsertCmd : public LxCommandBase
 {
 public:
 	LxInsertCmd() = delete;
-	virtual ~LxInsertCmd() = default;
+	virtual ~LxInsertCmd();
 	LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner);
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
@@ -96,7 +96,7 @@ private:
 	int index_;				//该段在哪个段(index)上下插入
 	int direction_;		//在index_段之前(0)还是之后(1)插入
 };
-
+// DO NOT use this command,use LxSectionRemove instead
 class LxSingleRemoveCmd : public LxCommandBase
 {
 public:
@@ -109,6 +109,9 @@ private:
 	size_t phy_pgh_index_;
 	size_t pos_global_;
 	size_t pos_inner_;
+	TCHAR ch_;
+	size_t font_index_;
+	size_t color_index_;
 };
 
 class LxDeleteCmd : public LxCommandBase
@@ -198,8 +201,9 @@ private:
 	size_t section_begin_pgh_;
 	size_t section_end_index_;
 	size_t section_end_pgh_;
+	StructuredSectionContext* structured_section_context_;
 };
-
+//DO NOT USE this command,this command has been abanded
 class LxSectionReplaceCmd : public LxCommandBase
 {
 public:
@@ -246,7 +250,7 @@ class LxModifyColorCmd : public LxCommandBase
 {
 public:
 	LxModifyColorCmd() = delete;
-	LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
+	LxModifyColorCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, COLORREF src_color);
 	virtual ~LxModifyColorCmd();
 public:
 	virtual void Excute(CDC* pDC) override;
@@ -254,7 +258,9 @@ public:
 	virtual void Undo(CDC* pDC) override;
 private:
 	size_t section_begin_index_;
+	size_t section_begin_pgh_;
 	size_t section_end_index_;
+	size_t section_end_pgh_;
 	COLORREF src_color_;
 	StructuredSrcContext* color_contex_;
 };

@@ -262,11 +262,11 @@ void LxDcViCtl::remove_section(CDC* pDC, size_t section_begin_index, size_t sect
 }
 
 void LxDcViCtl::section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
-	size_t section_end_index, size_t section_end_pgh)
+	size_t section_end_index, size_t section_end_pgh, StructuredSectionContext* structured_section_context)
 {
 	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
 	size_t pgh_b = section_begin_pgh < section_end_pgh ? section_begin_pgh : section_end_pgh;
-	remove_section(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh, nullptr);
+	remove_section(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh, structured_section_context);
 	if (cursor.tail_of_paragraph() || cursor.head_of_paragraph())
 	{
 		int direction = 0;
@@ -347,9 +347,16 @@ void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t
 	reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
 }
 
-void LxDcViCtl::modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
+void LxDcViCtl::modify_section_color(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, 
+	size_t section_end_pgh, COLORREF src_color)
 {
-	color_tree.modify(section_begin_index, section_end_index, src_color);
+	size_t index_b = section_begin_index < section_end_index ? section_begin_index : section_end_index;
+	size_t index_e = section_end_index > section_begin_index ? section_end_index : section_begin_index;
+	color_tree.modify(index_b, index_e, src_color);
+	if (!section.active())
+	{
+		reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
+	}
 }
 
 void LxDcViCtl::record_section_src_info(TreeBase* src_tree, StructuredSrcContext* src_contex, size_t section_begin, size_t section_end)
@@ -492,13 +499,16 @@ void LxDcViCtl::backspace()
 
 }
 
-bool LxDcViCtl::single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_)
+bool LxDcViCtl::single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_, TCHAR& ch, size_t& font_index, size_t& color_index)
 {
 	Paragraph* pgh = document.get_pgh(phy_pgh_index_);
 	if (pgh->size() == 0 || pos_inner_ == 0)
 		return false;
+	ch = pgh->Get(pos_inner_ - 1);
 	pgh->Delete(pos_inner_ - 1);
 
+	font_index = font_tree.get_src_index(pos_global_);
+	color_index = color_tree.get_src_index(pos_global_);
 	font_tree.remove(pos_global_ - 1, pos_global_);
 	color_tree.remove(pos_global_ - 1, pos_global_);
 	if (font_tree.empty() && color_tree.empty())
@@ -806,13 +816,33 @@ void LxDcViCtl::usr_undo(CDC* pDC)
 {
 	LxCommand* undo_command = lx_command_mgr.get_undo_cmd();
 	if (undo_command != nullptr)
+	{
+		if (section.active())
+		{
+			clear_section(pDC, &section);
+			section.cursor_begin = cursor;
+			section.cursor_end = cursor;
+		}
 		undo_command->Undo(pDC);
+	}
+	else
+		draw_complete(pDC);
 }
 void LxDcViCtl::usr_redo(CDC* pDC)
 {
 	LxCommand* redo_command = lx_command_mgr.get_redo_cmd();
 	if (redo_command != nullptr)
+	{
+		if (section.active())
+		{
+			clear_section(pDC, &section);
+			section.cursor_begin = cursor;
+			section.cursor_end = cursor;
+		}
 		redo_command->Excute(pDC);
+	}
+	else
+		draw_complete(pDC);
 }
 void LxDcViCtl::usr_mouse_lbutton_down(CDC* pDC, int x, int y)
 {
@@ -937,17 +967,11 @@ void LxDcViCtl::usr_color_change(CDC* pDC, COLORREF src_color)
 {
 	section.trace = false;
 	ASSERT(section.active());
-	LxCursor* _begin = &(section.cursor_begin);
-	LxCursor* _end = &(section.cursor_end);
-	if (section.cursor_end < section.cursor_begin)
-	{
-		_begin = &(section.cursor_end);
-		_end = &(section.cursor_begin);
-	}
 
 	LxCommand* modify_section_color_cmd = new LxCommand();
 	modify_section_color_cmd->add_child_cmd(
-		new LxModifyColorCmd(_begin->get_index_global(), _end->get_index_global(), src_color));
+		new LxModifyColorCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin), 
+		section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end), src_color));
 	modify_section_color_cmd->set_dvctl(this);
 	modify_section_color_cmd->Excute(pDC);
 	lx_command_mgr.insert_cmd(modify_section_color_cmd);
@@ -967,10 +991,17 @@ void LxDcViCtl::usr_insert(CDC* pDC, TCHAR* cs, int len, size_t src_font, COLORR
 	}
 	else                                       //选择区域有效
 	{
+		size_t _index_begin = section.cursor_begin.get_index_global();
+		size_t _index_end = section.cursor_end.get_index_global();
+		size_t _pgh_begin = compose_doc.current_phypgh_index(section.cursor_begin);
+		size_t _pgh_end = compose_doc.current_phypgh_index(section.cursor_end);
 		LxCommand* section_replace_cmd = new LxCommand();
 		section_replace_cmd->add_child_cmd(
-			new LxSectionReplaceCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin),
-			section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end), cs, len, src_font, src_color));
+			new LxSectionRemoveCmd(_index_begin, _pgh_begin, _index_end, _pgh_end));
+		section_replace_cmd->add_child_cmd(
+			new LxInsertCmd(cs, len, src_font, src_color, _pgh_begin < _pgh_end ? _pgh_begin : _pgh_end,
+			_index_begin < _index_end ? _index_begin : _index_end, 
+			section.cursor_begin < section.cursor_end ? section.cursor_begin.get_index_inner_paragraph() : section.cursor_end.get_index_inner_paragraph()));
 		section_replace_cmd->set_dvctl(this);
 		section_replace_cmd->Excute(pDC);
 		lx_command_mgr.insert_cmd(section_replace_cmd);

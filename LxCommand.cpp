@@ -26,7 +26,16 @@ void LxLocateCmd::Excute(CDC* pDC)
 }
 
 LxInsertCmd::LxInsertCmd(TCHAR* cs, size_t len, size_t src_font, COLORREF src_color, size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
-	: cs_(cs), len_(len), src_font_(src_font), src_color_(src_color), phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner) {}
+	: src_font_(src_font), src_color_(src_color), phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner)
+{
+	len_ = len;
+	cs_ = new TCHAR[len];
+	memcpy(cs_, cs, len*sizeof(TCHAR));
+}
+LxInsertCmd::~LxInsertCmd()
+{
+	delete[] cs_;
+}
 void LxInsertCmd::Excute(CDC* pDC)
 {
 	//获取插入前的状态信息 only for test and debugger
@@ -47,7 +56,9 @@ void LxInsertCmd::Excute(CDC* pDC)
 }
 void LxInsertCmd::Undo(CDC* pDC)
 {
-
+	LxSectionRemoveCmd section_rm_cmd(pos_global_, phy_pgh_index_, pos_global_ + len_, phy_pgh_index_);
+	section_rm_cmd.set_dvctl(doc_view_ctrl_);
+	section_rm_cmd.Excute(pDC);
 }
 
 LxInsertPhyParagraphCmd::LxInsertPhyParagraphCmd(int index, int direction)
@@ -72,17 +83,27 @@ void LxInsertPhyParagraphCmd::Undo(CDC* pDC)
 }
 
 LxSingleRemoveCmd::LxSingleRemoveCmd(size_t phy_pgh_index, size_t pos_global, size_t pos_inner)
-	: phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner)
+	: phy_pgh_index_(phy_pgh_index), pos_global_(pos_global), pos_inner_(pos_inner), ch_('\0')
 {}
 LxSingleRemoveCmd::~LxSingleRemoveCmd() {}
 void LxSingleRemoveCmd::Undo(CDC* pDC)
 {
-
+	if (ch_ != '\0')
+	{
+		LxInsertCmd insert_cmd(&ch_, 1, font_index_, color_index_, phy_pgh_index_, pos_global_ - 1, pos_inner_ - 1);
+		insert_cmd.set_dvctl(doc_view_ctrl_);
+		insert_cmd.Excute(pDC);
+	}
+	else
+	{
+		doc_view_ctrl_->draw_complete(pDC);
+	}
 }
 void LxSingleRemoveCmd::Excute(CDC* pDC)
 {
-	if (!doc_view_ctrl_->single_remove(phy_pgh_index_, pos_global_, pos_inner_))
+	if (!doc_view_ctrl_->single_remove(phy_pgh_index_, pos_global_, pos_inner_, ch_, font_index_, color_index_))
 	{
+		ch_ = '\0';
 		doc_view_ctrl_->draw_complete(pDC);
 		return;
 	}
@@ -168,7 +189,10 @@ LxSectionRemoveCmd::LxSectionRemoveCmd(size_t section_begin_index, size_t sectio
 }
 LxSectionRemoveCmd::~LxSectionRemoveCmd()
 {
-
+	if (structured_section_context_)
+	{
+		delete structured_section_context_;
+	}
 }
 void LxSectionRemoveCmd::Excute(CDC* pDC)
 {
@@ -199,16 +223,24 @@ void LxSectionRemoveCmd::Undo(CDC* pDC)
 
 LxSectionWrapCmd::LxSectionWrapCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
-	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh)
+	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh),
+	structured_section_context_(nullptr)
 {
 }
 LxSectionWrapCmd::~LxSectionWrapCmd()
 {
-
+	if (structured_section_context_)
+	{
+		delete structured_section_context_;
+	}
 }
 void LxSectionWrapCmd::Excute(CDC* pDC)
 {
-	doc_view_ctrl_->section_wrap(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	if (!structured_section_context_)
+	{
+		structured_section_context_ = new StructuredSectionContext();
+	}
+	doc_view_ctrl_->section_wrap(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, structured_section_context_);
 	doc_view_ctrl_->draw_complete(pDC);
 
 	ASSERT(doc_view_ctrl_->self_check());
@@ -216,7 +248,19 @@ void LxSectionWrapCmd::Excute(CDC* pDC)
 }
 void LxSectionWrapCmd::Undo(CDC* pDC)
 {
+	size_t _section_begin_pgh = section_begin_pgh_ < section_end_pgh_ ? section_begin_pgh_ : section_end_pgh_;
+	size_t _section_begin_index = section_begin_index_ < section_end_index_ ? section_begin_index_ : section_end_index_;
+	LxMergeCmd merge_cmd(_section_begin_pgh + 1);
+	merge_cmd.set_dvctl(doc_view_ctrl_);
+	merge_cmd.Excute(pDC);
+	doc_view_ctrl_->insert_structured_context(pDC, structured_section_context_, _section_begin_index, _section_begin_pgh);
+	doc_view_ctrl_->reset_selection(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
+	doc_view_ctrl_->draw_complete(pDC);
 
+	delete structured_section_context_;
+	structured_section_context_ = nullptr;
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
 }
 
 LxSectionReplaceCmd::LxSectionReplaceCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh,
@@ -265,7 +309,7 @@ void LxModifyFontCmd::Excute(CDC* pDC)
 	doc_view_ctrl_->draw_complete(pDC);
 
 	ASSERT(doc_view_ctrl_->self_check());
-	//doc_view_ctrl_->calc_font_color();
+	doc_view_ctrl_->calc_font_color();
 }
 void LxModifyFontCmd::Undo(CDC* pDC)
 {
@@ -274,8 +318,9 @@ void LxModifyFontCmd::Undo(CDC* pDC)
 	doc_view_ctrl_->calc_font_color();
 }
 
-LxModifyColorCmd::LxModifyColorCmd(size_t section_begin_index, size_t section_end_index, COLORREF src_color)
-	: section_begin_index_(section_begin_index), section_end_index_(section_end_index), src_color_(src_color), color_contex_(nullptr)
+LxModifyColorCmd::LxModifyColorCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh, COLORREF src_color)
+	: section_begin_index_(section_begin_index), section_begin_pgh_(section_begin_pgh), section_end_index_(section_end_index), section_end_pgh_(section_end_pgh),
+	src_color_(src_color), color_contex_(nullptr)
 {
 }
 LxModifyColorCmd::~LxModifyColorCmd()
@@ -290,15 +335,16 @@ void LxModifyColorCmd::Excute(CDC* pDC)
 		color_contex_ = new StructuredSrcContext();
 		doc_view_ctrl_->record_section_color_info(color_contex_, section_begin_index_, section_end_index_);
 	}
-	doc_view_ctrl_->modify_section_color(section_begin_index_, section_end_index_, src_color_);
+	doc_view_ctrl_->modify_section_color(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_, src_color_);
 	doc_view_ctrl_->draw_complete(pDC);
 
 	ASSERT(doc_view_ctrl_->self_check());
-	//doc_view_ctrl_->calc_font_color();
+	doc_view_ctrl_->calc_font_color();
 }
 void LxModifyColorCmd::Undo(CDC* pDC)
 {
 	doc_view_ctrl_->modify_structured_color_context(color_contex_);
+	doc_view_ctrl_->reset_selection(pDC, section_begin_index_, section_begin_pgh_, section_end_index_, section_end_pgh_);
 	doc_view_ctrl_->draw_complete(pDC);
 	doc_view_ctrl_->calc_font_color();
 }

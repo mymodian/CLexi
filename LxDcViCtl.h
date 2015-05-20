@@ -70,7 +70,7 @@ public:
 	size_t get_current_cur_index();
 	void locate(CDC* pDC, int doc_x, int doc_y);
 	void locate(CDC* pDC, Paragraph* pgh, int global_index);
-	bool single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_);
+	bool single_remove(size_t phy_pgh_index_, size_t pos_global_, size_t pos_inner_, TCHAR& ch, size_t& font_index, size_t& color_index);
 	void move_cursor(CDC* pDC, unsigned direction);
 	void modify_view_size(int width, int height);
 	void modify_mouse_hscroll(CDC* pDC, int hdistanse);
@@ -79,7 +79,8 @@ public:
 
 	//排版相关-------在 section != NULL 下的操作
 public:
-	void modify_section_color(size_t section_begin_index, size_t section_end_index, COLORREF src_color);
+	void modify_section_color(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, 
+		size_t section_end_index, size_t section_end_pgh, COLORREF src_color);
 	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
 		size_t section_end_index, size_t section_end_pgh, size_t src_font);
 	void modify_section_font(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
@@ -89,7 +90,7 @@ public:
 	void replace_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
 		size_t section_end_pgh, TCHAR* cs, size_t len, size_t src_font, COLORREF src_color);
 	void section_wrap(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh,
-		size_t section_end_index, size_t section_end_pgh);
+		size_t section_end_index, size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 
 	//信息记录
 public:
