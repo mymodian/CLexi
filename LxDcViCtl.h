@@ -38,6 +38,9 @@ public:
 	void usr_move_cursor(CDC* pDC, unsigned int direction);
 	void usr_font_change(CDC* pDC, LOGFONT log_font);
 	void usr_color_change(CDC* pDC, COLORREF src_color);
+	void usr_select_all(CDC* pDC);
+	void usr_copy();
+	void usr_cut(CDC* pDC);
 public:
 	bool section_active() { return section.active(); }
 public:
@@ -97,6 +100,8 @@ public:
 	void record_section_src_info(TreeBase* src_tree, StructuredSrcContext* src_contex, size_t section_begin, size_t section_end);
 	void record_section_color_info(StructuredSrcContext* color_contex, size_t section_begin, size_t section_end);
 	void record_section_font_info(StructuredSrcContext* font_contex, size_t section_begin, size_t section_end);
+	void record_section_context(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
+		size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 
 	//信息恢复
 public:
@@ -126,6 +131,7 @@ private:
 	GD_proxy_base gd_proxy;
 	LxScrollRender* render;
 	Section section;
+	StructuredSectionContext copy_context;
 private:
 	LxCommandMgr lx_command_mgr;		//命令管理
 private:

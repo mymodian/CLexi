@@ -730,6 +730,52 @@ Paragraph* LxDcViCtl::insert_null_phy_paragraph(int index)
 	document.insert_paragraph(new_phy_pragh, index);
 	return new_phy_pragh;
 }
+void LxDcViCtl::record_section_context(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
+	size_t section_end_pgh, StructuredSectionContext* structured_section_context)
+{
+	record_section_color_info(&(structured_section_context->color_info_list), section_begin_index, section_end_index);
+	record_section_font_info(&(structured_section_context->font_info_list), section_begin_index, section_end_index);
+	auto phy_pgh_iter_b = document.begin();
+	advance(phy_pgh_iter_b, section_begin_pgh);
+	size_t inner_index_b = document.get_offset_inner(section_begin_index, section_begin_pgh);
+	if (section_begin_pgh == section_end_pgh)
+	{
+		std::vector<TCHAR>* _contect_pgh = new std::vector<TCHAR>();
+		_contect_pgh->resize(section_end_index - section_begin_index);
+		memcpy(&((*_contect_pgh)[0]), (*phy_pgh_iter_b)->get_context_ptr() + inner_index_b, sizeof(TCHAR)*(section_end_index - section_begin_index));
+		structured_section_context->doc_context.push_back(_contect_pgh);
+		return;
+	}
+	auto phy_pgh_iter_e = document.begin();
+	advance(phy_pgh_iter_e, section_end_pgh);
+	size_t inner_index_e = document.get_offset_inner(section_end_index, section_end_pgh);
+	std::vector<TCHAR>* _contect_pgh = new std::vector<TCHAR>();
+	if (inner_index_b < (*phy_pgh_iter_b)->size())
+	{
+		_contect_pgh->resize((*phy_pgh_iter_b)->size() - inner_index_b);
+		memcpy(&((*_contect_pgh)[0]), (*phy_pgh_iter_b)->get_context_ptr() + inner_index_b, sizeof(TCHAR)*((*phy_pgh_iter_b)->size() - inner_index_b));
+	}
+	structured_section_context->doc_context.push_back(_contect_pgh);
+	auto midit = phy_pgh_iter_b;
+	++midit;
+	for (int i = section_begin_pgh + 1; i < section_end_pgh; ++i, ++midit)
+	{
+		_contect_pgh = new std::vector<TCHAR>();
+		if ((*midit)->size() > 0)
+		{
+			_contect_pgh->resize((*midit)->size());
+			memcpy(&((*_contect_pgh)[0]), (*midit)->get_context_ptr(), sizeof(TCHAR)*((*midit)->size()));
+		}
+		structured_section_context->doc_context.push_back(_contect_pgh);
+	}
+	_contect_pgh = new std::vector<TCHAR>();
+	if (inner_index_e > 0)
+	{
+		_contect_pgh->resize(inner_index_e);
+		memcpy(&((*_contect_pgh)[0]), (*phy_pgh_iter_e)->get_context_ptr(), sizeof(TCHAR)*(inner_index_e));
+	}
+	structured_section_context->doc_context.push_back(_contect_pgh);
+}
 void LxDcViCtl::remove_phy_section(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, 
 	size_t section_end_pgh, StructuredSectionContext* structured_section_context)
 {
@@ -1111,5 +1157,51 @@ void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
 		clear_section(pDC, &section);
 		section.cursor_begin = cursor;
 		section.cursor_end = cursor;
+	}
+}
+
+void LxDcViCtl::usr_select_all(CDC* pDC)
+{
+	if (document.size() > 0)
+	{
+		compose_doc.calc_cursor(section.cursor_begin, 0, document.get_pgh(0), pDC);
+		compose_doc.calc_cursor(section.cursor_end, document.size(), document.get_pgh(document.pgh_size() - 1), pDC);
+		cursor = section.cursor_end;
+	}
+	draw_complete(pDC);
+}
+
+void LxDcViCtl::usr_copy()
+{
+	if (!section.active())
+		return;
+	copy_context.clear();
+	LxCursor* _cur_begin = &(section.cursor_begin);
+	LxCursor* _cur_end = &(section.cursor_end);
+	if (*_cur_begin > *_cur_end)
+	{
+		_cur_begin = &(section.cursor_end);
+		_cur_end = &(section.cursor_begin);
+	}
+	record_section_context(_cur_begin->get_index_global(), compose_doc.current_phypgh_index(*_cur_begin),
+		_cur_end->get_index_global(), compose_doc.current_phypgh_index(*_cur_end), &copy_context);
+}
+
+void LxDcViCtl::usr_cut(CDC* pDC)
+{
+	if (section.active())
+	{
+		usr_copy();
+		LxCommand* section_remove_cmd = new LxCommand();
+		section_remove_cmd->add_child_cmd(
+			new LxSectionRemoveCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin),
+			section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end)));
+		section_remove_cmd->set_dvctl(this);
+		section_remove_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(section_remove_cmd);
+	}
+	else
+	{
+		draw_complete(pDC);
 	}
 }

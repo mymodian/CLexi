@@ -635,25 +635,68 @@ int CCLexiView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	RegisterHotKey(GetSafeHwnd(), 1002, MOD_CONTROL, 'Z');
 	RegisterHotKey(GetSafeHwnd(), 1003, MOD_CONTROL, 'y');
 	RegisterHotKey(GetSafeHwnd(), 1004, MOD_CONTROL, 'Y');
+	RegisterHotKey(GetSafeHwnd(), 1005, MOD_CONTROL, 'c');
+	RegisterHotKey(GetSafeHwnd(), 1006, MOD_CONTROL, 'C');
+	RegisterHotKey(GetSafeHwnd(), 1007, MOD_CONTROL, 'x');
+	RegisterHotKey(GetSafeHwnd(), 1008, MOD_CONTROL, 'X');
+	RegisterHotKey(GetSafeHwnd(), 1009, MOD_CONTROL, 'v');
+	RegisterHotKey(GetSafeHwnd(), 1010, MOD_CONTROL, 'V');
+	RegisterHotKey(GetSafeHwnd(), 1011, MOD_CONTROL, 'a');
+	RegisterHotKey(GetSafeHwnd(), 1012, MOD_CONTROL, 'A');
 
 	return 0;
 }
 
 LRESULT CCLexiView::OnHotKey(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == 1001 || wParam == 1002)
+	CDC* pDC = NULL;
+	switch (wParam)
 	{
-		CDC* pDC = NULL;
+	case 1001:
+	case 1002:
+	{
 		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_undo);
 		ExecuteNormalTask(task, pDC);
 		delete task;
+		break;
 	}
-	else if (wParam == 1003 || wParam == 1004)
+	case 1003:
+	case 1004:
 	{
-		CDC* pDC = NULL;
 		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_redo);
 		ExecuteNormalTask(task, pDC);
 		delete task;
+		break;
+	}
+	case 1005:
+	case 1006:
+	{
+		doc_view_controler.usr_copy();
+		break;
+	}
+	case 1007:
+	case 1008:
+	{
+		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_cut);
+		ExecuteNormalTask(task, pDC);
+		delete task;
+		break;
+	}
+	case 1009:
+	case 1010:
+	{
+		break;
+	}
+	case 1011:
+	case 1012:
+	{
+		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_select_all);
+		ExecuteNormalTask(task, pDC);
+		delete task;
+		break;
+	}
+	default:
+		break;
 	}
 
 	return 0;
