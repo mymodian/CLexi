@@ -25,6 +25,10 @@ struct StructuredSectionContext
 	{
 		clear();
 	}
+	inline bool empty()
+	{
+		return doc_context.empty();
+	}
 	inline void clear()
 	{
 		for (auto pgh : doc_context)

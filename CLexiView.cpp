@@ -685,6 +685,9 @@ LRESULT CCLexiView::OnHotKey(WPARAM wParam, LPARAM lParam)
 	case 1009:
 	case 1010:
 	{
+		Task<CDC>* task = NewRunnableMethod(&doc_view_controler, pDC, &LxDcViCtl::usr_paste);
+		ExecuteNormalTask(task, pDC);
+		delete task;
 		break;
 	}
 	case 1011:

@@ -13,7 +13,7 @@ next to do:
 	8.选择区域下的删除、插入、回车						 done
 	9.重构所有可能需要重构的命令的实现				 done
 	10.ctrl+z,ctrl+y undo和redo							 done
-	11.ctrl+c,ctrl+x,ctrl+v 复制、剪切、粘贴		 ctrl+c and ctrl+x done next to do ctrl+v
+	11.ctrl+c,ctrl+x,ctrl+v 复制、剪切、粘贴		 done
 	12.退出的时候怎么判断是否需要保存				 next to do
 */
 

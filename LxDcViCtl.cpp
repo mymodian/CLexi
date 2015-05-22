@@ -188,7 +188,7 @@ void LxDcViCtl::insert_structured_context(CDC* pDC, StructuredSectionContext* st
 	_pos_gbl = section_begin_index;
 	if (structured_section_context->doc_context.front()->size() > 0)
 	{
-		_phy_pgh->Insert(_pos_gbl, &((*(structured_section_context->doc_context.front()))[0]),
+		_phy_pgh->Insert(document.get_offset_inner(_pos_gbl, section_begin_pgh), &((*(structured_section_context->doc_context.front()))[0]),
 			structured_section_context->doc_context.front()->size());
 		_pos_gbl += structured_section_context->doc_context.front()->size();
 	}
@@ -221,13 +221,16 @@ void LxDcViCtl::insert_structured_context(CDC* pDC, StructuredSectionContext* st
 	compose_doc.calc_cursor(_cursor_t, section_begin_index, _phy_pgh, pDC);
 	LxParagraphInDocIter _pagraph_iter(&compose_doc, _cursor_t.page, _cursor_t.paragraph);
 	_pagraph_iter = compose_doc.modify(_pagraph_iter, _cursor_t.row, pDC);
+	size_t __pgh_index = section_begin_pgh;
 	for (auto _new_pgh : _new_added_pgh)
 	{
-		document.insert_paragraph(_new_pgh, ++section_begin_pgh);
+		document.insert_paragraph(_new_pgh, ++__pgh_index);
 		_pagraph_iter = compose_doc.compose_phy_pagph(_new_pgh, *(_pagraph_iter.get_page()), *(_pagraph_iter.get_paragraph()), 1, pDC);
 	}
 	compose_doc.modify_index(_pagraph_iter, structured_section_context->size());
 	compose_doc.relayout(_pagraph_iter);
+	compose_doc.calc_cursor(cursor, section_begin_index + structured_section_context->size(),
+		document.get_pgh(section_begin_pgh + structured_section_context->doc_context.size() - 1), pDC);
 }
 
 void LxDcViCtl::remove_section(CDC* pDC, size_t section_begin_index, size_t section_begin_pgh, 
@@ -1203,5 +1206,38 @@ void LxDcViCtl::usr_cut(CDC* pDC)
 	else
 	{
 		draw_complete(pDC);
+	}
+}
+
+void LxDcViCtl::usr_paste(CDC* pDC)
+{
+	if (copy_context.empty())
+	{
+		draw_complete(pDC);
+		return;
+	}
+	if (section.active())
+	{
+		LxCommand* section_paste_cmd = new LxCommand();
+		section_paste_cmd->add_child_cmd(
+			new LxSectionRemoveCmd(section.cursor_begin.get_index_global(), compose_doc.current_phypgh_index(section.cursor_begin),
+			section.cursor_end.get_index_global(), compose_doc.current_phypgh_index(section.cursor_end)));
+		LxCursor* _cur_begin = section.cursor_begin < section.cursor_end ? &(section.cursor_begin) : &(section.cursor_end);
+		section_paste_cmd->add_child_cmd(
+			new LxStructuredContextInsertCmd(_cur_begin->get_index_global(),
+			compose_doc.current_phypgh_index(*_cur_begin), &copy_context));
+		section_paste_cmd->set_dvctl(this);
+		section_paste_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(section_paste_cmd);
+	}
+	else
+	{
+		LxCommand* paste_cmd = new LxCommand();
+		paste_cmd->add_child_cmd(
+			new LxStructuredContextInsertCmd(cursor.get_index_global(),
+			compose_doc.current_phypgh_index(cursor), &copy_context));
+		paste_cmd->set_dvctl(this);
+		paste_cmd->Excute(pDC);
+		lx_command_mgr.insert_cmd(paste_cmd);
 	}
 }

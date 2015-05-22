@@ -41,6 +41,7 @@ public:
 	void usr_select_all(CDC* pDC);
 	void usr_copy();
 	void usr_cut(CDC* pDC);
+	void usr_paste(CDC* pDC);
 public:
 	bool section_active() { return section.active(); }
 public:

@@ -181,6 +181,40 @@ void LxSplitCmd::Undo(CDC* pDC)
 	merge_command.Excute(pDC);
 }
 
+LxStructuredContextInsertCmd::LxStructuredContextInsertCmd(size_t index_gbl, size_t pgh_index, StructuredSectionContext* structured_context)
+	: index_gbl_(index_gbl), pgh_index_(pgh_index), structured_context_(structured_context)
+{
+	bOwnContext = false;
+	context_size_ = structured_context->size();
+	phy_pgh_cnt_ = structured_context->doc_context.size();
+}
+LxStructuredContextInsertCmd::~LxStructuredContextInsertCmd()
+{
+	if (structured_context_ && bOwnContext)
+		delete structured_context_;
+}
+void LxStructuredContextInsertCmd::Excute(CDC* pDC)
+{
+	doc_view_ctrl_->insert_structured_context(pDC, structured_context_, index_gbl_, pgh_index_);
+	doc_view_ctrl_->draw_complete(pDC);
+
+	if (bOwnContext)
+	{
+		delete structured_context_;
+		structured_context_ = nullptr;
+	}
+	ASSERT(doc_view_ctrl_->self_check());
+	doc_view_ctrl_->calc_font_color();
+}
+void LxStructuredContextInsertCmd::Undo(CDC* pDC)
+{
+	LxSectionRemoveCmd section_rm_cmd(index_gbl_, pgh_index_, index_gbl_ + context_size_, pgh_index_ + phy_pgh_cnt_ - 1);
+	section_rm_cmd.set_dvctl(doc_view_ctrl_);
+	section_rm_cmd.Excute(pDC);
+	section_rm_cmd.move_structured_context(structured_context_);
+	bOwnContext = true;
+}
+
 LxSectionRemoveCmd::LxSectionRemoveCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh)
 	: section_begin_index_(section_begin_index), section_end_index_(section_end_index),
 	section_begin_pgh_(section_begin_pgh), section_end_pgh_(section_end_pgh), 
@@ -193,6 +227,11 @@ LxSectionRemoveCmd::~LxSectionRemoveCmd()
 	{
 		delete structured_section_context_;
 	}
+}
+void LxSectionRemoveCmd::move_structured_context(StructuredSectionContext* &structured_section_context_to)
+{
+	structured_section_context_to = structured_section_context_;
+	structured_section_context_ = nullptr;
 }
 void LxSectionRemoveCmd::Excute(CDC* pDC)
 {
@@ -393,6 +432,7 @@ LxCommandMgr::LxCommandMgr()
 	empty_cmd->add_child_cmd(new LxEmptyCmd());
 	command_list.push_back(empty_cmd);
 	curr_ = command_list.begin();
+	save_point_ = nullptr;
 }
 LxCommandMgr::~LxCommandMgr()
 {

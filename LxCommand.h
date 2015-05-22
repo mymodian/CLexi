@@ -168,12 +168,32 @@ private:
 	size_t offset_inner_;
 };
 
+class LxStructuredContextInsertCmd : public LxCommandBase
+{
+public:
+	LxStructuredContextInsertCmd() = delete;
+	LxStructuredContextInsertCmd(size_t index_gbl, size_t pgh_index, StructuredSectionContext* structured_context);
+	virtual ~LxStructuredContextInsertCmd();
+public:
+	virtual void Excute(CDC* pDC) override;
+	virtual bool CanUndo() override { return true; }
+	virtual void Undo(CDC* pDC) override;
+private:
+	size_t index_gbl_;
+	size_t pgh_index_;
+	size_t context_size_;
+	size_t phy_pgh_cnt_;
+	bool bOwnContext;
+	StructuredSectionContext* structured_context_;
+};
+
 class LxSectionRemoveCmd : public LxCommandBase
 {
 public:
 	LxSectionRemoveCmd() = delete;
 	LxSectionRemoveCmd(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index, size_t section_end_pgh);
 	virtual ~LxSectionRemoveCmd();
+	void move_structured_context(StructuredSectionContext* &structured_section_context_to);
 public:
 	virtual void Excute(CDC* pDC) override;
 	virtual bool CanUndo() override { return true; }
@@ -292,6 +312,7 @@ public:
 private:
 	list<LxCommand*> command_list;
 	list<LxCommand*>::iterator curr_;
+	LxCommand* save_point_;
 };
 
 #endif
