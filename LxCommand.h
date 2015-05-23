@@ -309,6 +309,8 @@ public:
 	void insert_cmd(LxCommand* lx_cmd);
 	LxCommand* get_redo_cmd();
 	LxCommand* get_undo_cmd();
+	void set_curr_as_savepoint();
+	bool changed();
 private:
 	list<LxCommand*> command_list;
 	list<LxCommand*>::iterator curr_;

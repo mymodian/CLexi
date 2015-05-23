@@ -186,17 +186,16 @@ void CMainFrame::OnUpdateApplicationLook(CCmdUI* pCmdUI)
 void CMainFrame::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	CFrameWnd::OnSysCommand(nID, lParam);
+	if (nID != SC_CLOSE)
+		CFrameWnd::OnSysCommand(nID, lParam);
 
 	if (nID == SC_RESTORE && lParam == 0)
 	{
 		((CCLexiView*)(GetActiveView()))->notify_recovery();
 	}
+	else if (nID == SC_CLOSE)
+	{
+		if (((CCLexiView*)(GetActiveView()))->notify_close())
+			CFrameWnd::OnSysCommand(nID, lParam);
+	}
 }
-
-
-//void CMainFrame::OnFileSaveAs()
-//{
-//	// TODO:  在此添加命令处理程序代码
-//	AfxMessageBox(L"save as");
-//}

@@ -22,6 +22,11 @@ void LxDcViCtl::clear()
 	render = nullptr;
 }
 
+bool LxDcViCtl::doc_changed()
+{
+	return lx_command_mgr.changed();
+}
+
 void LxDcViCtl::store_stream(FILE* file)
 {
 	document.store_stream(file);
@@ -30,6 +35,7 @@ void LxDcViCtl::store_stream(FILE* file)
 	SrcFontFactory::GetFontFactInstance()->store_stream(file, font_list_still_using);
 	font_tree.store_stream(file);
 	color_tree.store_stream(file);
+	lx_command_mgr.set_curr_as_savepoint();
 }
 
 void LxDcViCtl::build_from_stream(FILE* file)

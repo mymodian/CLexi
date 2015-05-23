@@ -64,6 +64,7 @@ CCLexiView::CCLexiView()
 	width_total_ = LxPaper::pixel_width;
 	height_total_ = LxPaper::pixel_height + 2 * ViewWindow::GetViewWindowInstance()->border_height;
 	font_index = 0;
+	opened_file_path.Empty();
 }
 
 CCLexiView::~CCLexiView()
@@ -254,6 +255,7 @@ BOOL CCLexiView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 LRESULT CCLexiView::OnLexiInit(WPARAM wParam, LPARAM lParam)
 {
+	GetDocument()->SetTitle(L"新文档");
 	CDC* pDC = GetDC();
 	doc_view_controler.init(pDC);
 	doc_view_controler.draw_complete(pDC);
@@ -418,6 +420,20 @@ void CCLexiView::ExecuteNormalTask(Task<CDC>* task, CDC* pdc)
 	bmp.DeleteObject();
 	if (!pdc)
 		ReleaseDC(pDC);
+	if (doc_view_controler.doc_changed())
+	{
+		if (opened_file_path.IsEmpty())
+			GetDocument()->SetTitle(L"新文档 * ");
+		else
+			GetDocument()->SetTitle(opened_file_path + L" * ");
+	}
+	else
+	{
+		if (opened_file_path.IsEmpty())
+			GetDocument()->SetTitle(L"新文档");
+		else
+			GetDocument()->SetTitle(opened_file_path);
+	}
 }
 
 void CCLexiView::insert(TCHAR* cs, int len)
@@ -564,6 +580,22 @@ void CCLexiView::notify_recovery()
 	ExecuteNormalTask(task, pDC);
 	delete task;
 }
+BOOL CCLexiView::notify_close()
+{
+	if (doc_view_controler.doc_changed())
+	{
+		CString tips;
+		tips.Format(L"是否保存对文档%s的修改？", opened_file_path);
+		int choose = MessageBox(tips, L"CLexi", MB_YESNOCANCEL);
+		if (choose == IDYES)
+		{
+			OnFileSave();
+			return !opened_file_path.IsEmpty();
+		}
+		return choose == IDNO;
+	}
+	return TRUE;
+}
 
 void CCLexiView::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -580,6 +612,8 @@ void CCLexiView::OnFileSaveAs()
 	if (dlg.DoModal() == IDOK)
 	{
 		CString str = dlg.GetPathName();
+		opened_file_path = str;
+		GetDocument()->SetTitle(opened_file_path);
 		USES_CONVERSION;
 		FILE* file;
 		fopen_s(&file, W2A(str), "wb+");
@@ -591,17 +625,21 @@ void CCLexiView::OnFileSaveAs()
 
 void CCLexiView::OnFileSave()
 {
-	CString filter = L"文本文件(*.txt)|*.txt||";
-	CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY, filter);
-	if (dlg.DoModal() == IDOK)
+	if (opened_file_path.IsEmpty())
 	{
-		CString str = dlg.GetPathName();
-		USES_CONVERSION;
-		FILE* file;
-		fopen_s(&file, W2A(str), "wb+");
-		doc_view_controler.store_stream(file);
-		fclose(file);
+		CString filter = L"文本文件(*.txt)|*.txt||";
+		CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY, filter);
+		if (dlg.DoModal() == IDOK)
+			opened_file_path = dlg.GetPathName();
+		else
+			return;
 	}
+	USES_CONVERSION;
+	FILE* file;
+	fopen_s(&file, W2A(opened_file_path), "wb+");
+	doc_view_controler.store_stream(file);
+	fclose(file);
+	GetDocument()->SetTitle(opened_file_path);
 }
 
 
@@ -612,6 +650,8 @@ void CCLexiView::OnFileOpen()
 	if (dlg.DoModal() == IDOK)
 	{
 		CString str = dlg.GetPathName();
+		opened_file_path = str;
+		GetDocument()->SetTitle(opened_file_path);
 		USES_CONVERSION;
 		FILE* file;
 		fopen_s(&file, W2A(str), "rb");

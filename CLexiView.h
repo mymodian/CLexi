@@ -13,6 +13,7 @@ class CCLexiView : public CScrollView
 {
 private:
 	LxDcViCtl doc_view_controler;				//文档和排版控制
+	CString opened_file_path;
 
 protected: // 仅从序列化创建
 	CCLexiView();
@@ -52,6 +53,7 @@ public:
 	void backspace();
 	void redraw();
 	void notify_recovery();
+	BOOL notify_close();
 // 重写
 public:
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图

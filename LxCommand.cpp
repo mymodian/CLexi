@@ -432,13 +432,19 @@ LxCommandMgr::LxCommandMgr()
 	empty_cmd->add_child_cmd(new LxEmptyCmd());
 	command_list.push_back(empty_cmd);
 	curr_ = command_list.begin();
-	save_point_ = nullptr;
+	save_point_ = empty_cmd;
 }
 LxCommandMgr::~LxCommandMgr()
 {
 	for (auto it : command_list)
 		delete it;
 	command_list.clear();
+}
+void LxCommandMgr::set_curr_as_savepoint()
+{
+	if (curr_ == command_list.begin())
+		return;
+	save_point_ = *curr_;
 }
 void LxCommandMgr::reset()
 {
@@ -449,6 +455,11 @@ void LxCommandMgr::reset()
 	empty_cmd->add_child_cmd(new LxEmptyCmd());
 	command_list.push_back(empty_cmd);
 	curr_ = command_list.begin();
+	save_point_ = empty_cmd;
+}
+bool LxCommandMgr::changed()
+{
+	return *curr_ != save_point_;
 }
 void LxCommandMgr::insert_cmd(LxCommand* lx_cmd)
 {
@@ -461,6 +472,8 @@ void LxCommandMgr::insert_cmd(LxCommand* lx_cmd)
 	++it;
 	for (; it != command_list.end();)
 	{
+		if (save_point_ == *it)
+			save_point_ = command_list.front();
 		delete *it;
 		it = command_list.erase(it);
 	}

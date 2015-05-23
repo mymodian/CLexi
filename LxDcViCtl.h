@@ -104,6 +104,7 @@ public:
 	void record_section_context(size_t section_begin_index, size_t section_begin_pgh, size_t section_end_index,
 		size_t section_end_pgh, StructuredSectionContext* structured_section_context);
 
+	bool doc_changed();
 	//–≈œ¢ª÷∏¥
 public:
 	void modify_structured_color_context(StructuredSrcContext* color_contex);
