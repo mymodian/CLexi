@@ -11,6 +11,9 @@
 #include "CLexiDoc.h"
 #include "CLexiView.h"
 
+#include "LxComposeAlgom.h"
+#include "LxSrcFontFactory.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -196,6 +199,10 @@ void CMainFrame::OnSysCommand(UINT nID, LPARAM lParam)
 	else if (nID == SC_CLOSE)
 	{
 		if (((CCLexiView*)(GetActiveView()))->notify_close())
+		{
+			SrcFontFactory::GetFontFactInstance()->clear();
+			ComposeAlgoFactory::GetComposeAlgoFactInstance()->clear();
 			CFrameWnd::OnSysCommand(nID, lParam);
+		}
 	}
 }

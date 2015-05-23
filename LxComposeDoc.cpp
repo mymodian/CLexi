@@ -516,6 +516,7 @@ LxParagraphInDocIter ComposeDoc::pure_remove_group_paragraph(LxParagraphInDocIte
 	{
 		auto to_deleted = group_first;
 		++group_first;
+		delete *(to_deleted.get_paragraph());
 		(*(to_deleted.get_page()))->remove_paragraph(to_deleted.get_paragraph());
 		if (group_first == this->pargraph_end() || (*group_first)->get_offset_inner() == 0)
 			break;

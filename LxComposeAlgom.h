@@ -51,6 +51,10 @@ class ComposeAlgoFactory
 public:
 	~ComposeAlgoFactory()
 	{
+		clear();
+	}
+	void clear()
+	{
 		for (auto algo : algoms)
 			delete algo;
 	}

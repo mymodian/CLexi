@@ -332,7 +332,7 @@ void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t
 	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
 
 	compose_doc.relayout_section(pDC, index_b, pgh_b, index_e, pgh_e);
-	//重新计算cursor的左边位置
+	//重新计算cursor
 	reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
 }
 
@@ -352,7 +352,7 @@ void LxDcViCtl::modify_section_font(CDC* pDC, size_t section_begin_index, size_t
 	size_t pgh_e = section_begin_pgh < section_end_pgh ? section_end_pgh : section_begin_pgh;
 
 	compose_doc.relayout_section(pDC, index_b, pgh_b, index_e, pgh_e);
-	//重新计算cursor的左边位置
+	//重新计算cursor
 	reset_selection(pDC, section_begin_index, section_begin_pgh, section_end_index, section_end_pgh);
 }
 
