@@ -202,10 +202,11 @@ void LxDcViCtl::insert_structured_context(CDC* pDC, StructuredSectionContext* st
 	if (structured_section_context->doc_context.size() > 1)
 	{
 		Paragraph* _splited_phy_pgh = new Paragraph();
-		if (_pos_gbl < _phy_pgh->size())
+		size_t _offset_inner_phy = document.get_offset_inner(_pos_gbl, section_begin_pgh);
+		if (_offset_inner_phy < _phy_pgh->size())
 		{
-			_splited_phy_pgh->Insert(0, _phy_pgh->get_context_ptr() + _pos_gbl, _phy_pgh->size() - _pos_gbl);
-			_phy_pgh->Delete(_pos_gbl, _phy_pgh->size() - 1);
+			_splited_phy_pgh->Insert(0, _phy_pgh->get_context_ptr() + _offset_inner_phy, _phy_pgh->size() - _offset_inner_phy);
+			_phy_pgh->Delete(_offset_inner_phy, _phy_pgh->size() - 1);
 		}
 		for (auto it = ++(structured_section_context->doc_context.begin()); it != --(structured_section_context->doc_context.end()); ++it)
 		{
@@ -869,6 +870,7 @@ size_t LxDcViCtl::merge_phy_paragraph(size_t index_para2)
 // user operation handler
 void LxDcViCtl::usr_undo(CDC* pDC)
 {
+	section.trace = false;
 	LxCommand* undo_command = lx_command_mgr.get_undo_cmd();
 	if (undo_command != nullptr)
 	{
@@ -885,6 +887,7 @@ void LxDcViCtl::usr_undo(CDC* pDC)
 }
 void LxDcViCtl::usr_redo(CDC* pDC)
 {
+	section.trace = false;
 	LxCommand* redo_command = lx_command_mgr.get_redo_cmd();
 	if (redo_command != nullptr)
 	{
@@ -1171,6 +1174,7 @@ void LxDcViCtl::usr_move_cursor(CDC* pDC, unsigned int direction)
 
 void LxDcViCtl::usr_select_all(CDC* pDC)
 {
+	section.trace = false;
 	if (document.size() > 0)
 	{
 		compose_doc.calc_cursor(section.cursor_begin, 0, document.get_pgh(0), pDC);
@@ -1182,6 +1186,7 @@ void LxDcViCtl::usr_select_all(CDC* pDC)
 
 void LxDcViCtl::usr_copy()
 {
+	section.trace = false;
 	if (!section.active())
 		return;
 	copy_context.clear();
@@ -1198,6 +1203,7 @@ void LxDcViCtl::usr_copy()
 
 void LxDcViCtl::usr_cut(CDC* pDC)
 {
+	section.trace = false;
 	if (section.active())
 	{
 		usr_copy();
@@ -1217,6 +1223,7 @@ void LxDcViCtl::usr_cut(CDC* pDC)
 
 void LxDcViCtl::usr_paste(CDC* pDC)
 {
+	section.trace = false;
 	if (copy_context.empty())
 	{
 		draw_complete(pDC);
