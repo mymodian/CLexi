@@ -862,6 +862,7 @@ size_t LxDcViCtl::merge_phy_paragraph(size_t index_para2)
 	size_t para1_size = (*phy_pgh_iter1)->size();
 	if ((*phy_pgh_iter2)->size())
 		(*phy_pgh_iter1)->Insert((*phy_pgh_iter1)->size(), (*phy_pgh_iter2)->get_context_ptr(), (*phy_pgh_iter2)->size());
+	delete *phy_pgh_iter2;
 	document.remove_paragraph(phy_pgh_iter2);
 
 	return para1_size;

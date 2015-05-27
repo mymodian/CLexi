@@ -533,6 +533,7 @@ void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 	{
 		auto to_deleted = group_first;
 		++group_first;
+		delete *(to_deleted.get_paragraph());
 		(*(to_deleted.get_page()))->remove_paragraph(to_deleted.get_paragraph());
 		if ((*(to_deleted.get_page()))->empty())
 		{
@@ -547,6 +548,7 @@ void ComposeDoc::remove_group_paragraph(LxParagraphInDocIter group_first)
 	{
 		auto to_deleted_page = may_null_page_start;
 		++may_null_page_start;
+		delete *to_deleted_page;
 		this->remove_page(to_deleted_page);
 	}
 	if (_cnt > 0)
