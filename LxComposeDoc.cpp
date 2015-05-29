@@ -647,9 +647,9 @@ LxParagraphInDocIter ComposeDoc::compose_phy_pagph(Paragraph* pagph, ComposePage
 				paragraph_iter reverse_it = --prev_page->end();
 				(*reverse_it)->set_parent_page(page);
 				page->add_paragraph(*reverse_it, 0);
-				page->set_area((*reverse_it)->get_area_begin(), page->get_area_end());
 				prev_page->remove_paragraph(reverse_it);
 			}
+			page->set_area(index_global, page->get_area_end());
 
 			y_offset = page->get_top_pos() + LxPaper::top_margin;
 			phy_pgh_index = 0;
